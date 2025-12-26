@@ -1,0 +1,51 @@
+openapi: 3.0.3
+info:
+  title: Blog Ingestion API
+  version: 1.0.0
+paths:
+  /api/blog/ingest:
+    post:
+      summary: Ingest a blog post from n8n
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title, slug, summary, body, tags, images]
+              properties:
+                title: { type: string }
+                slug: { type: string }
+                summary: { type: string }
+                body: { type: string, description: "HTML/Markdown" }
+                tags: { type: array, items: { type: string } }
+                featuredImage: { type: string, format: uri }
+                images:
+                  type: array
+                  items:
+                    type: object
+                    required: [url, alt]
+                    properties:
+                      url: { type: string, format: uri }
+                      alt: { type: string }
+                publish: { type: boolean, default: true }
+                correlationId: { type: string }
+      responses:
+        '200':
+          description: Accepted and published
+        '400':
+          description: Validation error
+        '401':
+          description: Invalid or missing API key
+        '415':
+          description: Unsupported media type
+        '500':
+          description: Server error
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key

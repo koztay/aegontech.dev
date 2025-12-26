@@ -31,7 +31,11 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+- Experience: hero + animation requirements documented; mobile-first layout; Lighthouse ≥90 (mobile/desktop), LCP ≤2.5s, CLS <0.1; accessibility checks and alt text coverage planned.
+- Automation: portfolio/blog ingestion paths defined with expected screenshot/metadata outputs, fallback behavior, and manual override fields; deduplication and idempotency rules captured.
+- Security: Supabase Auth roles mapped; API key storage/rotation for blog ingestion specified; rate limits and audit logging considered; no public write paths.
+- Observability: contract/integration tests planned for ingestion and metadata generation; structured logging and alert thresholds (failure rate >2%/15m) outlined; synthetic checks scheduled.
+- Data model: Supabase schemas for portfolio, blog, media, SEO metadata, and versioning/rollback are enumerated with migrations/backfill steps.
 
 ## Project Structure
 

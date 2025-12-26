@@ -9,6 +9,14 @@
     "chat.tools.terminal.autoApprove": {
         ".specify/scripts/bash/": true,
         ".specify/scripts/powershell/": true
+    },
+    "chat.mcp.serverSampling": {
+        "aegontech.dev/.vscode/mcp.json: com.supabase/mcp": {
+            "allowedModels": [
+                "copilot/claude-sonnet-4.5",
+                "copilot/gpt-5.1-codex-max"
+            ]
+        }
     }
 }
 

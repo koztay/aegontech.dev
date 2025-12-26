@@ -82,6 +82,8 @@
   Fill them out with the right functional requirements.
 -->
 
+> Constitution alignment: capture mobile-first/SEO performance budgets (Lighthouse, LCP/CLS), automated portfolio/blog ingestion behavior (screenshots, metadata, fallbacks), Supabase auth/API key constraints for admin/blog writes, observability/alerting needs, and structured content fields (SEO metadata, alt text, versioning/rollback).
+
 ### Functional Requirements
 
 - **FR-001**: System MUST [specific capability, e.g., "allow users to create accounts"]

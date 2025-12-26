@@ -1,0 +1,15 @@
+.next/
+build/
+dist/
+coverage/
+node_modules/
+.turbo/
+.vscode/
+.idea/
+tests/
+test/
+*.log
+.env*
+pnpm-lock.yaml
+package-lock.json
+yarn.lock

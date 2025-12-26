@@ -1,0 +1,27 @@
+# Node/Next
+node_modules/
+.next/
+.turbo/
+.vercel/
+.npmrc
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+build/
+dist/
+coverage/
+
+# Env / secrets
+.env*
+
+# Editors / OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.tmp
+
+# Logs
+*.log
+npm-debug.log*

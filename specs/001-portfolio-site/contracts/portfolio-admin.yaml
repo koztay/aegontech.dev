@@ -1,0 +1,40 @@
+openapi: 3.0.3
+info:
+  title: Portfolio Admin API
+  version: 1.0.0
+paths:
+  /api/portfolio/ingest:
+    post:
+      summary: Create or update a portfolio item from a URL
+      security:
+        - SupabaseAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [sourceUrl, type]
+              properties:
+                sourceUrl: { type: string, format: uri }
+                type: { type: string, enum: [web, app] }
+                featured: { type: boolean, default: false }
+                orderRank: { type: integer, default: 0 }
+                overrides:
+                  type: object
+                  properties:
+                    title: { type: string }
+                    summary: { type: string }
+                    tags: { type: array, items: { type: string } }
+      responses:
+        '200': { description: Created or updated; returns item payload }
+        '400': { description: Validation error or duplicate }
+        '401': { description: Unauthorized }
+        '409': { description: Duplicate sourceUrl }
+        '500': { description: Server error }
+components:
+  securitySchemes:
+    SupabaseAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

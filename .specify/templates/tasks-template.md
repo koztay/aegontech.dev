@@ -12,6 +12,8 @@ description: "Task list template for feature implementation"
 
 **Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
 
+**Constitution alignment**: Include tasks for mobile-first performance/SEO budgets, automated portfolio/blog ingestion (screenshots, metadata, fallbacks), Supabase auth/API key protections, observability/alerting and synthetic checks, and structured content/versioning with rollback paths.
+
 ## Format: `[ID] [P?] [Story] Description`
 
 - **[P]**: Can run in parallel (different files, no dependencies)
