@@ -1,6 +1,8 @@
 import { query } from "@/lib/db/client";
 import type { PortfolioItem } from "@/lib/types";
 
+export type { PortfolioItem } from "@/lib/types";
+
 const PLACEHOLDER_ITEMS: PortfolioItem[] = [
   {
     id: "dialable",
@@ -93,4 +95,9 @@ export async function getPortfolioItemBySlug(
   // Fallback to placeholder
   const item = PLACEHOLDER_ITEMS.find((item) => item.id === slug);
   return item || null;
+}
+
+export async function getFeaturedPortfolioItems(): Promise<PortfolioItem[]> {
+  const allItems = await getAllPortfolioItems();
+  return allItems.slice(0, 3); // Return first 3 items as featured
 }

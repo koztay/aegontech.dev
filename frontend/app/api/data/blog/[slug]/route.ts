@@ -3,10 +3,11 @@ import { getBlogPost } from "@/lib/data/blog";
 
 export async function GET(
     request: Request,
-    { params }: { params: { slug: string } }
+    { params }: { params: Promise<{ slug: string }> }
 ) {
     try {
-        const post = await getBlogPost(params.slug);
+        const { slug } = await params;
+        const post = await getBlogPost(slug);
 
         if (!post) {
             return NextResponse.json({ error: "Post not found" }, { status: 404 });

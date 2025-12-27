@@ -1,23 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { BlogDetail } from "@/components/blog";
 import { PublicShell } from "@/components/shell/PublicShell";
 import type { BlogPost } from "@/lib/types";
 
-export default function BlogDetailPage({
-  params,
-}: {
-  params: { slug: string };
-}) {
+export default function BlogDetailPage() {
   const router = useRouter();
+  const params = useParams();
+  const slug = params.slug as string;
   const [post, setPost] = useState<BlogPost | null>(null);
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   useEffect(() => {
     // Fetch blog post by slug
-    fetch(`/api/data/blog/${params.slug}`)
+    fetch(`/api/data/blog/${slug}`)
       .then((r) => r.json())
       .then((data) => {
         setPost(data);
@@ -34,7 +32,7 @@ export default function BlogDetailPage({
         document.documentElement.classList.add("dark");
       }
     }
-  }, [params.slug]);
+  }, [slug]);
 
   const handleToggleDarkMode = () => {
     setIsDarkMode(!isDarkMode);

@@ -35,7 +35,7 @@ export default async function PortfolioDetailPage({
   }
 
   const projectUrl =
-    item.websiteUrl || item.appStoreUrl || item.playStoreUrl;
+    item.links.website || item.links.appStore || item.links.playStore;
 
   return (
     <main className="mx-auto max-w-5xl px-6 py-12">
