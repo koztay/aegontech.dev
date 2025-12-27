@@ -1,48 +1,68 @@
-import type { Metadata } from "next";
-import { BlogCard } from "@/components/blocks/blog-card";
-import { getBlogIndex, blogUrl } from "@/lib/data/blog";
-import { buildPageMeta } from "@/lib/seo/meta";
+"use client";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://aegontech.dev";
-export const revalidate = 300;
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { BlogList } from "@/components/blog";
+import { PublicShell } from "@/components/shell/PublicShell";
+import type { BlogPost } from "@/lib/types";
 
-export const metadata: Metadata = buildPageMeta({
-  title: "Blog | Aegontech",
-  description: "Insights on mobile, SaaS, and velocity from the Aegontech studio.",
-  url: `${SITE_URL}/blog`
-});
+export default function BlogPage() {
+  const router = useRouter();
+  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
-type Props = {
-  searchParams: Promise<{ tag?: string }>;
-};
+  useEffect(() => {
+    // Fetch blog posts
+    fetch("/api/data/blog")
+      .then((r) => r.json())
+      .then((data) => {
+        setBlogPosts(data);
+      })
+      .catch((error) => {
+        console.error("Error loading blog posts:", error);
+      });
 
-export default async function BlogIndexPage({ searchParams }: Props) {
-  const posts = await getBlogIndex();
-  const { tag: tagParam } = await searchParams;
-  const tag = tagParam?.toLowerCase();
-  const filtered = tag ? posts.filter((p) => p.tags.map((t) => t.toLowerCase()).includes(tag)) : posts;
+    // Check dark mode preference
+    if (typeof window !== "undefined") {
+      const isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      setIsDarkMode(isDark);
+      if (isDark) {
+        document.documentElement.classList.add("dark");
+      }
+    }
+  }, []);
+
+  const handleToggleDarkMode = () => {
+    setIsDarkMode(!isDarkMode);
+    document.documentElement.classList.toggle("dark");
+  };
+
+  const handlePostClick = (slug: string) => {
+    router.push(`/blog/${slug}`);
+  };
+
+  const navigationItems = [
+    { label: "Home", href: "/" },
+    { label: "Portfolio", href: "/portfolio" },
+    { label: "Blog", href: "/blog" },
+    { label: "Contact", href: "#contact" },
+  ];
 
   return (
-    <main className="mx-auto max-w-5xl px-6 py-12 space-y-8">
-      <header className="space-y-3">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent-foreground/80">Blog</p>
-        <h1 className="text-4xl font-semibold text-ink">Inside the studio</h1>
-        <p className="text-lg text-slate-600">Launch notes, playbooks, and lessons from shipping mobile and SaaS products fast.</p>
-        {tag ? <p className="text-sm text-slate-500">Filtering by tag: {tag}</p> : null}
-      </header>
-
-      <section className="grid gap-6 md:grid-cols-2" aria-label="Blog posts">
-        {filtered.map((post) => (
-          <BlogCard
-            key={post.slug}
-            title={post.title}
-            summary={post.summary}
-            href={`/blog/${post.slug}`}
-            tag={post.tags[0]}
-            publishedAt={post.publishedAt ?? undefined}
-          />
-        ))}
-      </section>
-    </main>
+    <PublicShell
+      navigationItems={navigationItems}
+      currentPath="/blog"
+      isDarkMode={isDarkMode}
+      onToggleDarkMode={handleToggleDarkMode}
+      onNavigate={(href) => {
+        if (href.startsWith("#")) {
+          router.push("/" + href);
+        } else {
+          router.push(href);
+        }
+      }}
+    >
+      <BlogList posts={blogPosts} onPostClick={handlePostClick} />
+    </PublicShell>
   );
 }
