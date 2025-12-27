@@ -1,0 +1,64 @@
+{
+    "_meta": {
+        "models": {
+            "blogPosts": "Each blog post is an article with title, content, featured image, and publication date."
+        },
+        "relationships": []
+    },
+    "blogPosts": [
+        {
+            "id": "building-scalable-saas",
+            "title": "Building Scalable SaaS Applications in 2024",
+            "slug": "building-scalable-saas",
+            "excerpt": "Learn the key architectural patterns and best practices for building SaaS applications that can scale to millions of users.",
+            "content": "Building a scalable SaaS application requires careful consideration of architecture, database design, and infrastructure. In this article, we explore the patterns that have proven successful for our clients...\n\n## Key Principles\n\n1. **Microservices Architecture** - Break down your application into smaller, independent services.\n2. **Database Sharding** - Distribute data across multiple database instances.\n3. **Caching Strategies** - Implement Redis or Memcached for frequently accessed data.\n4. **Auto-scaling** - Use cloud services that can automatically scale based on demand.\n\n## Conclusion\n\nBuilding scalable applications is not just about technology—it's about planning for growth from day one.",
+            "featuredImage": "https://picsum.photos/seed/saas-scale/800/400",
+            "publishedAt": "2024-12-20T10:00:00Z"
+        },
+        {
+            "id": "mobile-app-development-trends",
+            "title": "Mobile App Development Trends to Watch",
+            "slug": "mobile-app-development-trends",
+            "excerpt": "Discover the latest trends in mobile app development, from AI integration to cross-platform frameworks.",
+            "content": "The mobile app landscape is evolving rapidly. Here are the trends that are shaping how we build mobile applications...\n\n## AI and Machine Learning\n\nIntegrating AI capabilities directly into mobile apps is becoming more accessible with on-device ML frameworks.\n\n## Cross-Platform Development\n\nFlutter and React Native continue to dominate, offering near-native performance with single codebases.\n\n## Privacy-First Design\n\nWith increasing regulations, privacy-first design is no longer optional—it's essential.",
+            "featuredImage": "https://picsum.photos/seed/mobile-trends/800/400",
+            "publishedAt": "2024-12-15T14:30:00Z"
+        },
+        {
+            "id": "choosing-right-tech-stack",
+            "title": "Choosing the Right Tech Stack for Your Startup",
+            "slug": "choosing-right-tech-stack",
+            "excerpt": "A practical guide to selecting technologies that will grow with your business without over-engineering.",
+            "content": "One of the most critical decisions for any startup is choosing the right technology stack. Make the wrong choice, and you could face expensive rewrites down the line...\n\n## Factors to Consider\n\n- **Team Expertise** - Choose technologies your team knows well.\n- **Scalability Needs** - Consider your growth trajectory.\n- **Ecosystem** - Look at available libraries and community support.\n- **Cost** - Factor in hosting, licensing, and maintenance costs.\n\n## Our Recommended Stack\n\nFor most startups, we recommend: React/Next.js for frontend, Node.js or Python for backend, and PostgreSQL for the database.",
+            "featuredImage": "https://picsum.photos/seed/tech-stack/800/400",
+            "publishedAt": "2024-12-10T09:00:00Z"
+        },
+        {
+            "id": "api-design-best-practices",
+            "title": "API Design Best Practices for Modern Applications",
+            "slug": "api-design-best-practices",
+            "excerpt": "Create APIs that are intuitive, maintainable, and a joy to work with for both internal teams and external developers.",
+            "content": "A well-designed API is the foundation of any successful software product. Here's how to get it right...\n\n## RESTful Conventions\n\nFollow established conventions for resource naming, HTTP methods, and status codes.\n\n## Versioning Strategy\n\nPlan for API versioning from the start—your API will evolve.\n\n## Documentation\n\nInvest in comprehensive documentation with examples and interactive playgrounds.",
+            "featuredImage": "https://picsum.photos/seed/api-design/800/400",
+            "publishedAt": "2024-12-05T16:00:00Z"
+        },
+        {
+            "id": "devops-for-small-teams",
+            "title": "DevOps Practices for Small Development Teams",
+            "slug": "devops-for-small-teams",
+            "excerpt": "Implement effective DevOps practices without a dedicated DevOps team. Automation and CI/CD for everyone.",
+            "content": "You don't need a large team to implement effective DevOps practices. Here's how small teams can automate their way to faster, more reliable deployments...\n\n## Start with CI/CD\n\nGitHub Actions, GitLab CI, or CircleCI can automate your build and deployment pipeline.\n\n## Infrastructure as Code\n\nUse Terraform or Pulumi to manage your infrastructure declaratively.\n\n## Monitoring and Alerting\n\nSet up basic monitoring with tools like Grafana, Prometheus, or managed services like Datadog.",
+            "featuredImage": "https://picsum.photos/seed/devops-small/800/400",
+            "publishedAt": "2024-11-28T11:00:00Z"
+        },
+        {
+            "id": "ux-design-principles",
+            "title": "UX Design Principles for Technical Products",
+            "slug": "ux-design-principles",
+            "excerpt": "How to make complex technical products accessible and delightful for users of all skill levels.",
+            "content": "Technical products often suffer from poor UX because designers don't understand the domain, or developers don't prioritize user experience. Here's how to bridge that gap...\n\n## Progressive Disclosure\n\nShow simple options first, with advanced features available for power users.\n\n## Contextual Help\n\nProvide help exactly where and when users need it.\n\n## Consistent Patterns\n\nUse consistent interaction patterns throughout your application.",
+            "featuredImage": "https://picsum.photos/seed/ux-principles/800/400",
+            "publishedAt": "2024-11-20T13:00:00Z"
+        }
+    ]
+}

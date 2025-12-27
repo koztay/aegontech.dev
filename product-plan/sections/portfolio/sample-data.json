@@ -1,0 +1,73 @@
+{
+    "_meta": {
+        "models": {
+            "portfolioItems": "Each portfolio item represents a SaaS application or mobile app built by AEGONTECH."
+        },
+        "relationships": []
+    },
+    "portfolioItems": [
+        {
+            "id": "dialable",
+            "title": "Dialable",
+            "description": "International calling platform with competitive rates worldwide. Features include call recording, number masking, and credit management.",
+            "type": "saas",
+            "screenshot": "https://picsum.photos/seed/dialable/800/600",
+            "links": {
+                "website": "https://dialable.io"
+            }
+        },
+        {
+            "id": "maximus-iptv",
+            "title": "Maximus IPTV Player",
+            "description": "Feature-rich IPTV player for iOS with M3U and Xtream Codes support. Includes EPG, favorites, and Chromecast.",
+            "type": "mobile",
+            "screenshot": "https://picsum.photos/seed/maximus/800/600",
+            "links": {
+                "appStore": "https://apps.apple.com/app/maximus-iptv",
+                "playStore": "https://play.google.com/store/apps/details?id=com.maximus.iptv"
+            }
+        },
+        {
+            "id": "cloudsync-pro",
+            "title": "CloudSync Pro",
+            "description": "Enterprise file synchronization platform with real-time collaboration, version control, and advanced security features.",
+            "type": "saas",
+            "screenshot": "https://picsum.photos/seed/cloudsync/800/600",
+            "links": {
+                "website": "https://cloudsyncpro.io"
+            }
+        },
+        {
+            "id": "fittrack-ai",
+            "title": "FitTrack AI",
+            "description": "AI-powered fitness companion app with personalized workout plans, nutrition tracking, and progress analytics.",
+            "type": "mobile",
+            "screenshot": "https://picsum.photos/seed/fittrack/800/600",
+            "links": {
+                "appStore": "https://apps.apple.com/app/fittrack-ai",
+                "playStore": "https://play.google.com/store/apps/details?id=com.fittrack.ai"
+            }
+        },
+        {
+            "id": "invoicehub",
+            "title": "InvoiceHub",
+            "description": "Streamlined invoicing and billing platform for freelancers and small businesses. Automated reminders and payment tracking.",
+            "type": "saas",
+            "screenshot": "https://picsum.photos/seed/invoicehub/800/600",
+            "links": {
+                "website": "https://invoicehub.app"
+            }
+        },
+        {
+            "id": "mediavault",
+            "title": "MediaVault",
+            "description": "Secure media management app with cloud backup, facial recognition, and smart albums for iOS and Android.",
+            "type": "mobile",
+            "screenshot": "https://picsum.photos/seed/mediavault/800/600",
+            "links": {
+                "appStore": "https://apps.apple.com/app/mediavault",
+                "playStore": "https://play.google.com/store/apps/details?id=com.mediavault.app"
+            }
+        }
+    ]
+}

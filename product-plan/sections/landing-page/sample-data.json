@@ -1,0 +1,144 @@
+{
+    "_meta": {
+        "models": {
+            "services": "Services offered by AEGONTECH LLC displayed on the landing page.",
+            "teamMembers": "Team members displayed in the About section.",
+            "testimonials": "Client testimonials and reviews.",
+            "featuredPortfolioItems": "Preview of portfolio items shown on landing page."
+        },
+        "relationships": [
+            "FeaturedPortfolioItem is a subset of PortfolioItem from the Portfolio section"
+        ]
+    },
+    "heroContent": {
+        "tagline": "Building Tomorrow's Software Today",
+        "description": "We craft innovative SaaS products and mobile applications that solve real-world problems.",
+        "ctaText": "Explore Our Work",
+        "ctaLink": "/portfolio",
+        "backgroundImage": "/images/hero-bg.jpg"
+    },
+    "services": [
+        {
+            "id": "svc-001",
+            "icon": "code",
+            "title": "Custom Software Development",
+            "description": "End-to-end development of tailored software solutions that fit your unique business needs."
+        },
+        {
+            "id": "svc-002",
+            "icon": "smartphone",
+            "title": "Mobile App Development",
+            "description": "Native and cross-platform mobile applications for iOS and Android platforms."
+        },
+        {
+            "id": "svc-003",
+            "icon": "cloud",
+            "title": "SaaS Product Development",
+            "description": "Scalable cloud-based software products designed for subscription-based delivery."
+        },
+        {
+            "id": "svc-004",
+            "icon": "palette",
+            "title": "UI/UX Design",
+            "description": "User-centered design that creates intuitive and beautiful digital experiences."
+        },
+        {
+            "id": "svc-005",
+            "icon": "server",
+            "title": "Cloud Infrastructure",
+            "description": "Robust cloud architecture and DevOps solutions for high availability and scale."
+        }
+    ],
+    "teamMembers": [
+        {
+            "id": "team-001",
+            "name": "Alex Chen",
+            "role": "CEO & Founder",
+            "bio": "15+ years in software development. Previously led engineering at a Fortune 500 tech company.",
+            "photoUrl": "/images/team/alex-chen.jpg"
+        },
+        {
+            "id": "team-002",
+            "name": "Sarah Johnson",
+            "role": "CTO",
+            "bio": "Full-stack architect with expertise in scalable cloud systems and microservices.",
+            "photoUrl": "/images/team/sarah-johnson.jpg"
+        },
+        {
+            "id": "team-003",
+            "name": "Marcus Williams",
+            "role": "Lead Designer",
+            "bio": "Award-winning designer focused on creating exceptional user experiences.",
+            "photoUrl": "/images/team/marcus-williams.jpg"
+        },
+        {
+            "id": "team-004",
+            "name": "Emily Rodriguez",
+            "role": "Mobile Lead",
+            "bio": "iOS and Android specialist with 20+ apps shipped to the App Store and Play Store.",
+            "photoUrl": "/images/team/emily-rodriguez.jpg"
+        }
+    ],
+    "testimonials": [
+        {
+            "id": "test-001",
+            "quote": "AEGONTECH transformed our vision into a polished product that our users love. Their attention to detail is unmatched.",
+            "clientName": "Michael Foster",
+            "clientCompany": "TechVentures Inc.",
+            "clientPhotoUrl": "/images/testimonials/michael-foster.jpg"
+        },
+        {
+            "id": "test-002",
+            "quote": "Working with AEGONTECH was seamless. They delivered on time, on budget, and exceeded our expectations.",
+            "clientName": "Jennifer Martinez",
+            "clientCompany": "StartupFlow",
+            "clientPhotoUrl": "/images/testimonials/jennifer-martinez.jpg"
+        },
+        {
+            "id": "test-003",
+            "quote": "Their mobile app development expertise helped us launch on both platforms simultaneously. Highly recommended!",
+            "clientName": "David Park",
+            "clientCompany": "MobileFirst Solutions",
+            "clientPhotoUrl": "/images/testimonials/david-park.jpg"
+        },
+        {
+            "id": "test-004",
+            "quote": "The SaaS platform they built for us handles thousands of users daily without breaking a sweat.",
+            "clientName": "Lisa Thompson",
+            "clientCompany": "CloudScale Corp",
+            "clientPhotoUrl": "/images/testimonials/lisa-thompson.jpg"
+        }
+    ],
+    "featuredPortfolioItems": [
+        {
+            "id": "port-001",
+            "title": "Dialable",
+            "type": "saas",
+            "description": "International calling platform with competitive rates worldwide.",
+            "imageUrl": "/images/portfolio/dialable.png",
+            "url": "https://www.dialable.world"
+        },
+        {
+            "id": "port-002",
+            "title": "Maximus IPTV Player",
+            "type": "mobile",
+            "description": "Feature-rich IPTV player for iOS with M3U and Xtream support.",
+            "imageUrl": "/images/portfolio/maximus-iptv.png",
+            "url": "https://apps.apple.com/app/maximus-iptv-player-m3u-xtream/id6744410529"
+        },
+        {
+            "id": "port-003",
+            "title": "CloudSync Pro",
+            "type": "saas",
+            "description": "Enterprise file synchronization and collaboration platform.",
+            "imageUrl": "/images/portfolio/cloudsync-pro.png",
+            "url": "https://cloudsync.example.com"
+        }
+    ],
+    "contactInfo": {
+        "address": "123 Tech Boulevard, Suite 400, San Francisco, CA 94105",
+        "email": "hello@aegontech.com",
+        "phone": "+1 (555) 123-4567",
+        "mapEmbedUrl": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3153.019284573!"
+    }
+}

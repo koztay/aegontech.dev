@@ -1,0 +1,61 @@
+{
+    "_meta": {
+        "models": {
+            "admin": "Authenticated admin user profile",
+            "dashboardStats": "Summary statistics for the dashboard",
+            "portfolioItems": "Portfolio items for admin management (references portfolio section)",
+            "blogPosts": "Blog posts for admin management (references blog section)"
+        },
+        "relationships": []
+    },
+    "admin": {
+        "id": "admin-001",
+        "email": "admin@aegontech.dev",
+        "name": "Admin User"
+    },
+    "dashboardStats": {
+        "totalPortfolioItems": 6,
+        "totalBlogPosts": 6,
+        "recentActivityCount": 12
+    },
+    "recentPortfolioItems": [
+        {
+            "id": "dialable",
+            "title": "Dialable",
+            "type": "saas",
+            "updatedAt": "2024-12-20T10:00:00Z"
+        },
+        {
+            "id": "maximus-iptv",
+            "title": "Maximus IPTV Player",
+            "type": "mobile",
+            "updatedAt": "2024-12-18T14:30:00Z"
+        },
+        {
+            "id": "cloudsync-pro",
+            "title": "CloudSync Pro",
+            "type": "saas",
+            "updatedAt": "2024-12-15T09:00:00Z"
+        }
+    ],
+    "recentBlogPosts": [
+        {
+            "id": "building-scalable-saas",
+            "title": "Building Scalable SaaS Applications in 2024",
+            "status": "published",
+            "updatedAt": "2024-12-20T10:00:00Z"
+        },
+        {
+            "id": "mobile-app-development-trends",
+            "title": "Mobile App Development Trends to Watch",
+            "status": "published",
+            "updatedAt": "2024-12-15T14:30:00Z"
+        },
+        {
+            "id": "choosing-right-tech-stack",
+            "title": "Choosing the Right Tech Stack for Your Startup",
+            "status": "draft",
+            "updatedAt": "2024-12-10T09:00:00Z"
+        }
+    ]
+}

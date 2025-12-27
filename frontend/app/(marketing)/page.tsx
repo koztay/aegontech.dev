@@ -1,22 +1,123 @@
-import type { Metadata } from "next";
-import { Hero } from "@/components/sections/hero";
-import { PortfolioStrip } from "@/components/sections/portfolio-strip";
-import { buildPageMeta } from "@/lib/seo/meta";
+"use client";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://aegontech.dev";
-
-export const metadata: Metadata = buildPageMeta({
-  title: "AegonTech Studio — SaaS & Mobile Launches",
-  description: "We design, build, and launch modern SaaS and mobile apps with performance, SEO, and accessibility baked in.",
-  url: SITE_URL,
-  image: `${SITE_URL}/assets/og-default.png`
-});
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import {
+  HeroSection,
+  ServicesSection,
+  PortfolioPreview,
+  TeamSection,
+  TestimonialsSection,
+  ContactSection,
+} from "@/components/landing";
+import { PublicShell } from "@/components/shell/PublicShell";
+import {
+  getHeroContent,
+  getContactInfo,
+  getTeamMembers,
+  getTestimonials,
+} from "@/lib/data/static";
+import type {
+  Service,
+  FeaturedPortfolioItem,
+  ContactFormData,
+} from "@/lib/types";
 
 export default function MarketingPage() {
+  const router = useRouter();
+  const [services, setServices] = useState<Service[]>([]);
+  const [portfolioItems, setPortfolioItems] = useState<FeaturedPortfolioItem[]>([]);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  const heroContent = getHeroContent();
+  const contactInfo = getContactInfo();
+  const teamMembers = getTeamMembers();
+  const testimonials = getTestimonials();
+
+  useEffect(() => {
+    // Fetch data from API routes (only for portfolio and services)
+    Promise.all([
+      fetch("/api/data/services").then((r) => r.json()),
+      fetch("/api/data/portfolio").then((r) => r.json()),
+    ])
+      .then(([servicesData, portfolioData]) => {
+        setServices(servicesData);
+        setPortfolioItems(portfolioData);
+      })
+      .catch((error) => {
+        console.error("Error loading data:", error);
+      });
+
+    // Check dark mode preference
+    if (typeof window !== "undefined") {
+      const isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      setIsDarkMode(isDark);
+      if (isDark) {
+        document.documentElement.classList.add("dark");
+      }
+    }
+  }, []);
+
+  const handleToggleDarkMode = () => {
+    setIsDarkMode(!isDarkMode);
+    document.documentElement.classList.toggle("dark");
+  };
+
+  const handleContactSubmit = async (data: ContactFormData) => {
+    const response = await fetch("/api/contact", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to submit contact form");
+    }
+  };
+
+  const navigationItems = [
+    { label: "Home", href: "/" },
+    { label: "Portfolio", href: "/portfolio" },
+    { label: "Blog", href: "/blog" },
+    { label: "Contact", href: "#contact" },
+  ];
+
   return (
-    <main className="flex flex-col">
-      <Hero />
-      <PortfolioStrip />
-    </main>
+    <PublicShell
+      navigationItems={navigationItems}
+      currentPath="/"
+      isDarkMode={isDarkMode}
+      onToggleDarkMode={handleToggleDarkMode}
+      onNavigate={(href) => {
+        if (href.startsWith("#")) {
+          const element = document.querySelector(href);
+          element?.scrollIntoView({ behavior: "smooth" });
+        } else {
+          router.push(href);
+        }
+      }}
+    >
+      <HeroSection
+        content={heroContent}
+        onCtaClick={() => router.push("/portfolio")}
+      />
+
+      <ServicesSection services={services} />
+
+      <PortfolioPreview
+        items={portfolioItems}
+        onViewAll={() => router.push("/portfolio")}
+        onItemClick={(id) => console.log("Portfolio item clicked:", id)}
+      />
+
+      <TeamSection
+        members={teamMembers}
+        onMemberClick={(id) => console.log("Team member clicked:", id)}
+      />
+
+      <TestimonialsSection testimonials={testimonials} />
+
+      <ContactSection contactInfo={contactInfo} onSubmit={handleContactSubmit} />
+    </PublicShell>
   );
 }

@@ -1,98 +1,95 @@
-import { getSupabaseClient } from "@/lib/supabase/client";
+import { query } from "@/lib/db/client";
 
 export type PortfolioItem = {
   id: string;
   title: string;
-  summary: string;
-  type: "web" | "app";
-  link: string;
-  order_rank: number;
-  image: string;
+  description: string;
+  type: "saas" | "mobile";
+  screenshot: string;
+  websiteUrl?: string;
+  appStoreUrl?: string;
+  playStoreUrl?: string;
 };
 
 const PLACEHOLDER_ITEMS: PortfolioItem[] = [
   {
     id: "dialable",
     title: "Dialable",
-    summary: "Global SaaS dialer platform",
-    type: "web",
-    link: "https://www.dialable.world",
-    order_rank: 1,
-    image: "/assets/placeholder.svg"
+    description: "Global SaaS dialer platform with competitive international rates",
+    type: "saas",
+    screenshot: "https://picsum.photos/seed/dialable/400/300",
+    websiteUrl: "https://www.dialable.world",
   },
   {
     id: "maximus",
-    title: "Maximus IPTV",
-    summary: "Premium streaming app experience",
-    type: "app",
-    link: "https://apps.apple.com/app/maximus-iptv-player-m3u-xtream/id6744410529",
-    order_rank: 2,
-    image: "/assets/placeholder.svg"
+    title: "Maximus IPTV Player",
+    description: "Feature-rich IPTV player for iOS with M3U and Xtream support",
+    type: "mobile",
+    screenshot: "https://picsum.photos/seed/maximus/400/300",
+    appStoreUrl: "https://apps.apple.com/app/maximus-iptv-player-m3u-xtream/id6744410529",
   },
   {
-    id: "saas-kit",
-    title: "SaaS Launch Kit",
-    summary: "Composable foundations for SaaS",
-    type: "web",
-    link: "https://aegontech.dev/saas-kit",
-    order_rank: 3,
-    image: "/assets/placeholder.svg"
-  }
+    id: "cloudsync",
+    title: "CloudSync Pro",
+    description: "Enterprise file synchronization and collaboration platform",
+    type: "saas",
+    screenshot: "https://picsum.photos/seed/cloudsync/400/300",
+    websiteUrl: "https://cloudsync.example.com",
+  },
 ];
 
-type PortfolioRow = {
-  id: string;
-  title: string;
-  summary: string | null;
-  type: "web" | "app";
-  hero_link: string | null;
-  order_rank: number | null;
-  status: string;
-  featured_flag: boolean | null;
-};
-
-function mapRowToItem(row: PortfolioRow): PortfolioItem {
-  return {
-    id: row.id,
-    title: row.title,
-    summary: row.summary ?? "",
-    type: row.type,
-    link: row.hero_link ?? "#",
-    order_rank: row.order_rank ?? 0,
-    image: "/assets/placeholder.svg"
-  };
-}
-
-export async function getFeaturedPortfolioItems(): Promise<PortfolioItem[]> {
+export async function getAllPortfolioItems(): Promise<PortfolioItem[]> {
   try {
-    const supabase = getSupabaseClient();
-    const { data, error } = await supabase
-      .from("portfolio_items")
-      .select("id,title,summary,type,hero_link,order_rank,status,featured_flag")
-      .eq("status", "published")
-      .order("featured_flag", { ascending: false })
-      .order("order_rank", { ascending: true })
-      .order("updated_at", { ascending: false })
-      .limit(6);
+    const rows = await query<any>(
+      "SELECT * FROM portfolio_items ORDER BY created_at DESC"
+    );
 
-    if (error) throw error;
-
-    const items = (data ?? [])
-      .filter((row) => row.featured_flag)
-      .map(mapRowToItem);
-
-    if (items.length >= 3) return items.slice(0, 3);
-
-    const filler = (data ?? [])
-      .filter((row) => !row.featured_flag)
-      .map(mapRowToItem)
-      .slice(0, 3 - items.length);
-
-    const combined = [...items, ...filler];
-    if (combined.length > 0) return combined;
+    if (rows.length > 0) {
+      return rows.map((row) => ({
+        id: row.id,
+        title: row.title,
+        description: row.description,
+        type: row.type,
+        screenshot: row.screenshot,
+        websiteUrl: row.website_url,
+        appStoreUrl: row.app_store_url,
+        playStoreUrl: row.play_store_url,
+      }));
+    }
   } catch (error) {
     console.warn("Falling back to placeholder portfolio items", error);
   }
 
   return PLACEHOLDER_ITEMS;
+}
+
+export async function getPortfolioItemBySlug(
+  slug: string
+): Promise<PortfolioItem | null> {
+  try {
+    const rows = await query<any>(
+      "SELECT * FROM portfolio_items WHERE title = $1 LIMIT 1",
+      [slug.replace(/-/g, " ")]
+    );
+
+    if (rows.length > 0) {
+      const row = rows[0];
+      return {
+        id: row.id,
+        title: row.title,
+        description: row.description,
+        type: row.type,
+        screenshot: row.screenshot,
+        websiteUrl: row.website_url,
+        appStoreUrl: row.app_store_url,
+        playStoreUrl: row.play_store_url,
+      };
+    }
+  } catch (error) {
+    console.warn("Error fetching portfolio item:", error);
+  }
+
+  // Fallback to placeholder
+  const item = PLACEHOLDER_ITEMS.find((item) => item.id === slug);
+  return item || null;
 }
