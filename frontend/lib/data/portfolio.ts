@@ -1,15 +1,5 @@
 import { query } from "@/lib/db/client";
-
-export type PortfolioItem = {
-  id: string;
-  title: string;
-  description: string;
-  type: "saas" | "mobile";
-  screenshot: string;
-  websiteUrl?: string;
-  appStoreUrl?: string;
-  playStoreUrl?: string;
-};
+import type { PortfolioItem } from "@/lib/types";
 
 const PLACEHOLDER_ITEMS: PortfolioItem[] = [
   {
@@ -18,7 +8,9 @@ const PLACEHOLDER_ITEMS: PortfolioItem[] = [
     description: "Global SaaS dialer platform with competitive international rates",
     type: "saas",
     screenshot: "https://picsum.photos/seed/dialable/400/300",
-    websiteUrl: "https://www.dialable.world",
+    links: {
+      website: "https://www.dialable.world",
+    },
   },
   {
     id: "maximus",
@@ -26,7 +18,10 @@ const PLACEHOLDER_ITEMS: PortfolioItem[] = [
     description: "Feature-rich IPTV player for iOS with M3U and Xtream support",
     type: "mobile",
     screenshot: "https://picsum.photos/seed/maximus/400/300",
-    appStoreUrl: "https://apps.apple.com/app/maximus-iptv-player-m3u-xtream/id6744410529",
+    links: {
+      appStore:
+        "https://apps.apple.com/app/maximus-iptv-player-m3u-xtream/id6744410529",
+    },
   },
   {
     id: "cloudsync",
@@ -34,7 +29,9 @@ const PLACEHOLDER_ITEMS: PortfolioItem[] = [
     description: "Enterprise file synchronization and collaboration platform",
     type: "saas",
     screenshot: "https://picsum.photos/seed/cloudsync/400/300",
-    websiteUrl: "https://cloudsync.example.com",
+    links: {
+      website: "https://cloudsync.example.com",
+    },
   },
 ];
 
@@ -51,9 +48,11 @@ export async function getAllPortfolioItems(): Promise<PortfolioItem[]> {
         description: row.description,
         type: row.type,
         screenshot: row.screenshot,
-        websiteUrl: row.website_url,
-        appStoreUrl: row.app_store_url,
-        playStoreUrl: row.play_store_url,
+        links: {
+          website: row.website_url || undefined,
+          appStore: row.app_store_url || undefined,
+          playStore: row.play_store_url || undefined,
+        },
       }));
     }
   } catch (error) {
@@ -80,9 +79,11 @@ export async function getPortfolioItemBySlug(
         description: row.description,
         type: row.type,
         screenshot: row.screenshot,
-        websiteUrl: row.website_url,
-        appStoreUrl: row.app_store_url,
-        playStoreUrl: row.play_store_url,
+        links: {
+          website: row.website_url || undefined,
+          appStore: row.app_store_url || undefined,
+          playStore: row.play_store_url || undefined,
+        },
       };
     }
   } catch (error) {

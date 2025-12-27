@@ -1,12 +1,15 @@
 import { NextResponse } from "next/server";
-import { getFeaturedPortfolioItems } from "@/lib/data/landing";
+import { getAllPortfolioItems } from "@/lib/data/portfolio";
 
 export async function GET() {
     try {
-        const portfolio = await getFeaturedPortfolioItems();
+        const portfolio = await getAllPortfolioItems();
         return NextResponse.json(portfolio);
     } catch (error) {
         console.error("Error in portfolio API:", error);
-        return NextResponse.json({ error: "Failed to fetch portfolio items" }, { status: 500 });
+        return NextResponse.json(
+            { error: "Failed to fetch portfolio items" },
+            { status: 500 }
+        );
     }
 }
