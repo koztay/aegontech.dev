@@ -94,4 +94,8 @@
   .animate-infinite-scroll-portfolio {
     animation: infinite-scroll 40s linear infinite;
   }
+
+  .paused {
+    animation-play-state: paused !important;
+  }
 }

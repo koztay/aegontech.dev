@@ -141,7 +141,7 @@ export function PortfolioPreview({
                 >
                     <div
                         ref={scrollRef}
-                        className={`flex gap-4 pb-2 ${!isPaused && items.length > 0 ? 'animate-infinite-scroll-portfolio' : ''}`}
+                        className={`flex gap-4 pb-2 animate-infinite-scroll-portfolio ${isPaused ? 'paused' : ''}`}
                         style={{ scrollbarWidth: "none", msOverflowStyle: "none", width: "fit-content" }}
                     >
                         {extendedItems.map((item, index) => (
