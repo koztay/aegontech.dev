@@ -10,8 +10,8 @@
     "node": "20.x"
   },
   "scripts": {
-    "build": "cd frontend && pnpm install && pnpm run build",
-    "dev": "cd frontend && pnpm dev",
-    "start": "cd frontend && pnpm start"
+    "build": "cd frontend && npm ci && npm run build",
+    "dev": "cd frontend && npm run dev",
+    "start": "cd frontend && npm run start"
   }
 }
