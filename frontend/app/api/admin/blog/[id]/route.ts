@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { getDbPool } from "@/lib/db/client";
+import { removeObject } from "@/lib/storage/minio";
+import { logAudit } from "@/lib/observability/audit";
 
 export async function GET(
   request: Request,
@@ -81,6 +83,23 @@ export async function DELETE(
   try {
     const { id } = await params;
     const pool = getDbPool();
+    // find associated media assets
+    const mediaRes = await pool.query(
+      "SELECT storage_path FROM media_assets WHERE blog_post_id = $1",
+      [id]
+    );
+
+    // attempt to remove objects from MinIO
+    for (const row of mediaRes.rows) {
+      try {
+        await removeObject(row.storage_path);
+      } catch (e) {
+        console.error("Failed to remove media object:", row.storage_path, e);
+      }
+    }
+
+    // remove media rows
+    await pool.query("DELETE FROM media_assets WHERE blog_post_id = $1", [id]);
 
     const result = await pool.query(
       "DELETE FROM blog_posts WHERE id = $1 RETURNING *",
@@ -88,10 +107,14 @@ export async function DELETE(
     );
 
     if (result.rows.length === 0) {
-      return NextResponse.json(
-        { error: "Post not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Post not found" }, { status: 404 });
+    }
+
+    try {
+      const actor = (request.headers.get("cookie") || "").includes("admin_session=") ? "admin" : null;
+      await logAudit({ action: "blog.delete", actor, entity_type: "blog_post", entity_id: id, details: { deleted_media_count: mediaRes.rows.length } });
+    } catch (e) {
+      console.warn("audit warn:", e);
     }
 
     return NextResponse.json({ success: true });

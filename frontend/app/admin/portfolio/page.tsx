@@ -1,5 +1,6 @@
 import { getDbPool } from "@/lib/db/client";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
@@ -13,9 +14,11 @@ async function getPortfolioItems() {
 
 export default async function AdminPortfolio() {
   const items = await getPortfolioItems();
+  const MediaUploader = (await import('@/components/admin/MediaUploader')).default;
 
   return (
     <div className="space-y-6">
+      <MediaUploader associatedType="portfolio" />
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Portfolio Management</h2>
         <Link href="/admin/portfolio/new">

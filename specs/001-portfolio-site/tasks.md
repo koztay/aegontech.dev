@@ -21,8 +21,6 @@
 
 ## Phase 2: Foundational (Blocking Prerequisites)
 
-## Phase 2: Foundational (Blocking Prerequisites)
-
 **Purpose**: Core infrastructure that MUST be complete before ANY user story can be implemented
 
 - [x] T006 Create Supabase migrations for schemas in `data-model.md` (portfolio_items, media_assets, blog_posts, api_keys, audit_logs) and storage bucket `public-media`.
@@ -111,11 +109,16 @@
 
 ---
 
+
 ## Phase N: Polish & Cross-Cutting Concerns
 
 - [X] T041 [P] Run Lighthouse + accessibility audits; fix performance/contrast/LCP/CLS issues and document results in `frontend/tests/e2e/reports/`.
-- [X] T042 [P] Add synthetic health checks for strip data freshness and ingestion failure alert (>2%/15m) in `frontend/lib/observability/synthetic.ts`.
-- [X] T043 [P] Add versioning/rollback helpers for portfolio/blog records in `frontend/lib/data/versioning.ts`.
+- [X] T042 [P] Add synthetic health checks for strip data freshness, screenshot freshness, metadata completeness, and ingestion failure alert (>2%/15m) in `frontend/lib/observability/synthetic.ts`.
+- [X] T043 [P] Add versioning/rollback helpers for portfolio/blog records in `frontend/lib/data/versioning.ts` and add explicit test/acceptance mapping.
+- [X] T046 [P] Add structured logging for all ingestion, mutation, and publish steps in `frontend/lib/observability/logging.ts` and ensure test coverage.
+- [X] T047 [P] Add audit logging for all admin and blog write actions in `frontend/lib/observability/audit.ts` and ensure test coverage.
+- [X] T048 [P] Standardize terminology: use "needs_attention" and "admin actions" across all code and docs.
+- [X] T049 [P] Add admin UI for manual retry of ingestion (screenshot/metadata) with explicit acceptance criteria in `frontend/app/(marketing)/admin/portfolio/page.tsx` and test mapping.
 - [x] T044 [P] Harden security headers and caching (Next.js middleware) in `frontend/middleware.ts`.
 - [X] T045 Update `quickstart.md` with final envs, commands, and admin onboarding steps.
 

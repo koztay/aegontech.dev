@@ -7,6 +7,9 @@
 
 ## Clarifications
 
+### Session 2025-12-28
+- Q: Should images be deleted from storage when a Portfolio/Blog item is deleted, or only unlinked? → A: Delete images from storage when a Portfolio/Blog item is deleted.
+
 ### Session 2025-12-25
 - Q: Should blog submissions from n8n auto-publish when validation passes, or require manual review? → A: Auto-publish all valid blog submissions from n8n if validation passes.
 
@@ -38,12 +41,13 @@ A prospective client lands on the homepage, sees a modern hero with clear positi
 1. **Given** the site is published with at least 3 featured portfolio entries, **When** a visitor opens the homepage, **Then** they see a hero section with CTA and a looping horizontal strip showing exactly 3 items with titles, tags (web/app), and live links.
 2. **Given** the visitor is on mobile, **When** the strip auto-scrolls, **Then** the interaction remains smooth (no jank), can be paused via user interaction (swipe/tap), and preserves focus/ARIA for accessibility.
 
----
 
-### User Story 2 - Admin adds/curates portfolio items via URL (Priority: P2)
-
-An authenticated admin adds a new portfolio entry by providing either a website URL or an App Store link; the system auto-captures a screenshot/cover image and metadata, supports manual overrides, and allows setting featured status for homepage display.
-
+Constitution alignment: All requirements below are explicit and testable, including:
+- Mobile-first/SEO performance budgets (Lighthouse, LCP/CLS)
+- Automated portfolio/blog ingestion (screenshots, metadata, fallbacks)
+- Supabase auth/API key constraints for admin/blog writes
+- Observability: structured logging for all ingestion, mutation, and publish steps; audit logs for all admin and blog write actions; synthetic health checks for screenshot freshness, metadata completeness, and public page health; alerting when ingestion failure rate exceeds 2% over 15 minutes
+- Structured content fields (SEO metadata, alt text, versioning/rollback)
 **Why this priority**: Keeps the portfolio fresh with minimal effort; necessary to sustain the homepage strip with accurate content.
 
 **Independent Test**: From admin panel, submit a new entry with a web URL and an App Store URL; verify auto metadata + screenshot are pulled, overrides save, and the entry appears in the portfolio list and (if marked featured) in the homepage strip.
@@ -75,6 +79,7 @@ An automation (n8n) posts blog content, metadata, and images to a secure API usi
 [Add more user stories as needed, each with an assigned priority]
 
 ### Edge Cases
+- When a Portfolio or Blog item is deleted, all associated images are also deleted from storage to prevent orphaned files and reduce storage costs.
 
 - Screenshot capture times out or site blocks the crawler; system retries once, stores last-known-good screenshot if available, and flags the item for manual upload.
 - App Store metadata fetch fails or artwork missing; show placeholder artwork, keep entry in draft, and allow manual image upload.
@@ -92,6 +97,7 @@ An automation (n8n) posts blog content, metadata, and images to a secure API usi
 
 > Constitution alignment: capture mobile-first/SEO performance budgets (Lighthouse, LCP/CLS), automated portfolio/blog ingestion behavior (screenshots, metadata, fallbacks), Supabase auth/API key constraints for admin/blog writes, observability/alerting needs, and structured content fields (SEO metadata, alt text, versioning/rollback).
 
+
 ### Functional Requirements
 
 - **FR-001**: Homepage must present a hero section with CTA and an infinite horizontal strip showing exactly 3 featured portfolio items pulled from Supabase, with smooth auto-scroll and keyboard/touch controls.
@@ -105,10 +111,10 @@ An automation (n8n) posts blog content, metadata, and images to a secure API usi
 - **FR-009**: All public pages (home, portfolio detail, blog posts) must emit SEO metadata (title, description, canonical, OG/Twitter tags, schema.org) and readable slugs.
 - **FR-010**: Performance budgets: Lighthouse ≥90 (mobile/desktop) on home/portfolio/blog, LCP ≤2.5s, CLS <0.1, TTI ≤4s on 4G; strip animation must not drop below 55fps on modern mobile.
 - **FR-011**: Accessibility: all media must include alt text; horizontal strip must be operable via keyboard and provide pause/previous/next controls; color contrast meets WCAG AA.
-- **FR-012**: Observability: ingestion steps (metadata fetch, screenshot, uploads), admin mutations, and blog API calls must be logged with correlation IDs; alerts trigger when failure rate >2% over 15 minutes.
-- **FR-013**: Resilience: when screenshot or metadata fetch fails, the system retries once, applies placeholders, and marks the record as "needs attention" without blocking other entries.
-- **FR-014**: Versioning: content changes (portfolio/blog) must record author, timestamp, and change summary with ability to restore the last version.
-- **FR-015**: Admin UI must surface ingestion status (success, retry, failed) and allow manual retry for screenshot/metadata pulls.
+- **FR-012**: Observability: All ingestion steps (metadata fetch, screenshot, uploads), admin actions, and blog API calls must be logged with correlation IDs; synthetic health checks must run daily for screenshot freshness, metadata completeness, and public page health; alerts must trigger when ingestion failure rate >2% over 15 minutes; all logs must be auditable.
+- **FR-013**: Resilience: When screenshot or metadata fetch fails, the system retries once, applies placeholders, and marks the record as "needs_attention" without blocking other entries.
+- **FR-014**: Versioning: Content changes (portfolio/blog) must record author, timestamp, and change summary with ability to restore the last version; versioning/rollback must be testable and mapped to acceptance criteria.
+- **FR-015**: Admin UI must surface ingestion status (success, retry, failed) and allow manual retry for screenshot/metadata pulls, with explicit acceptance criteria and test mapping.
 
 ### Key Entities *(include if feature involves data)*
 
@@ -134,6 +140,7 @@ An automation (n8n) posts blog content, metadata, and images to a secure API usi
   These must be technology-agnostic and measurable.
 -->
 
+
 ### Measurable Outcomes
 
 - **SC-001**: Homepage LCP ≤2.5s and CLS <0.1 on mobile and desktop; Lighthouse performance score ≥90 for home/portfolio/blog pages.
@@ -143,4 +150,4 @@ An automation (n8n) posts blog content, metadata, and images to a secure API usi
 - **SC-005**: Blog API rejects 100% of requests without a valid API key; valid requests store posts with all referenced images resolved and return success within 5 seconds for payloads ≤2MB.
 - **SC-006**: Accessibility checks: 0 critical WCAG violations on home/portfolio/blog; all images have alt text and strip is keyboard operable with pause/next/prev controls.
 - **SC-007**: Admin workflow: creating and publishing a portfolio item via URL (including override edits) completes in ≤3 minutes end-to-end in staging.
-- **SC-008**: Observability: ingestion failure alert triggers when 3 or more failures occur within 15 minutes; audit logs captured for 100% of admin and blog write actions.
+- **SC-008**: Observability: Ingestion failure alert triggers when 3 or more failures occur within 15 minutes; audit logs are captured for 100% of admin and blog write actions; synthetic health checks for screenshot freshness, metadata completeness, and public page health run daily and are testable.
