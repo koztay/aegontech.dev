@@ -4,12 +4,24 @@ import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
+interface PortfolioItem {
+  id: string;
+  title: string;
+  description: string;
+  type: string;
+  screenshot: string;
+  website_url: string | null;
+  app_store_url: string | null;
+  play_store_url: string | null;
+  created_at: string;
+}
+
 async function getPortfolioItems() {
   const pool = getDbPool();
   const result = await pool.query(
     "SELECT id, title, description, type, screenshot, website_url, app_store_url, play_store_url, created_at FROM portfolio_items ORDER BY created_at DESC"
   );
-  return result.rows;
+  return result.rows as PortfolioItem[];
 }
 
 export default async function AdminPortfolio() {
@@ -30,7 +42,7 @@ export default async function AdminPortfolio() {
         {items.map((item) => {
           const slug = item.title.toLowerCase().replace(/\s+/g, '-');
           const projectUrl = item.website_url || item.app_store_url || item.play_store_url;
-          
+
           return (
             <Card key={item.id} className="p-6">
               <div className="flex justify-between items-start">
