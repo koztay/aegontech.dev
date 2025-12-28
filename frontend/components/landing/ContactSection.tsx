@@ -133,12 +133,19 @@ export function ContactSection({ contactInfo, onSubmit }: ContactSectionProps) {
 
                     {/* Contact Info */}
                     <div className="lg:col-span-2 space-y-4">
-                        {/* Map Placeholder */}
-                        <div className="h-40 rounded-xl overflow-hidden bg-slate-200 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center">
-                            <div className="text-center text-slate-500 dark:text-slate-400">
-                                <MapPin className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                                <p className="text-xs">Map will load here</p>
-                            </div>
+                        {/* Map Embed */}
+                        <div className="rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-white flex items-center justify-center" style={{ minHeight: 300 }}>
+                            <iframe
+                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3191.8514062272557!2d-75.52716622470389!3d39.15586722710242!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c764aa7c38b56d%3A0x1c6368e17a8edc56!2s8%20The%20Green%20Suite%20B%2C%20Dover%2C%20DE%2019910%2C%20USA!5e0!3m2!1sen!2str!4v1766932429361!5m2!1sen!2str"
+                                width="400"
+                                height="300"
+                                style={{ border: 0, display: 'block' }}
+                                allowFullScreen
+                                loading="lazy"
+                                referrerPolicy="no-referrer-when-downgrade"
+                                title="Google Map"
+                                onError={(e) => { e.target.style.display = 'none'; e.target.parentNode.innerHTML += '<div class="text-center text-slate-500">Map failed to load</div>'; }}
+                            />
                         </div>
 
                         {/* Contact Cards */}
