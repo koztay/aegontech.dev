@@ -42,7 +42,16 @@ export default function MarketingPage() {
     ])
       .then(([servicesData, portfolioData]) => {
         setServices(servicesData);
-        setPortfolioItems(portfolioData);
+        // Map PortfolioItem to FeaturedPortfolioItem
+        const mappedPortfolio = portfolioData.map((item: any) => ({
+          id: item.id,
+          title: item.title,
+          type: item.type,
+          description: item.description,
+          imageUrl: item.screenshot,
+          url: item.links?.website || item.links?.appStore || item.links?.playStore || `/portfolio/${item.id}`,
+        }));
+        setPortfolioItems(mappedPortfolio);
       })
       .catch((error) => {
         console.error("Error loading data:", error);
