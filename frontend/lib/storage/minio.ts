@@ -43,6 +43,15 @@ export async function presignPut(objectName: string, expiresSeconds = 300): Prom
   });
 }
 
+export async function presignGet(objectName: string, expiresSeconds = 300): Promise<string> {
+  return new Promise((resolve, reject) => {
+    client.presignedGetObject(bucket, objectName, expiresSeconds, (err: any, url: string) => {
+      if (err) return reject(err);
+      resolve(url);
+    });
+  });
+}
+
 export async function statObject(objectName: string) {
   return new Promise<any>((resolve, reject) => {
     client.statObject(bucket, objectName, (err: any, stat: any) => {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import MediaSelector from "@/components/admin/MediaSelector";
 import { useRouter, useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -11,6 +12,8 @@ export default function EditPortfolioItem() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [item, setItem] = useState<any>(null);
+  const [showSelector, setShowSelector] = useState(false);
+  const [screenshotUrl, setScreenshotUrl] = useState<string>("");
 
   useEffect(() => {
     fetch(`/api/admin/portfolio/${params.id}`)
@@ -18,6 +21,10 @@ export default function EditPortfolioItem() {
       .then((data) => setItem(data))
       .catch(() => setError("Failed to load item"));
   }, [params.id]);
+
+  useEffect(() => {
+    if (item) setScreenshotUrl(item.screenshot || "");
+  }, [item]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -29,7 +36,7 @@ export default function EditPortfolioItem() {
       title: formData.get("title"),
       description: formData.get("description"),
       type: formData.get("type"),
-      screenshot: formData.get("screenshot"),
+      screenshot: screenshotUrl,
       website_url: formData.get("website_url") || null,
       app_store_url: formData.get("app_store_url") || null,
       play_store_url: formData.get("play_store_url") || null,
@@ -137,14 +144,21 @@ export default function EditPortfolioItem() {
             <label htmlFor="screenshot" className="block text-sm font-medium mb-2">
               Screenshot URL *
             </label>
-            <input
-              type="url"
-              id="screenshot"
-              name="screenshot"
-              required
-              defaultValue={item.screenshot}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+            <div className="flex items-start gap-3">
+              <input
+                type="url"
+                id="screenshot"
+                name="screenshot"
+                required
+                value={screenshotUrl}
+                onChange={(e)=>setScreenshotUrl(String(e.target.value))}
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <div className="flex flex-col items-center gap-2">
+                <button type="button" className="px-3 py-1 border rounded" onClick={()=>setShowSelector(true)}>Choose</button>
+                {screenshotUrl ? <img src={screenshotUrl} alt="screenshot" className="w-24 h-16 object-cover rounded border" /> : null}
+              </div>
+            </div>
           </div>
 
           <div>
@@ -209,6 +223,9 @@ export default function EditPortfolioItem() {
           </div>
         </form>
       </Card>
+      {showSelector ? (
+        <MediaSelector onSelect={(url)=>{setScreenshotUrl(url); setShowSelector(false)}} onClose={()=>setShowSelector(false)} />
+      ) : null}
     </div>
   );
 }

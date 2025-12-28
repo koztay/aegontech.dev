@@ -1,4 +1,5 @@
 import { query } from "@/lib/db/client";
+import { presignGet } from "@/lib/storage/minio";
 import type { PortfolioItem } from "@/lib/types";
 
 export type { PortfolioItem } from "@/lib/types";
@@ -44,17 +45,27 @@ export async function getAllPortfolioItems(): Promise<PortfolioItem[]> {
     );
 
     if (rows.length > 0) {
-      return rows.map((row) => ({
-        id: row.id,
-        title: row.title,
-        description: row.description,
-        type: row.type,
-        screenshot: row.screenshot,
-        links: {
-          website: row.website_url || undefined,
-          appStore: row.app_store_url || undefined,
-          playStore: row.play_store_url || undefined,
-        },
+      return await Promise.all(rows.map(async (row) => {
+        let screenshotUrl = row.screenshot;
+        try {
+          if (screenshotUrl && !screenshotUrl.startsWith("http")) {
+            screenshotUrl = await presignGet(screenshotUrl, 300);
+          }
+        } catch (e) {
+          // fallback to stored value
+        }
+        return {
+          id: row.id,
+          title: row.title,
+          description: row.description,
+          type: row.type,
+          screenshot: screenshotUrl,
+          links: {
+            website: row.website_url || undefined,
+            appStore: row.app_store_url || undefined,
+            playStore: row.play_store_url || undefined,
+          },
+        };
       }));
     }
   } catch (error) {
@@ -75,12 +86,18 @@ export async function getPortfolioItemBySlug(
 
     if (rows.length > 0) {
       const row = rows[0];
+      let screenshotUrl = row.screenshot;
+      try {
+        if (screenshotUrl && !screenshotUrl.startsWith("http")) {
+          screenshotUrl = await presignGet(screenshotUrl, 300);
+        }
+      } catch (e) {}
       return {
         id: row.id,
         title: row.title,
         description: row.description,
         type: row.type,
-        screenshot: row.screenshot,
+        screenshot: screenshotUrl,
         links: {
           website: row.website_url || undefined,
           appStore: row.app_store_url || undefined,
