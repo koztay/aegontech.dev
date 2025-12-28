@@ -4,7 +4,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { PortfolioCard } from "@/components/blocks/portfolio-card";
 import { getFeaturedPortfolioItems, PortfolioItem } from "@/lib/data/portfolio";
 
-const SCROLL_STEP = 0.9;
 const POINTER_SWIPE_THRESHOLD = 36;
 
 function usePrefersReducedMotion() {
@@ -24,7 +23,6 @@ function usePrefersReducedMotion() {
 export function PortfolioStrip() {
   const [items, setItems] = useState<PortfolioItem[]>([]);
   const [isPaused, setIsPaused] = useState(false);
-  const [isAutoEnabled, setIsAutoEnabled] = useState(true);
   const prefersReducedMotion = usePrefersReducedMotion();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const pointerStart = useRef<number | null>(null);
@@ -35,28 +33,15 @@ export function PortfolioStrip() {
 
   useEffect(() => {
     if (prefersReducedMotion) {
-      setIsAutoEnabled(false);
       setIsPaused(true);
     }
   }, [prefersReducedMotion]);
 
   const loopItems = useMemo(() => {
     if (items.length === 0) return [] as PortfolioItem[];
-    return [...items, ...items];
+    // Triple the items to create seamless infinite scroll
+    return [...items, ...items, ...items];
   }, [items]);
-
-  useEffect(() => {
-    if (!containerRef.current || isPaused || !isAutoEnabled || loopItems.length === 0) return;
-    const el = containerRef.current;
-    let raf: number;
-    const tick = () => {
-      const widthHalf = el.scrollWidth / 2;
-      el.scrollLeft = (el.scrollLeft + SCROLL_STEP) % widthHalf;
-      raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [loopItems, isPaused, isAutoEnabled]);
 
   const scrollByCard = useCallback(
     (direction: "next" | "prev") => {
@@ -141,19 +126,24 @@ export function PortfolioStrip() {
         </div>
         <div
           ref={containerRef}
-          className="relative flex snap-x snap-mandatory overflow-hidden rounded-3xl border border-slate-200 bg-white p-4 outline-none"
+          className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-4 outline-none"
           role="region"
           aria-label="Featured portfolio items"
           tabIndex={0}
-          onMouseEnter={() => setIsPaused(true)}
-          onMouseLeave={() => setIsPaused(prefersReducedMotion)}
           onPointerDown={handlePointerDown}
           onPointerUp={handlePointerUp}
           onKeyDown={handleKeyDown}
         >
-          <div className="flex min-w-full gap-4">
+          <div 
+            className={`flex gap-4 ${!prefersReducedMotion ? 'animate-infinite-scroll' : ''}`}
+            style={{
+              width: 'fit-content',
+            }}
+            onMouseEnter={() => setIsPaused(true)}
+            onMouseLeave={() => setIsPaused(false)}
+          >
             {loopItems.map((item, idx) => (
-              <PortfolioCard key={`${item.id}-${idx}`} item={item} priority={idx === 0} />
+              <PortfolioCard key={`${item.id}-${idx}`} item={item} priority={idx < 3} />
             ))}
           </div>
         </div>

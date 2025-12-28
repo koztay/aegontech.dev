@@ -4,11 +4,11 @@ import type { PortfolioPreviewProps, FeaturedPortfolioItem } from "@/lib/types";
 import { ArrowRight, ChevronLeft, ChevronRight, Smartphone, Globe } from "lucide-react";
 import { useRef } from "react";
 
-// Dummy placeholder images
+// Dummy placeholder images - using consistent seeds
 const placeholderImages = [
-    "https://picsum.photos/seed/dialable/400/300",
-    "https://picsum.photos/seed/maximus/400/300",
-    "https://picsum.photos/seed/cloudsync/400/300",
+    "https://picsum.photos/seed/dialable1234/400/300",
+    "https://picsum.photos/seed/maximus5678/400/300",
+    "https://picsum.photos/seed/cloudsync9012/400/300",
     "https://picsum.photos/seed/project4/400/300",
     "https://picsum.photos/seed/project5/400/300",
 ];
@@ -22,7 +22,9 @@ function PortfolioCard({
     index: number;
     onItemClick?: (id: string) => void;
 }) {
-    const placeholderImage = placeholderImages[index % placeholderImages.length];
+    // Use consistent index based on item ID to ensure same image across duplicates
+    const imageIndex = index % (placeholderImages.length);
+    const placeholderImage = placeholderImages[imageIndex];
 
     return (
         <div
@@ -91,7 +93,7 @@ export function PortfolioPreview({
         }
     };
 
-    // Duplicate for infinite scroll effect
+    // Triple items for seamless infinite scroll effect
     const extendedItems = [...items, ...items, ...items];
 
     return (
@@ -132,18 +134,22 @@ export function PortfolioPreview({
 
                 {/* Horizontal Scroll */}
                 <div
-                    ref={scrollRef}
-                    className="flex gap-4 overflow-x-auto pb-2"
-                    style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+                    className="relative overflow-hidden"
                 >
-                    {extendedItems.map((item, index) => (
-                        <PortfolioCard
-                            key={`${item.id}-${index}`}
-                            item={item}
-                            index={index}
-                            onItemClick={onItemClick}
-                        />
-                    ))}
+                    <div
+                        ref={scrollRef}
+                        className="flex gap-4 animate-infinite-scroll-portfolio pb-2"
+                        style={{ scrollbarWidth: "none", msOverflowStyle: "none", width: "fit-content" }}
+                    >
+                        {extendedItems.map((item, index) => (
+                            <PortfolioCard
+                                key={`${item.id}-${index}`}
+                                item={item}
+                                index={index % items.length}
+                                onItemClick={onItemClick}
+                            />
+                        ))}
+                    </div>
                 </div>
             </div>
         </section>

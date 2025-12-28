@@ -12,6 +12,7 @@ export function PortfolioCard({ item, priority }: Props) {
   return (
     <a
       href={itemUrl}
+      data-card
       className="group relative flex min-w-[240px] max-w-[320px] snap-start flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
     >
       <div className="relative h-40 w-full overflow-hidden bg-slate-100">

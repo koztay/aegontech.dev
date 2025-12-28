@@ -9,7 +9,7 @@ const PLACEHOLDER_ITEMS: PortfolioItem[] = [
     title: "Dialable",
     description: "Global SaaS dialer platform with competitive international rates",
     type: "saas",
-    screenshot: "https://picsum.photos/seed/dialable/400/300",
+    screenshot: "https://picsum.photos/seed/dialable1234/400/300",
     links: {
       website: "https://www.dialable.world",
     },
@@ -19,7 +19,7 @@ const PLACEHOLDER_ITEMS: PortfolioItem[] = [
     title: "Maximus IPTV Player",
     description: "Feature-rich IPTV player for iOS with M3U and Xtream support",
     type: "mobile",
-    screenshot: "https://picsum.photos/seed/maximus/400/300",
+    screenshot: "https://picsum.photos/seed/maximus5678/400/300",
     links: {
       appStore:
         "https://apps.apple.com/app/maximus-iptv-player-m3u-xtream/id6744410529",
@@ -30,7 +30,7 @@ const PLACEHOLDER_ITEMS: PortfolioItem[] = [
     title: "CloudSync Pro",
     description: "Enterprise file synchronization and collaboration platform",
     type: "saas",
-    screenshot: "https://picsum.photos/seed/cloudsync/400/300",
+    screenshot: "https://picsum.photos/seed/cloudsync9012/400/300",
     links: {
       website: "https://cloudsync.example.com",
     },
