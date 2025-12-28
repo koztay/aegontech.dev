@@ -4,7 +4,7 @@ import { submitContactForm } from "@/lib/data/landing";
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { name, email, message } = body;
+        const { name, email, message, from } = body;
 
         const userAgent = request.headers.get("user-agent") || undefined;
         const ip =
@@ -19,7 +19,7 @@ export async function POST(request: Request) {
             );
         }
 
-        await submitContactForm({ name, email, message, userAgent, ip });
+        await submitContactForm({ name, email, message, userAgent, ip, from });
 
         return NextResponse.json({ success: true });
     } catch (error) {

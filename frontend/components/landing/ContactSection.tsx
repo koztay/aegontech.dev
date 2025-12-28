@@ -9,6 +9,7 @@ export function ContactSection({ contactInfo, onSubmit }: ContactSectionProps) {
         name: "",
         email: "",
         message: "",
+        from: "aegontech.dev",
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSubmitted, setIsSubmitted] = useState(false);
@@ -17,9 +18,23 @@ export function ContactSection({ contactInfo, onSubmit }: ContactSectionProps) {
         e.preventDefault();
         setIsSubmitting(true);
         try {
-            await onSubmit?.(formData);
+            const payload = {
+                name: formData.name,
+                email: formData.email,
+                message: formData.message,
+                from: formData.from ?? "aegontech.dev",
+                userAgent: typeof navigator !== "undefined" ? navigator.userAgent : formData.userAgent,
+                receivedAt: new Date().toISOString(),
+            };
+            // Debug: print exactly what the frontend will send
+            // Check browser console to verify `from` is present before it reaches n8n
+            // eslint-disable-next-line no-console
+            console.log("[ContactSection] submitting payload:", payload);
+
+            await onSubmit?.(payload as any);
+
             setIsSubmitted(true);
-            setFormData({ name: "", email: "", message: "" });
+            setFormData({ name: "", email: "", message: "", from: "aegontech.dev" });
             setTimeout(() => setIsSubmitted(false), 5000);
         } catch (error) {
             console.error("Failed to submit contact form:", error);
@@ -61,6 +76,7 @@ export function ContactSection({ contactInfo, onSubmit }: ContactSectionProps) {
                             </div>
                         ) : (
                             <form onSubmit={handleSubmit} className="space-y-4">
+                                <input type="hidden" name="from" value="aegontech.dev" />
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div>
                                         <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">

@@ -55,6 +55,7 @@ export interface ContactFormData {
     message: string;
     userAgent?: string;
     ip?: string;
+    from?: string;
 }
 
 // ==================

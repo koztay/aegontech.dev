@@ -80,14 +80,15 @@ export async function submitContactForm(
     try {
         const webhook = process.env.N8N_WEBHOOK_URL;
         if (webhook) {
-            const payload = {
-                name: data.name,
-                email: data.email,
-                message: data.message,
-                userAgent: data.userAgent,
-                ip: data.ip,
-                receivedAt: new Date().toISOString(),
-            };
+                const payload = {
+                    name: data.name,
+                    email: data.email,
+                    message: data.message,
+                    from: data.from,
+                    userAgent: data.userAgent,
+                    ip: data.ip,
+                    receivedAt: new Date().toISOString(),
+                };
 
             // Don't await - don't block DB insert on webhook latency
             fetch(webhook, {
