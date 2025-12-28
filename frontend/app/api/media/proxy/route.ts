@@ -39,10 +39,16 @@ export async function POST(request: Request) {
     const objectKey = `${associatedType || "uploads"}/${id}-${safeName}`;
 
     await new Promise<void>((resolve, reject) => {
-      client.putObject(process.env.MINIO_S3_BUCKET_NAME || "public-media", objectKey, buffer, (err: any) => {
-        if (err) return reject(err);
-        resolve();
-      });
+      client.putObject(
+        process.env.MINIO_S3_BUCKET_NAME || "public-media",
+        objectKey,
+        buffer,
+        buffer.length,
+        (err: any) => {
+          if (err) return reject(err);
+          resolve();
+        }
+      );
     });
 
     const url = getPublicUrl(objectKey);

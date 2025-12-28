@@ -54,7 +54,7 @@ export async function presignGet(objectName: string, expiresSeconds = 300): Prom
 
 export async function statObject(objectName: string) {
   return new Promise<any>((resolve, reject) => {
-    client.statObject(bucket, objectName, (err: any, stat: any) => {
+    (client as any).statObject(bucket, objectName, (err: any, stat: any) => {
       if (err) return reject(err);
       resolve(stat);
     });
@@ -83,10 +83,10 @@ export function getPublicUrl(objectName: string) {
 
 export async function ensureBucketExists() {
   return new Promise<void>((resolve, reject) => {
-    client.bucketExists(bucket, (err: any, exists: boolean) => {
+    (client as any).bucketExists(bucket, (err: any, exists: boolean) => {
       if (err) return reject(err);
       if (exists) return resolve();
-      client.makeBucket(bucket, "us-east-1", (err2: any) => {
+      (client as any).makeBucket(bucket, "us-east-1", (err2: any) => {
         if (err2) return reject(err2);
         resolve();
       });

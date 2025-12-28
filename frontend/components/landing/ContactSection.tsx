@@ -160,7 +160,11 @@ export function ContactSection({ contactInfo, onSubmit }: ContactSectionProps) {
                                 loading="lazy"
                                 referrerPolicy="no-referrer-when-downgrade"
                                 title="Google Map"
-                                onError={(e) => { e.target.style.display = 'none'; e.target.parentNode.innerHTML += '<div class="text-center text-slate-500">Map failed to load</div>'; }}
+                                onError={(e: React.SyntheticEvent<HTMLIFrameElement>) => {
+                                    e.currentTarget.style.display = 'none';
+                                    const parent = e.currentTarget.parentNode as HTMLElement | null;
+                                    if (parent) parent.innerHTML += '<div class="text-center text-slate-500">Map failed to load</div>';
+                                }}
                             />
                         </div>
 
