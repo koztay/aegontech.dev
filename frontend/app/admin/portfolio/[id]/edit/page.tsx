@@ -146,7 +146,7 @@ export default function EditPortfolioItem() {
             </label>
             <div className="flex items-start gap-3">
               <input
-                type="url"
+                type="text"
                 id="screenshot"
                 name="screenshot"
                 required
