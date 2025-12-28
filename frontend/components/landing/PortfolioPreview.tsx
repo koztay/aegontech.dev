@@ -2,7 +2,7 @@
 
 import type { PortfolioPreviewProps, FeaturedPortfolioItem } from "@/lib/types";
 import { ArrowRight, ChevronLeft, ChevronRight, Smartphone, Globe } from "lucide-react";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 
 // Dummy placeholder images - using consistent seeds
 const placeholderImages = [
@@ -83,6 +83,7 @@ export function PortfolioPreview({
     onViewAll,
 }: PortfolioPreviewProps) {
     const scrollRef = useRef<HTMLDivElement>(null);
+    const [isPaused, setIsPaused] = useState(false);
 
     const scroll = (direction: "left" | "right") => {
         if (scrollRef.current) {
@@ -135,10 +136,12 @@ export function PortfolioPreview({
                 {/* Horizontal Scroll */}
                 <div
                     className="relative overflow-hidden"
+                    onMouseEnter={() => setIsPaused(true)}
+                    onMouseLeave={() => setIsPaused(false)}
                 >
                     <div
                         ref={scrollRef}
-                        className="flex gap-4 animate-infinite-scroll-portfolio pb-2"
+                        className={`flex gap-4 pb-2 ${!isPaused && items.length > 0 ? 'animate-infinite-scroll-portfolio' : ''}`}
                         style={{ scrollbarWidth: "none", msOverflowStyle: "none", width: "fit-content" }}
                     >
                         {extendedItems.map((item, index) => (

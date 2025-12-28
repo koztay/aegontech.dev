@@ -90,16 +90,8 @@
   .animate-infinite-scroll {
     animation: infinite-scroll 25s linear infinite;
   }
-  
-  .animate-infinite-scroll:hover {
-    animation-play-state: paused;
-  }
 
   .animate-infinite-scroll-portfolio {
     animation: infinite-scroll 40s linear infinite;
-  }
-  
-  .animate-infinite-scroll-portfolio:hover {
-    animation-play-state: paused;
   }
 }
