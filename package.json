@@ -2,6 +2,10 @@
   "name": "aegontech-repo-root",
   "private": true,
   "packageManager": "pnpm@10",
+  "dependencies": {
+    "next": "15.5.9",
+    "eslint-config-next": "15.5.9"
+  },
   "scripts": {
     "build": "cd frontend && pnpm install && pnpm run build",
     "dev": "cd frontend && pnpm dev",
