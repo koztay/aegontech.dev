@@ -75,4 +75,30 @@ export async function submitContactForm(
         "INSERT INTO contact_submissions (name, email, message) VALUES ($1, $2, $3)",
         [data.name, data.email, data.message]
     );
+
+    // Send to n8n webhook if configured (fire-and-forget)
+    try {
+        const webhook = process.env.N8N_WEBHOOK_URL;
+        if (webhook) {
+            const payload = {
+                name: data.name,
+                email: data.email,
+                message: data.message,
+                userAgent: data.userAgent,
+                ip: data.ip,
+                receivedAt: new Date().toISOString(),
+            };
+
+            // Don't await - don't block DB insert on webhook latency
+            fetch(webhook, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+            }).catch((err) =>
+                console.error("Error sending submission to n8n webhook:", err)
+            );
+        }
+    } catch (err) {
+        console.error("Failed to initiate n8n webhook:", err);
+    }
 }

@@ -6,6 +6,12 @@ export async function POST(request: Request) {
         const body = await request.json();
         const { name, email, message } = body;
 
+        const userAgent = request.headers.get("user-agent") || undefined;
+        const ip =
+            request.headers.get("x-forwarded-for") ||
+            request.headers.get("x-real-ip") ||
+            undefined;
+
         if (!name || !email || !message) {
             return NextResponse.json(
                 { error: "Missing required fields" },
@@ -13,7 +19,7 @@ export async function POST(request: Request) {
             );
         }
 
-        await submitContactForm({ name, email, message });
+        await submitContactForm({ name, email, message, userAgent, ip });
 
         return NextResponse.json({ success: true });
     } catch (error) {
