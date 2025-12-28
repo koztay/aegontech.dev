@@ -3,12 +3,20 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
+interface BlogPost {
+  id: string;
+  title: string;
+  slug: string;
+  status: string;
+  created_at: string;
+}
+
 async function getBlogPosts() {
   const pool = getDbPool();
   const result = await pool.query(
     "SELECT id, title, slug, status, created_at FROM blog_posts ORDER BY created_at DESC"
   );
-  return result.rows;
+  return result.rows as BlogPost[];
 }
 
 export default async function AdminBlog() {
