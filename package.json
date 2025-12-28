@@ -1,0 +1,10 @@
+{
+  "name": "aegontech-repo-root",
+  "private": true,
+  "packageManager": "pnpm@10",
+  "scripts": {
+    "build": "cd frontend && pnpm install && pnpm run build",
+    "dev": "cd frontend && pnpm dev",
+    "start": "cd frontend && pnpm start"
+  }
+}
