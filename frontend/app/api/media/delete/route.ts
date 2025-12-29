@@ -3,18 +3,12 @@ import { removeObject } from "@/lib/storage/minio";
 import { query } from "@/lib/db/client";
 import { logAudit } from "@/lib/observability/audit";
 
-function isAdmin(request: Request) {
-  const cookie = request.headers.get("cookie") || "";
-  if (cookie.includes("admin_session=")) return true;
-  // Allow server-internal deletion with secret
-  const secret = request.headers.get("x-internal-secret");
-  if (secret && secret === process.env.INTERNAL_SERVICE_SECRET) return true;
-  return false;
-}
+import { isAuthorized } from "@/lib/auth/api-auth";
 
 export async function POST(request: Request) {
   try {
-    if (!isAdmin(request)) {
+    const auth = isAuthorized(request);
+    if (!auth.ok) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -33,8 +27,7 @@ export async function POST(request: Request) {
     await query(`DELETE FROM media_assets WHERE storage_path = $1`, [objectKey]);
 
     try {
-      const actor = (request.headers.get("cookie") || "").includes("admin_session=") ? "admin" : null;
-      await logAudit({ action: "media.delete", actor, entity_type: "object", entity_id: objectKey, details: {} });
+      await logAudit({ action: "media.delete", actor: auth.actor || null, entity_type: "object", entity_id: objectKey, details: {} });
     } catch (e) {
       console.warn("audit warn:", e);
     }

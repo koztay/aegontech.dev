@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import Link from "next/link";
-import { LayoutDashboard, FolderKanban, FileText, LogOut } from "lucide-react";
+import { LayoutDashboard, FolderKanban, FileText, LogOut, Image as ImageIcon } from "lucide-react";
 
 export default async function AdminLayout({
   children,
@@ -43,6 +43,13 @@ export default async function AdminLayout({
           >
             <FileText className="w-5 h-5" />
             <span>Blog</span>
+          </Link>
+          <Link
+            href="/admin/media"
+            className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100 transition-colors"
+          >
+            <ImageIcon className="w-5 h-5" />
+            <span>Media</span>
           </Link>
         </nav>
         <div className="p-4 border-t">
