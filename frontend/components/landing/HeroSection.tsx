@@ -9,7 +9,7 @@ export function HeroSection({ content, onCtaClick }: HeroSectionProps) {
             {/* Background Image */}
             <div className="absolute inset-0">
                 <img
-                    src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1920&q=80"
+                    src="/assets/hero-image.jpeg"
                     alt="Tech background"
                     className="w-full h-full object-cover"
                 />
