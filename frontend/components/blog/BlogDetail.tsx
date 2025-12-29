@@ -1,5 +1,6 @@
 import type { BlogDetailProps } from "@/lib/types";
 import { ArrowLeft, Calendar } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 
 export function BlogDetail({ post, onBack }: BlogDetailProps) {
     const formattedDate = new Date(post.publishedAt).toLocaleDateString("en-US", {
@@ -45,57 +46,37 @@ export function BlogDetail({ post, onBack }: BlogDetailProps) {
 
                 {/* Content */}
                 <div className="prose prose-lg prose-slate dark:prose-invert max-w-none">
-                    {post.content.split("\n\n").map((paragraph, index) => {
-                        if (paragraph.startsWith("## ")) {
-                            return (
-                                <h2
-                                    key={index}
-                                    className="text-2xl font-bold text-slate-900 dark:text-white mt-8 mb-4"
-                                >
-                                    {paragraph.replace("## ", "")}
-                                </h2>
-                            );
-                        }
-                        if (paragraph.startsWith("- ")) {
-                            const items = paragraph
-                                .split("\n")
-                                .filter((line) => line.startsWith("- "));
-                            return (
-                                <ul key={index} className="list-disc list-inside space-y-2 my-4">
-                                    {items.map((item, i) => (
-                                        <li key={i} className="text-slate-600 dark:text-slate-400">
-                                            {item.replace("- ", "")}
-                                        </li>
-                                    ))}
-                                </ul>
-                            );
-                        }
-                        if (paragraph.match(/^\d\. /)) {
-                            const items = paragraph
-                                .split("\n")
-                                .filter((line) => line.match(/^\d\. /));
-                            return (
-                                <ol
-                                    key={index}
-                                    className="list-decimal list-inside space-y-2 my-4"
-                                >
-                                    {items.map((item, i) => (
-                                        <li key={i} className="text-slate-600 dark:text-slate-400">
-                                            {item.replace(/^\d\. /, "")}
-                                        </li>
-                                    ))}
-                                </ol>
-                            );
-                        }
-                        return (
-                            <p
-                                key={index}
-                                className="text-slate-600 dark:text-slate-400 leading-relaxed my-4"
-                            >
-                                {paragraph}
-                            </p>
-                        );
-                    })}
+                    <ReactMarkdown
+                        components={{
+                            h2: ({ node, ...props }) => (
+                                <h2 className="text-2xl font-bold text-slate-900 dark:text-white mt-8 mb-4" {...props} />
+                            ),
+                            h3: ({ node, ...props }) => (
+                                <h3 className="text-xl font-bold text-slate-900 dark:text-white mt-6 mb-3" {...props} />
+                            ),
+                            p: ({ node, ...props }) => (
+                                <p className="text-slate-600 dark:text-slate-400 leading-relaxed my-4" {...props} />
+                            ),
+                            ul: ({ node, ...props }) => (
+                                <ul className="list-disc list-inside space-y-2 my-4 text-slate-600 dark:text-slate-400" {...props} />
+                            ),
+                            ol: ({ node, ...props }) => (
+                                <ol className="list-decimal list-inside space-y-2 my-4 text-slate-600 dark:text-slate-400" {...props} />
+                            ),
+                            li: ({ node, ...props }) => (
+                                <li className="text-slate-600 dark:text-slate-400" {...props} />
+                            ),
+                            img: ({ node, ...props }) => (
+                                <img
+                                    className="rounded-lg w-full h-auto my-6 shadow-md"
+                                    loading="lazy"
+                                    {...props}
+                                />
+                            ),
+                        }}
+                    >
+                        {post.content}
+                    </ReactMarkdown>
                 </div>
             </div>
         </article>
