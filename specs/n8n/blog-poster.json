@@ -1,0 +1,500 @@
+{
+    "nodes": [
+        {
+            "parameters": {
+                "rule": {
+                    "interval": [
+                        {
+                            "triggerAtHour": 13
+                        }
+                    ]
+                }
+            },
+            "id": "97adc0d5-5198-454f-9055-d1040ccf7d58",
+            "name": "Daily Schedule2",
+            "type": "n8n-nodes-base.scheduleTrigger",
+            "typeVersion": 1.1,
+            "position": [
+                -1408,
+                2400
+            ]
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "https://api.openai.com/v1/chat/completions",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "httpHeaderAuth",
+                "sendBody": true,
+                "specifyBody": "json",
+                "jsonBody": "={{ { \"model\": \"gpt-4-turbo\", \"messages\": [ { \"role\": \"system\", \"content\": $json.system_prompt }, { \"role\": \"user\", \"content\": $json.user_prompt } ] } }}",
+                "options": {}
+            },
+            "id": "e8c5a7f1-9ba5-4000-b773-4e855e76e161",
+            "name": "AI Content Agent2",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                -1184,
+                2400
+            ],
+            "credentials": {
+                "httpHeaderAuth": {
+                    "id": "1UPsIUoaAyTpIRuS",
+                    "name": "Open AI"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "jsCode": "const aiResponse = $input.item.json.choices[0].message.content;\nlet parsedData;\ntry {\n    parsedData = JSON.parse(aiResponse);\n} catch (e) {\n    const cleanJson = aiResponse.replace(/^```json\\n|\\n```$/g, '');\n    parsedData = JSON.parse(cleanJson);\n}\n\nreturn {\n    json: {\n        ...parsedData,\n        featured_prompt: parsedData.image_prompts.find(p => p.type === 'featured').prompt,\n        inline_prompts: parsedData.image_prompts.filter(p => p.type === 'inline')\n    }\n};"
+            },
+            "id": "153bb96e-9b98-4caf-8b8e-cf5ae9cd02d5",
+            "name": "Parse AI Response2",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                -960,
+                2400
+            ]
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "https://fal.run/fal-ai/flux-2-pro",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "httpHeaderAuth",
+                "sendBody": true,
+                "specifyBody": "json",
+                "jsonBody": "={{ { \"prompt\": 'Photorealistic professional photograph, high-resolution, natural lighting, real-world scene: ' + $json.featured_prompt, \"image_size\": \"landscape_16_9\", \"num_images\": 1 } }}",
+                "options": {}
+            },
+            "id": "4e06417c-cbfd-488a-ba8b-af471ec3e34e",
+            "name": "Fal.ai (Featured)1",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                -288,
+                2304
+            ],
+            "credentials": {
+                "httpHeaderAuth": {
+                    "id": "EnSy6MlA0fNgaGb9",
+                    "name": "Fal.ai"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "url": "={{ $json.images[0].url }}",
+                "options": {
+                    "response": {
+                        "response": {
+                            "responseFormat": "file",
+                            "outputPropertyName": "file"
+                        }
+                    }
+                }
+            },
+            "id": "b00eda4e-f4b1-423a-aad6-9a8f2ea233cd",
+            "name": "Download Featured Image1",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                -64,
+                2304
+            ]
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "https://aegontech.dev/api/media/upload",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "httpHeaderAuth",
+                "sendBody": true,
+                "jsonBody": "={{ { \"filename\": $binary.file.fileName || 'featured.png', \"contentType\": $binary.file.mimeType || 'image/png', \"dataBase64\": $binary.file.data, \"altText\": \"Featured Image\" } }}",
+                "contentType": "multipart-form-data",
+                "bodyParameters": {
+                    "parameters": [
+                        {
+                            "parameterType": "formBinaryData",
+                            "name": "file",
+                            "inputDataFieldName": "file"
+                        },
+                        {
+                            "name": "altText",
+                            "value": "Featured Image"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "id": "cb0fdaa9-88a2-4757-a128-18d01dcabcd9",
+            "name": "Upload Featured Image2",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                160,
+                2304
+            ],
+            "credentials": {
+                "httpHeaderAuth": {
+                    "id": "4q4zxpvntZvPXRnF",
+                    "name": "Ageontech API"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "fieldToSplitOut": "inline_prompts",
+                "options": {}
+            },
+            "id": "b15d0fcf-b248-40c6-acb7-7c140db9661c",
+            "name": "Split Inline Images2",
+            "type": "n8n-nodes-base.itemLists",
+            "typeVersion": 3,
+            "position": [
+                -736,
+                2496
+            ]
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "https://fal.run/fal-ai/flux-2-pro",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "httpHeaderAuth",
+                "sendBody": true,
+                "specifyBody": "json",
+                "jsonBody": "={{ { \"prompt\": 'Photorealistic professional photograph, high-resolution, natural lighting, real-world scene: ' + $json.prompt, \"image_size\": \"square\", \"num_images\": 1 } }}",
+                "options": {}
+            },
+            "id": "2b2ff2ea-ec68-4239-be5d-2bd2e74675fc",
+            "name": "Fal.ai (Inline)1",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                -512,
+                2496
+            ],
+            "credentials": {
+                "httpHeaderAuth": {
+                    "id": "EnSy6MlA0fNgaGb9",
+                    "name": "Fal.ai"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "url": "={{ $json.images[0].url }}",
+                "options": {
+                    "response": {
+                        "response": {
+                            "responseFormat": "file",
+                            "outputPropertyName": "file"
+                        }
+                    }
+                }
+            },
+            "id": "3e5ea238-cccf-4086-9695-feeb2ccf4716",
+            "name": "Download Inline Image1",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                -288,
+                2496
+            ]
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "https://aegontech.dev/api/media/upload",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "httpHeaderAuth",
+                "sendBody": true,
+                "jsonBody": "={{ { \"filename\": $binary.file.fileName || 'inline.png', \"contentType\": $binary.file.mimeType || 'image/png', \"dataBase64\": $binary.file.data, \"altText\": \"Inline Blog Image\" } }}",
+                "contentType": "multipart-form-data",
+                "bodyParameters": {
+                    "parameters": [
+                        {
+                            "parameterType": "formBinaryData",
+                            "name": "file",
+                            "inputDataFieldName": "file"
+                        },
+                        {
+                            "name": "altText",
+                            "value": "Inline Blog Image"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "id": "00f496f6-0291-4ea0-a282-685d2bcc6201",
+            "name": "Upload Inline Image2",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                -64,
+                2496
+            ],
+            "credentials": {
+                "httpHeaderAuth": {
+                    "id": "4q4zxpvntZvPXRnF",
+                    "name": "Ageontech API"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "jsCode": "const allItems = $input.all();\nconst urls = allItems.map(item => item.json.media.url);\nreturn [{ json: { urls } }];"
+            },
+            "id": "f3ea4091-64fb-415b-878c-4866f784313b",
+            "name": "Aggregate Images2",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                160,
+                2496
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "const contentData = $(\"Parse AI Response2\").first().json;\nconst featuredImg = $(\"Upload Featured Image2\").first().json.media.url;\n\n// Get inline image URLs from the Aggregate Images node\nconst aggregateData = $(\"Aggregate Images2\").first().json;\nconst inlineImgs = aggregateData.urls || [];\n\nlet finalContent = contentData.content;\n\ninlineImgs.forEach((url, index) => {\n    const placeholder = `<<IMAGE_PLACEHOLDER_${index + 1}>>`;\n    const markdownImage = `![Blog Image](${url})`;\n    finalContent = finalContent.replace(placeholder, markdownImage);\n});\n\nreturn [{\n    json: {\n        title: contentData.title,\n        slug: contentData.slug,\n        excerpt: contentData.excerpt,\n        featuredImage: featuredImg,\n        seo_title: contentData.seo_title,\n        seo_description: contentData.seo_description,\n        seo_keywords: contentData.seo_keywords,\n        content: finalContent,\n        is_published: true\n    }\n}];"
+            },
+            "id": "88a46fc0-c574-4880-9f25-bbd26d96ba04",
+            "name": "Prepare Payload2",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                608,
+                2400
+            ]
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "https://aegontech.dev/api/blog/publish",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "httpHeaderAuth",
+                "sendBody": true,
+                "specifyBody": "json",
+                "jsonBody": "={{ $json }}",
+                "options": {}
+            },
+            "id": "13f7e3a1-5ad2-456b-8c0b-d3eac535e4b9",
+            "name": "Post to Ageontech",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                832,
+                2400
+            ],
+            "credentials": {
+                "httpHeaderAuth": {
+                    "id": "4q4zxpvntZvPXRnF",
+                    "name": "Ageontech API"
+                }
+            }
+        },
+        {
+            "parameters": {},
+            "type": "n8n-nodes-base.merge",
+            "typeVersion": 3.2,
+            "position": [
+                384,
+                2400
+            ],
+            "id": "3ea845ad-4581-45ca-861f-926310343c5d",
+            "name": "Merge2"
+        },
+        {
+            "parameters": {
+                "values": {
+                    "string": [
+                        {
+                            "name": "system_prompt",
+                            "value": "You are a Senior SEO Content Strategist for Ageontech LLC.\\n\\nThe Company: Ageontech LLC.\\nWhat we do: We build high-performance web applications, mobile apps, and enterprise software solutions.\\nTone: Professional, authoritative, technical yet accessible, innovative.\\n\\nThe Task: Write a compelling, SEO-optimized blog post for our tech blog.\\nTopics: Custom software vs off-the-shelf, Scalable architecture, Modern tech stacks (React, Node, Python), AI integration in business, Mobile app dev trends, Cloud infrastructure.\\n\\nGoal: Establish Ageontech as a thought leader and attract potential B2B clients looking for development services.\\n\\nStructure:\\nHook: Address a common business/tech challenge.\\nThe Solution: How modern software solves it.\\nAgeontech's Approach: Our expertise.\\nCTA: Contact Ageontech for a consultation.\\n\\nFormatting:\\nUse Markdown formatting (H2, H3, bolding for emphasis).\\nKeep paragraphs short (2-3 sentences) for readability.\\nInclude placeholders for images like [Image: Description of image] where appropriate.\\n\\nOutput strictly valid JSON."
+                        },
+                        {
+                            "name": "user_prompt",
+                            "value": "Generate a blog post with a COMPLETELY NEW AND UNIQUE topic. Do NOT reuse any previous titles. Current timestamp for uniqueness: \" + Date.now() + \".\\n\\n**REQUIREMENTS:**\\n1. **Topic**: Create a FRESH, UNIQUE topic. Pick a random angle from: custom software development, enterprise mobile apps, AI in business, legacy system modernization, cloud migration strategies, scalable web architecture, outsourcing vs in-house dev, REACT/Next.js trends, startup MVP development, digital transformation success stories. The title MUST be different from any common titles.\\n2. **Format**: Return the result as a VALID JSON object (and ONLY JSON) with the following schema:\\n    ```json\\n    {\\n      \\\"title\\\": \\\"Catchy Title\\\",\\n      \\\"slug\\\": \\\"catchy-title-slug\\\",\\n      \\\"excerpt\\\": \\\"Short 2-sentence summary\\\",\\n      \\\"seo_title\\\": \\\"SEO Optimized Title\\\",\\n      \\\"seo_description\\\": \\\"meta description\\\",\\n      \\\"seo_keywords\\\": [\\\"keyword1\\\", \\\"keyword2\\\"],\\n      \\\"content\\\": \\\"Markdown content...\\\",\\n      \\\"image_prompts\\\": [\\n          {\\\"type\\\": \\\"featured\\\", \\\"prompt\\\": \\\"Detailed prompt for main cover image\\\"},\\n          {\\\"type\\\": \\\"inline\\\", \\\"prompt\\\": \\\"Detailed prompt for inline image 1\\\"},\\n          {\\\"type\\\": \\\"inline\\\", \\\"prompt\\\": \\\"Detailed prompt for inline image 2\\\"}\\n      ]\\n    }\\n    ```\\n3. **Content Body**: \\n    -   Use proper Markdown headings (##, ###).\\n    -   Length: At least 800 words.\\n    -   **Important**: Where you want the inline images to appear, insert the placeholder text: `<<IMAGE_PLACEHOLDER_1>>`, `<<IMAGE_PLACEHOLDER_2>>`, etc., corresponding to the order in the `image_prompts` array (skipping the featured one).\\n    -   Ensure there are at least 2 inline images.\\n4. **Image Prompts**: Each image prompt MUST describe a REAL PHOTOGRAPH. Use: 'Professional stock photo of...', 'Real photograph showing...', 'Authentic candid photo of...'. Describe real people, real offices, real devices. NO illustrations, NO digital art, NO 3D renders, NO cartoons, NO anime style.\\n5. **Image Negative Constraints**: NEVER include any religious references, symbols, attire, or iconography in the image prompts. Avoid hijabs, crosses, religious buildings, prayer imagery, or any cultural/religious clothing. Keep images neutral, modern, secular, and globally inclusive. Focus on diverse professionals in contemporary business casual or smart casual attire."
+                        }
+                    ]
+                }
+            },
+            "id": "change-me-to-unique-id-1",
+            "name": "Define Prompts",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 1,
+            "position": [
+                -1296,
+                2400
+            ]
+        }
+    ],
+    "connections": {
+        "Daily Schedule2": {
+            "main": [
+                [
+                    {
+                        "node": "Define Prompts",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Define Prompts": {
+            "main": [
+                [
+                    {
+                        "node": "AI Content Agent2",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "AI Content Agent2": {
+            "main": [
+                [
+                    {
+                        "node": "Parse AI Response2",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Parse AI Response2": {
+            "main": [
+                [
+                    {
+                        "node": "Fal.ai (Featured)1",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Split Inline Images2",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Fal.ai (Featured)1": {
+            "main": [
+                [
+                    {
+                        "node": "Download Featured Image1",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Download Featured Image1": {
+            "main": [
+                [
+                    {
+                        "node": "Upload Featured Image2",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Upload Featured Image2": {
+            "main": [
+                [
+                    {
+                        "node": "Merge2",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Split Inline Images2": {
+            "main": [
+                [
+                    {
+                        "node": "Fal.ai (Inline)1",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Fal.ai (Inline)1": {
+            "main": [
+                [
+                    {
+                        "node": "Download Inline Image1",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Download Inline Image1": {
+            "main": [
+                [
+                    {
+                        "node": "Upload Inline Image2",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Upload Inline Image2": {
+            "main": [
+                [
+                    {
+                        "node": "Aggregate Images2",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Aggregate Images2": {
+            "main": [
+                [
+                    {
+                        "node": "Merge2",
+                        "type": "main",
+                        "index": 1
+                    }
+                ]
+            ]
+        },
+        "Prepare Payload2": {
+            "main": [
+                [
+                    {
+                        "node": "Post to Dialable2",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Merge2": {
+            "main": [
+                [
+                    {
+                        "node": "Prepare Payload2",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "pinData": {},
+    "meta": {
+        "instanceId": "495481f5f4ddde18c82827077397d5fb058466368fd2c3275b9a5cd849415675"
+    }
+}
