@@ -31,6 +31,7 @@
     --chart-5: 340 75% 55%;
     --radius: 0.5rem;
   }
+
   .dark {
     color-scheme: dark;
     --background: 222 35% 7%;
@@ -66,12 +67,17 @@
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground antialiased;
   }
-  h1, h2, h3 {
+
+  h1,
+  h2,
+  h3 {
     @apply font-semibold text-foreground;
   }
+
   p {
     @apply text-slate-600;
   }
@@ -80,22 +86,45 @@
 @layer utilities {
   @keyframes infinite-scroll {
     from {
-      transform: translateX(0);
+      transform: translate3d(0, 0, 0);
     }
+
     to {
-      transform: translateX(calc(-100% / 3));
+      transform: translate3d(calc(-100% / 3), 0, 0);
+    }
+  }
+
+  @-webkit-keyframes infinite-scroll {
+    from {
+      -webkit-transform: translate3d(0, 0, 0);
+      transform: translate3d(0, 0, 0);
+    }
+
+    to {
+      -webkit-transform: translate3d(calc(-100% / 3), 0, 0);
+      transform: translate3d(calc(-100% / 3), 0, 0);
     }
   }
 
   .animate-infinite-scroll {
+    -webkit-animation: infinite-scroll 25s linear infinite;
     animation: infinite-scroll 25s linear infinite;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
   }
 
   .animate-infinite-scroll-portfolio {
+    -webkit-animation: infinite-scroll 40s linear infinite;
     animation: infinite-scroll 40s linear infinite;
+    -webkit-animation-delay: 0s;
+    animation-delay: 0s;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    will-change: transform;
   }
 
   .paused {
+    -webkit-animation-play-state: paused !important;
     animation-play-state: paused !important;
   }
 }

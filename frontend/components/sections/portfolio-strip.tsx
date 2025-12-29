@@ -134,7 +134,7 @@ export function PortfolioStrip() {
           onPointerUp={handlePointerUp}
           onKeyDown={handleKeyDown}
         >
-          <div 
+          <div
             className={`flex gap-4 ${!prefersReducedMotion ? 'animate-infinite-scroll' : ''}`}
             style={{
               width: 'fit-content',
@@ -143,7 +143,7 @@ export function PortfolioStrip() {
             onMouseLeave={() => setIsPaused(false)}
           >
             {loopItems.map((item, idx) => (
-              <PortfolioCard key={`${item.id}-${idx}`} item={item} priority={idx < 3} />
+              <PortfolioCard key={`${item.id}-${idx}`} item={item} />
             ))}
           </div>
         </div>

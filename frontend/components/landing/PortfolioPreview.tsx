@@ -2,7 +2,7 @@
 
 import type { PortfolioPreviewProps, FeaturedPortfolioItem } from "@/lib/types";
 import { ArrowRight, ChevronLeft, ChevronRight, Smartphone, Globe } from "lucide-react";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 
 // Dummy placeholder images - using consistent seeds
 const placeholderImages = [
@@ -47,8 +47,8 @@ function PortfolioCard({
                 <div className="absolute top-2 left-2">
                     <span
                         className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium ${item.type === "mobile"
-                                ? "bg-cyan-500 text-white"
-                                : "bg-indigo-500 text-white"
+                            ? "bg-cyan-500 text-white"
+                            : "bg-indigo-500 text-white"
                             }`}
                     >
                         {item.type === "mobile" ? (
@@ -84,6 +84,16 @@ export function PortfolioPreview({
 }: PortfolioPreviewProps) {
     const scrollRef = useRef<HTMLDivElement>(null);
     const [isPaused, setIsPaused] = useState(false);
+    const [isAnimating, setIsAnimating] = useState(false);
+
+    // Safari fix: Force repaint to trigger CSS animation on mount
+    useEffect(() => {
+        // Use setTimeout to ensure Safari has completed initial paint
+        const timer = setTimeout(() => {
+            setIsAnimating(true);
+        }, 50);
+        return () => clearTimeout(timer);
+    }, []);
 
     const scroll = (direction: "left" | "right") => {
         if (scrollRef.current) {
@@ -141,7 +151,7 @@ export function PortfolioPreview({
                 >
                     <div
                         ref={scrollRef}
-                        className={`flex gap-4 pb-2 animate-infinite-scroll-portfolio ${isPaused ? 'paused' : ''}`}
+                        className={`flex gap-4 pb-2 ${isAnimating ? 'animate-infinite-scroll-portfolio' : ''} ${isPaused ? 'paused' : ''}`}
                         style={{ scrollbarWidth: "none", msOverflowStyle: "none", width: "fit-content" }}
                     >
                         {extendedItems.map((item, index) => (
