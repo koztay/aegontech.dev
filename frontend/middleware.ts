@@ -13,6 +13,7 @@ const contentSecurityPolicy = [
   `img-src ${imgSrc.join(" ")}`,
   "font-src 'self' https:",
   "connect-src 'self' https: wss:",
+  "frame-src 'self' https://www.google.com https://maps.google.com",
   "frame-ancestors 'none'",
 ].join("; ");
 
@@ -48,7 +49,7 @@ export function middleware(request: Request) {
   if (isAdmin && !isAdminLogin) {
     const cookies = request.headers.get("cookie");
     const hasSession = cookies?.includes("admin_session=");
-    
+
     if (!hasSession) {
       return NextResponse.redirect(new URL("/admin-login", request.url));
     }
