@@ -6,39 +6,72 @@ import { logAudit } from "@/lib/observability/audit";
 const MAX_SIZE = Number(process.env.MAX_UPLOAD_BYTES || 5 * 1024 * 1024); // 5MB
 const ALLOWED = ["image/png", "image/jpeg", "image/webp"];
 
-function isAuthorized(request: Request) {
-  const secret = request.headers.get("x-internal-secret");
-  if (secret && process.env.INTERNAL_SERVICE_SECRET && secret === process.env.INTERNAL_SERVICE_SECRET) return { ok: true, actor: "internal" };
-  const apiKey = request.headers.get("x-api-key");
-  if (apiKey && process.env.ADMIN_PASSWORD && apiKey === process.env.ADMIN_PASSWORD) return { ok: true, actor: "admin" };
-  const cookie = request.headers.get("cookie") || "";
-  if (cookie.includes("admin_session=")) return { ok: true, actor: "admin" };
-  return { ok: false };
-}
+import { isAuthorized } from "@/lib/auth/api-auth";
 
 export async function POST(request: Request) {
   try {
     const auth = isAuthorized(request);
     if (!auth.ok) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    // Safely read and parse JSON body to avoid uncaught parse errors
-    let body: any = {};
+    let filename, contentType, buffer, altText, caption, associatedType, associatedId;
+
+    // Try parsing as FormData first (Multipart)
+    let isMultipart = false;
     try {
-      const text = await request.text();
-      if (text) {
-        try {
-          body = JSON.parse(text);
-        } catch (e: any) {
-          return NextResponse.json({ error: "Invalid JSON", message: String(e.message) }, { status: 400 });
+      // Cloning the request is necessary because reading the body consumes the stream.
+      // However, cloning large file requests is memory intensive.
+      // But given we don't know the type for sure, we rely on the header first.
+
+      // Let's stick to header check but make it lower case and more robust
+      const cType = (request.headers.get("content-type") || "").toLowerCase();
+
+      if (cType.includes("multipart/form-data")) {
+        const formData = await request.formData();
+        const file = formData.get("file") as File;
+
+        if (file && typeof file.arrayBuffer === "function") {
+          filename = file.name;
+          contentType = file.type;
+          buffer = Buffer.from(await file.arrayBuffer());
+          altText = formData.get("altText") as string;
+          caption = formData.get("caption") as string;
+          associatedType = formData.get("associatedType") as string;
+          associatedId = formData.get("associatedId") as string;
+          isMultipart = true;
         }
       }
-    } catch (e: any) {
-      return NextResponse.json({ error: "Could not read request body", message: String(e.message) }, { status: 400 });
+    } catch (e) {
+      console.warn("Multipard parsing failed, trying JSON fallback", e);
     }
 
-    const { filename, contentType, dataBase64, altText, caption, associatedType, associatedId } = body || {};
+    if (!isMultipart) {
+      // JSON Fallback
+      let body: any = {};
+      try {
+        const text = await request.text();
+        if (text) body = JSON.parse(text);
+      } catch (e: any) {
+        // Provide more context in error for debugging
+        const cType = request.headers.get("content-type");
+        return NextResponse.json({
+          error: "Invalid JSON",
+          message: String(e.message),
+          debug: { receivedContentType: cType }
+        }, { status: 400 });
+      }
 
-    if (!filename || !contentType || !dataBase64 || !altText) {
+      const { dataBase64 } = body;
+      filename = body.filename;
+      contentType = body.contentType;
+      altText = body.altText;
+      caption = body.caption;
+      associatedType = body.associatedType;
+      associatedId = body.associatedId;
+
+      if (dataBase64) buffer = Buffer.from(dataBase64, "base64");
+    }
+
+    if (!filename || !contentType || !buffer || !altText) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
@@ -46,7 +79,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unsupported media type" }, { status: 415 });
     }
 
-    const buffer = Buffer.from(dataBase64, "base64");
     if (buffer.length > MAX_SIZE) {
       return NextResponse.json({ error: "File too large" }, { status: 413 });
     }

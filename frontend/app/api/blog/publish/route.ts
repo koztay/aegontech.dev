@@ -1,8 +1,14 @@
 import { NextResponse } from "next/server";
 import { query } from "@/lib/db/client";
+import { isAuthorized } from "@/lib/auth/api-auth";
 
 export async function POST(request: Request) {
     try {
+        const auth = isAuthorized(request);
+        if (!auth.ok) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
         const body = await request.json();
         const { title, slug, excerpt, content, featuredImage } = body;
 
