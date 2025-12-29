@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import client, { getPublicUrl } from "@/lib/storage/minio";
+import client, { getPublicUrl, ensureBucketExists } from "@/lib/storage/minio";
 import { query } from "@/lib/db/client";
 import { logAudit } from "@/lib/observability/audit";
 
@@ -88,6 +88,8 @@ export async function POST(request: Request) {
     const objectKey = `${associatedType || "uploads"}/${id}-${safeName}`;
 
     // upload to MinIO
+    await ensureBucketExists();
+
     await new Promise<void>((resolve, reject) => {
       client.putObject(
         process.env.MINIO_S3_BUCKET_NAME || "public-media",

@@ -81,14 +81,48 @@ export function getPublicUrl(objectName: string) {
   return `${scheme}://${endpointHost}:${endpointPort}/${bucket}/${objectName}`;
 }
 
+export async function setPublicPolicy() {
+  const policy = {
+    Version: "2012-10-17",
+    Statement: [
+      {
+        Effect: "Allow",
+        Principal: { AWS: ["*"] },
+        Action: ["s3:GetObject"],
+        Resource: [`arn:aws:s3:::${bucket}/*`],
+      },
+    ],
+  };
+
+  return new Promise<void>((resolve, reject) => {
+    client.setBucketPolicy(bucket, JSON.stringify(policy), (err: any) => {
+      // Ignore if error is just about existing policy (optional refinement), 
+      // but usually we want to overwrite to ensure it's public.
+      if (err) {
+        console.warn("Failed to set public bucket policy:", err);
+        // Don't reject, just warn, so we don't block app startup if user lacks permissions
+        return resolve();
+      }
+      resolve();
+    });
+  });
+}
+
 export async function ensureBucketExists() {
   return new Promise<void>((resolve, reject) => {
     (client as any).bucketExists(bucket, (err: any, exists: boolean) => {
       if (err) return reject(err);
-      if (exists) return resolve();
+
+      const finish = async () => {
+        await setPublicPolicy();
+        resolve();
+      };
+
+      if (exists) return finish();
+
       (client as any).makeBucket(bucket, "us-east-1", (err2: any) => {
         if (err2) return reject(err2);
-        resolve();
+        finish();
       });
     });
   });
