@@ -36,7 +36,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   });
 
   return (
-    <html lang="en" className={`${inter.variable} bg-mist text-ink`}>
+    <html lang="en" className={inter.variable}>
       <head>
         <JsonLd schema={websiteSchema} />
         <JsonLd schema={localBusinessSchema} />

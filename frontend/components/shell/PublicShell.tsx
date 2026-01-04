@@ -1,7 +1,7 @@
 "use client";
 
 import { Menu, X, Sun, Moon } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 
 interface NavItem {
@@ -14,18 +14,42 @@ interface PublicShellProps {
     children: React.ReactNode;
     navigationItems: NavItem[];
     currentPath?: string;
-    isDarkMode?: boolean;
-    onToggleDarkMode?: () => void;
 }
 
 export function PublicShell({
     children,
     navigationItems,
     currentPath = "/",
-    isDarkMode = false,
-    onToggleDarkMode,
 }: PublicShellProps) {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [isDarkMode, setIsDarkMode] = useState(false);
+
+    useEffect(() => {
+        // Check localStorage and system preference on mount
+        const savedTheme = localStorage.getItem("theme");
+        const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        
+        const shouldBeDark = savedTheme === "dark" || (!savedTheme && systemPrefersDark);
+        setIsDarkMode(shouldBeDark);
+        
+        if (shouldBeDark) {
+            document.documentElement.classList.add("dark");
+        } else {
+            document.documentElement.classList.remove("dark");
+        }
+    }, []);
+
+    const toggleDarkMode = () => {
+        const newDarkMode = !isDarkMode;
+        setIsDarkMode(newDarkMode);
+        localStorage.setItem("theme", newDarkMode ? "dark" : "light");
+        
+        if (newDarkMode) {
+            document.documentElement.classList.add("dark");
+        } else {
+            document.documentElement.classList.remove("dark");
+        }
+    };
 
     return (
         <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
@@ -70,7 +94,7 @@ export function PublicShell({
                         <div className="flex items-center space-x-4">
                             {/* Dark Mode Toggle */}
                             <button
-                                onClick={onToggleDarkMode}
+                                onClick={toggleDarkMode}
                                 className="p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                             >
                                 {isDarkMode ? (
