@@ -1,7 +1,7 @@
 import type { BlogListProps } from "@/lib/types";
 import { BlogCard } from "./BlogCard";
 
-export function BlogList({ posts, onPostClick }: BlogListProps) {
+export function BlogList({ posts }: BlogListProps) {
     // Sort posts by date (newest first)
     const sortedPosts = [...posts].sort(
         (a, b) =>
@@ -28,7 +28,7 @@ export function BlogList({ posts, onPostClick }: BlogListProps) {
                 {/* Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {sortedPosts.map((post) => (
-                        <BlogCard key={post.id} post={post} onPostClick={onPostClick} />
+                        <BlogCard key={post.id} post={post} />
                     ))}
                 </div>
             </div>

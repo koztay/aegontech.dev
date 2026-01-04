@@ -3,6 +3,8 @@
 import type { PortfolioPreviewProps, FeaturedPortfolioItem } from "@/lib/types";
 import { ArrowRight, ChevronLeft, ChevronRight, Smartphone, Globe } from "lucide-react";
 import { useRef, useState, useEffect } from "react";
+import Link from "next/link";
+import Image from "next/image";
 
 // Dummy placeholder images - using consistent seeds
 const placeholderImages = [
@@ -16,19 +18,17 @@ const placeholderImages = [
 function PortfolioCard({
     item,
     index,
-    onItemClick,
 }: {
     item: FeaturedPortfolioItem;
     index: number;
-    onItemClick?: (id: string) => void;
 }) {
     // Use consistent index based on item ID to ensure same image across duplicates
     const imageIndex = index % (placeholderImages.length);
     const placeholderImage = placeholderImages[imageIndex];
 
     return (
-        <div
-            onClick={() => onItemClick?.(item.id)}
+        <Link
+            href={item.url}
             className="group cursor-pointer"
             style={{ width: "240px", minWidth: "240px", maxWidth: "240px" }}
         >
@@ -37,10 +37,13 @@ function PortfolioCard({
                 className="relative rounded-lg overflow-hidden bg-slate-200 dark:bg-slate-700 mb-2 shadow-sm group-hover:shadow-md transition-shadow"
                 style={{ width: "240px", height: "180px" }}
             >
-                <img
+                <Image
                     src={item.imageUrl || placeholderImage}
                     alt={item.title}
-                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    fill
+                    sizes="240px"
+                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    loading="lazy"
                 />
 
                 {/* Type Badge */}
@@ -73,15 +76,11 @@ function PortfolioCard({
             <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
                 {item.description}
             </p>
-        </div>
+        </Link>
     );
 }
 
-export function PortfolioPreview({
-    items,
-    onItemClick,
-    onViewAll,
-}: PortfolioPreviewProps) {
+export function PortfolioPreview({ items }: PortfolioPreviewProps) {
     const scrollRef = useRef<HTMLDivElement>(null);
     const [isPaused, setIsPaused] = useState(false);
     const [isAnimating, setIsAnimating] = useState(false);
@@ -134,12 +133,12 @@ export function PortfolioPreview({
                         >
                             <ChevronRight className="w-4 h-4" />
                         </button>
-                        <button
-                            onClick={onViewAll}
+                        <Link
+                            href="/portfolio"
                             className="ml-2 inline-flex items-center gap-1 text-indigo-600 dark:text-indigo-400 font-medium text-xs"
                         >
                             View All <ArrowRight className="w-3 h-3" />
-                        </button>
+                        </Link>
                     </div>
                 </div>
 
@@ -159,7 +158,6 @@ export function PortfolioPreview({
                                 key={`${item.id}-${index}`}
                                 item={item}
                                 index={index % items.length}
-                                onItemClick={onItemClick}
                             />
                         ))}
                     </div>

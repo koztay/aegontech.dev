@@ -2,16 +2,22 @@
 
 import type { HeroSectionProps } from "@/lib/types";
 import { ArrowRight, ChevronDown } from "lucide-react";
+import Link from "next/link";
+import Image from "next/image";
 
-export function HeroSection({ content, onCtaClick }: HeroSectionProps) {
+export function HeroSection({ content }: HeroSectionProps) {
     return (
         <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-slate-900">
             {/* Background Image */}
             <div className="absolute inset-0">
-                <img
+                <Image
                     src="/assets/hero-image.jpeg"
                     alt="Tech background"
-                    className="w-full h-full object-cover"
+                    fill
+                    priority
+                    sizes="100vw"
+                    quality={85}
+                    className="object-cover"
                 />
                 {/* Gradient overlay */}
                 <div className="absolute inset-0 bg-gradient-to-b from-slate-900/80 via-slate-900/70 to-slate-900" />
@@ -55,13 +61,13 @@ export function HeroSection({ content, onCtaClick }: HeroSectionProps) {
 
                 {/* CTAs */}
                 <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                    <button
-                        onClick={onCtaClick}
+                    <Link
+                        href="/portfolio"
                         className="group inline-flex items-center gap-2 px-8 py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl transition-all duration-300 shadow-lg shadow-indigo-500/25 hover:shadow-xl hover:shadow-indigo-500/30"
                     >
                         {content.ctaText}
                         <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                    </button>
+                    </Link>
 
                     <button className="inline-flex items-center gap-2 px-8 py-4 text-slate-300 hover:text-white font-medium transition-colors">
                         Learn More

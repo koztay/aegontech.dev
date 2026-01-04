@@ -26,12 +26,16 @@ export function ContactSection({ contactInfo, onSubmit }: ContactSectionProps) {
                 userAgent: typeof navigator !== "undefined" ? navigator.userAgent : formData.userAgent,
                 receivedAt: new Date().toISOString(),
             };
-            // Debug: print exactly what the frontend will send
-            // Check browser console to verify `from` is present before it reaches n8n
-            // eslint-disable-next-line no-console
-            console.log("[ContactSection] submitting payload:", payload);
+            
+            const response = await fetch("/api/contact", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+            });
 
-            await onSubmit?.(payload as any);
+            if (!response.ok) {
+                throw new Error("Failed to submit contact form");
+            }
 
             setIsSubmitted(true);
             setFormData({ name: "", email: "", message: "", from: "aegontech.dev" });

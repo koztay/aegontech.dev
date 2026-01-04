@@ -1,45 +1,38 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { BlogList } from "@/components/blog";
 import { PublicShell } from "@/components/shell/PublicShell";
-import type { BlogPost } from "@/lib/types";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { buildPageMeta, buildWebsiteSchema, buildBreadcrumbSchema } from "@/lib/seo/meta";
+import type { Metadata } from "next";
+import { getBlogIndex } from "@/lib/data/blog";
+import Link from "next/link";
 
-export default function BlogPage() {
-  const router = useRouter();
-  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
-  const [isDarkMode, setIsDarkMode] = useState(false);
+export const metadata: Metadata = buildPageMeta({
+  title: "Blog - Aegontech.dev",
+  description: "Latest insights, tutorials, and updates from Aegontech",
+  url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://aegontech.dev'}/blog`,
+  type: "website",
+});
 
-  useEffect(() => {
-    // Fetch blog posts
-    fetch("/api/data/blog")
-      .then((r) => r.json())
-      .then((data) => {
-        setBlogPosts(data);
-      })
-      .catch((error) => {
-        console.error("Error loading blog posts:", error);
-      });
+export default async function BlogPage() {
+  const blogPosts = await getBlogIndex();
 
-    // Check dark mode preference
-    if (typeof window !== "undefined") {
-      const isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-      setIsDarkMode(isDark);
-      if (isDark) {
-        document.documentElement.classList.add("dark");
-      }
-    }
-  }, []);
+  const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://aegontech.dev";
 
-  const handleToggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode);
-    document.documentElement.classList.toggle("dark");
-  };
+  // Build WebSite schema with search action
+  const websiteSchema = buildWebsiteSchema({
+    name: "Aegontech.dev",
+    description: "Latest insights, tutorials, and updates from Aegontech",
+    url: SITE_URL,
+    searchAction: true
+  });
 
-  const handlePostClick = (slug: string) => {
-    router.push(`/blog/${slug}`);
-  };
+  // Build BreadcrumbList schema
+  const breadcrumbSchema = buildBreadcrumbSchema({
+    items: [
+      { name: "Home", url: SITE_URL },
+      { name: "Blog", url: `${SITE_URL}/blog` }
+    ]
+  });
 
   const navigationItems = [
     { label: "Home", href: "/" },
@@ -52,17 +45,10 @@ export default function BlogPage() {
     <PublicShell
       navigationItems={navigationItems}
       currentPath="/blog"
-      isDarkMode={isDarkMode}
-      onToggleDarkMode={handleToggleDarkMode}
-      onNavigate={(href) => {
-        if (href.startsWith("#")) {
-          router.push("/" + href);
-        } else {
-          router.push(href);
-        }
-      }}
     >
-      <BlogList posts={blogPosts} onPostClick={handlePostClick} />
+      <JsonLd schema={websiteSchema} />
+      <JsonLd schema={breadcrumbSchema} />
+      <BlogList posts={blogPosts} />
     </PublicShell>
   );
 }

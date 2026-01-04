@@ -1,7 +1,9 @@
 import type { BlogCardProps } from "@/lib/types";
 import { Calendar } from "lucide-react";
+import Link from "next/link";
+import Image from "next/image";
 
-export function BlogCard({ post, onPostClick }: BlogCardProps) {
+export function BlogCard({ post }: BlogCardProps) {
     const formattedDate = new Date(post.publishedAt).toLocaleDateString("en-US", {
         year: "numeric",
         month: "long",
@@ -9,19 +11,22 @@ export function BlogCard({ post, onPostClick }: BlogCardProps) {
     });
 
     return (
-        <article
-            onClick={() => onPostClick?.(post.slug)}
-            className="group cursor-pointer bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-200 dark:border-slate-800"
-        >
+        <Link href={`/blog/${post.slug}`}>
+            <article
+                className="group cursor-pointer bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-200 dark:border-slate-800"
+            >
             {/* Featured Image */}
             <div
                 className="relative overflow-hidden bg-slate-100 dark:bg-slate-800"
                 style={{ height: "200px" }}
             >
-                <img
+                <Image
                     src={post.featuredImage}
                     alt={post.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 400px"
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                    loading="lazy"
                 />
             </div>
 
@@ -50,6 +55,7 @@ export function BlogCard({ post, onPostClick }: BlogCardProps) {
                     </span>
                 </div>
             </div>
-        </article>
+            </article>
+        </Link>
     );
 }

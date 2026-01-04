@@ -1,7 +1,7 @@
 import type { PortfolioGridProps } from "@/lib/types";
 import { PortfolioCard } from "./PortfolioCard";
 
-export function PortfolioGrid({ items, onExternalLink }: PortfolioGridProps) {
+export function PortfolioGrid({ items }: PortfolioGridProps) {
     return (
         <section className="py-16 bg-slate-50 dark:bg-slate-950">
             <div className="max-w-6xl mx-auto px-6">
@@ -25,7 +25,6 @@ export function PortfolioGrid({ items, onExternalLink }: PortfolioGridProps) {
                         <PortfolioCard
                             key={item.id}
                             item={item}
-                            onExternalLink={onExternalLink}
                         />
                     ))}
                 </div>

@@ -1,68 +1,52 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { PortfolioGrid } from "@/components/portfolio";
 import { PublicShell } from "@/components/shell/PublicShell";
-import type { PortfolioItem } from "@/lib/types";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { buildPageMeta, buildWebsiteSchema, buildBreadcrumbSchema } from "@/lib/seo/meta";
+import type { Metadata } from "next";
+import { getAllPortfolioItems } from "@/lib/data/portfolio";
 
-export default function PortfolioPage() {
-    const router = useRouter();
-    const [portfolioItems, setPortfolioItems] = useState<PortfolioItem[]>([]);
-    const [isDarkMode, setIsDarkMode] = useState(false);
+export const metadata: Metadata = buildPageMeta({
+  title: "Portfolio - Aegontech.dev",
+  description: "Explore our portfolio of successful projects and case studies",
+  url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://aegontech.dev'}/portfolio`,
+  type: "website",
+});
 
-    useEffect(() => {
-        // Fetch portfolio items
-        fetch("/api/data/portfolio")
-            .then((r) => r.json())
-            .then((data) => {
-                setPortfolioItems(data);
-            })
-            .catch((error) => {
-                console.error("Error loading portfolio items:", error);
-            });
+export default async function PortfolioPage() {
+  const portfolioItems = await getAllPortfolioItems();
 
-        // Check dark mode preference
-        if (typeof window !== "undefined") {
-            const isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-            setIsDarkMode(isDark);
-            if (isDark) {
-                document.documentElement.classList.add("dark");
-            }
-        }
-    }, []);
+  const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://aegontech.dev";
 
-    const handleToggleDarkMode = () => {
-        setIsDarkMode(!isDarkMode);
-        document.documentElement.classList.toggle("dark");
-    };
+  // Build WebSite schema
+  const websiteSchema = buildWebsiteSchema({
+    name: "Aegontech.dev",
+    description: "Explore our portfolio of successful projects and case studies",
+    url: SITE_URL
+  });
 
-    const handleExternalLink = (url: string) => {
-        console.log("External link clicked:", url);
-    };
+  // Build BreadcrumbList schema
+  const breadcrumbSchema = buildBreadcrumbSchema({
+    items: [
+      { name: "Home", url: SITE_URL },
+      { name: "Portfolio", url: `${SITE_URL}/portfolio` }
+    ]
+  });
 
-    const navigationItems = [
-        { label: "Home", href: "/" },
-        { label: "Portfolio", href: "/portfolio" },
-        { label: "Blog", href: "/blog" },
-        { label: "Contact", href: "#contact" },
-    ];
+  const navigationItems = [
+    { label: "Home", href: "/" },
+    { label: "Portfolio", href: "/portfolio" },
+    { label: "Blog", href: "/blog" },
+    { label: "Contact", href: "#contact" },
+  ];
 
-    return (
-        <PublicShell
-            navigationItems={navigationItems}
-            currentPath="/portfolio"
-            isDarkMode={isDarkMode}
-            onToggleDarkMode={handleToggleDarkMode}
-            onNavigate={(href) => {
-                if (href.startsWith("#")) {
-                    router.push("/" + href);
-                } else {
-                    router.push(href);
-                }
-            }}
-        >
-            <PortfolioGrid items={portfolioItems} onExternalLink={handleExternalLink} />
-        </PublicShell>
-    );
+  return (
+    <PublicShell
+      navigationItems={navigationItems}
+      currentPath="/portfolio"
+    >
+      <JsonLd schema={websiteSchema} />
+      <JsonLd schema={breadcrumbSchema} />
+      <PortfolioGrid items={portfolioItems} />
+    </PublicShell>
+  );
 }

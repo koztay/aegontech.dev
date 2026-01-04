@@ -5,16 +5,11 @@ import { User } from "lucide-react";
 
 function TeamCard({
     member,
-    onMemberClick,
 }: {
     member: TeamMember;
-    onMemberClick?: (id: string) => void;
 }) {
     return (
-        <div
-            onClick={() => onMemberClick?.(member.id)}
-            className="group text-center cursor-pointer"
-        >
+        <div className="group text-center">
             {/* Photo */}
             <div className="relative w-28 h-28 mx-auto mb-4 rounded-full overflow-hidden bg-gradient-to-br from-indigo-100 to-cyan-100 dark:from-indigo-900/50 dark:to-cyan-900/50 ring-4 ring-white dark:ring-slate-800 shadow-lg group-hover:ring-indigo-200 dark:group-hover:ring-indigo-700 transition-all duration-300">
                 {member.photoUrl ? (
@@ -49,7 +44,7 @@ function TeamCard({
     );
 }
 
-export function TeamSection({ members, onMemberClick }: TeamSectionProps) {
+export function TeamSection({ members }: TeamSectionProps) {
     return (
         <section className="py-20 bg-slate-50 dark:bg-slate-900">
             <div className="max-w-6xl mx-auto px-6">
@@ -72,7 +67,6 @@ export function TeamSection({ members, onMemberClick }: TeamSectionProps) {
                         <TeamCard
                             key={member.id}
                             member={member}
-                            onMemberClick={onMemberClick}
                         />
                     ))}
                 </div>

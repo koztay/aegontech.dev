@@ -1,6 +1,8 @@
 import type { BlogDetailProps } from "@/lib/types";
 import { ArrowLeft, Calendar } from "lucide-react";
 import ReactMarkdown from "react-markdown";
+import Link from "next/link";
+import Image from "next/image";
 
 export function BlogDetail({ post, onBack }: BlogDetailProps) {
     const formattedDate = new Date(post.publishedAt).toLocaleDateString("en-US", {
@@ -13,23 +15,26 @@ export function BlogDetail({ post, onBack }: BlogDetailProps) {
         <article className="py-16 bg-white dark:bg-slate-950">
             <div className="max-w-3xl mx-auto px-6">
                 {/* Back Button */}
-                <button
-                    onClick={onBack}
+                <Link
+                    href="/blog"
                     className="inline-flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 mb-8 transition-colors"
                 >
                     <ArrowLeft className="w-4 h-4" />
                     Back to Blog
-                </button>
+                </Link>
 
                 {/* Featured Image */}
                 <div
                     className="relative rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-800 mb-8"
                     style={{ height: "400px" }}
                 >
-                    <img
+                    <Image
                         src={post.featuredImage}
                         alt={post.title}
-                        className="w-full h-full object-cover"
+                        fill
+                        priority
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
+                        className="object-cover"
                     />
                 </div>
 
@@ -66,13 +71,35 @@ export function BlogDetail({ post, onBack }: BlogDetailProps) {
                             li: ({ node, ...props }) => (
                                 <li className="text-slate-600 dark:text-slate-400" {...props} />
                             ),
-                            img: ({ node, ...props }) => (
-                                <img
-                                    className="rounded-lg w-full h-auto my-6 shadow-md"
-                                    loading="lazy"
-                                    {...props}
-                                />
-                            ),
+                            img: ({ node, ...props }) => {
+                                const src = props.src as string;
+                                // Check if it's a relative path (local image) or external URL
+                                const isExternal = src.startsWith('http');
+                                
+                                if (isExternal) {
+                                    return (
+                                        <img
+                                            alt={props.alt || 'Blog content image'}
+                                            className="rounded-lg w-full h-auto my-6 shadow-md"
+                                            loading="lazy"
+                                            {...props}
+                                        />
+                                    );
+                                }
+                                
+                                // For local images, use Next.js Image component
+                                return (
+                                    <Image
+                                        src={src}
+                                        alt={props.alt || 'Blog content image'}
+                                        width={800}
+                                        height={450}
+                                        className="rounded-lg my-6 shadow-md"
+                                        loading="lazy"
+                                        sizes="(max-width: 768px) 100vw, 800px"
+                                    />
+                                );
+                            },
                         }}
                     >
                         {post.content}

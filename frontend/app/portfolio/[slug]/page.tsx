@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { buildPageMeta } from "@/lib/seo/meta";
+import { buildPageMeta, buildCreativeWorkSchema, buildBreadcrumbSchema } from "@/lib/seo/meta";
 import { getPortfolioItemBySlug } from "@/lib/data/portfolio";
+import { JsonLd } from "@/components/seo/JsonLd";
+import Image from "next/image";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://aegontech.dev";
 
@@ -37,8 +39,30 @@ export default async function PortfolioDetailPage({
   const projectUrl =
     item.links.website || item.links.appStore || item.links.playStore;
 
+  // Build CreativeWork schema
+  const creativeWorkSchema = buildCreativeWorkSchema({
+    name: item.title,
+    description: item.description || "",
+    url: `${SITE_URL}/portfolio/${slug}`,
+    image: item.screenshot,
+    keywords: [item.type === "saas" ? "SaaS" : "Mobile App"],
+    applicationCategory: item.type === "saas" ? "BusinessApplication" : "MobileApplication",
+    operatingSystem: item.type === "saas" ? "Web Browser" : "iOS, Android"
+  });
+
+  // Build BreadcrumbList schema
+  const breadcrumbSchema = buildBreadcrumbSchema({
+    items: [
+      { name: "Home", url: SITE_URL },
+      { name: "Portfolio", url: `${SITE_URL}/portfolio` },
+      { name: item.title, url: `${SITE_URL}/portfolio/${slug}` }
+    ]
+  });
+
   return (
     <main className="mx-auto max-w-5xl px-6 py-12">
+      <JsonLd schema={creativeWorkSchema} />
+      <JsonLd schema={breadcrumbSchema} />
       <div className="mb-6 space-y-3">
         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-accent-foreground/80">
           Portfolio
@@ -65,13 +89,15 @@ export default async function PortfolioDetailPage({
       </div>
 
       {item.screenshot ? (
-        <div className="mb-8 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+        <div className="mb-8 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm relative">
+          <Image
             src={item.screenshot}
             alt={item.title}
+            width={1920}
+            height={1080}
             className="h-auto w-full"
-            loading="lazy"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1920px"
+            priority
           />
         </div>
       ) : null}
