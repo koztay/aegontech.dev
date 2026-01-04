@@ -1,9 +1,11 @@
 /**
- * llms.txt generator for AegonTech API documentation
+ * llms.txt API route for AegonTech API documentation
  * Provides structured information about public APIs for LLM consumption
  *
  * Format specification: https://llmstxt.org/
  */
+
+import { NextResponse } from 'next/server'
 
 // ==================
 // API Endpoint Definitions
@@ -70,10 +72,10 @@ const DATA_SCHEMAS = {
 };
 
 // ==================
-// Main Export
+// Generate llms.txt Content
 // ==================
 
-export default function llms(): string {
+function generateLlmsTxt(): string {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.aegontech.dev";
 
   // Remove trailing slash from base URL for consistency
@@ -145,4 +147,18 @@ export default function llms(): string {
   lines.push("");
 
   return lines.join("\n");
+}
+
+// ==================
+// API Route Handler
+// ==================
+
+export async function GET() {
+  const content = generateLlmsTxt();
+  
+  return new NextResponse(content, {
+    headers: {
+      'Content-Type': 'text/plain',
+    },
+  });
 }

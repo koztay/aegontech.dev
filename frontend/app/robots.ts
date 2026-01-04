@@ -5,7 +5,7 @@ import { MetadataRoute } from "next";
  * Controls search engine crawler access and references the sitemap
  */
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://aegontech.dev";
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.aegontech.dev";
 
   // Remove trailing slash from base URL for consistency
   const siteUrl = baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
@@ -19,5 +19,6 @@ export default function robots(): MetadataRoute.Robots {
       },
     ],
     sitemap: `${siteUrl}/sitemap.xml`,
-  };
+    llms: `${siteUrl}/llms.txt`,
+  } as MetadataRoute.Robots;
 }
