@@ -88,7 +88,7 @@ function generateLlmsTxt(): string {
   lines.push("");
 
   // Blockquote for description
-  lines.push("> AegonTech provides public APIs for accessing blog posts, portfolio items, and services. All endpoints return JSON data and require no authentication.");
+  lines.push("> AegonTech provides public APIs for accessing blog posts, portfolio items, and services. All endpoints return JSON data and require no authentication. Rate limiting is set to 100 requests per hour per IP address.");
   lines.push("");
 
   // API Endpoints section (H2)
@@ -106,16 +106,6 @@ function generateLlmsTxt(): string {
   lines.push(`- [Home Page](${siteUrl}): Main landing page`);
   lines.push(`- [Blog](${siteUrl}/blog): All blog posts with pagination`);
   lines.push(`- [Portfolio](${siteUrl}/portfolio): Portfolio showcase`);
-  lines.push("");
-
-  // Authentication section (H2)
-  lines.push("## Authentication");
-  lines.push("- No authentication required for public APIs");
-  lines.push("");
-
-  // Rate Limiting section (H2)
-  lines.push("## Rate Limiting");
-  lines.push("- 100 requests per hour per IP address");
   lines.push("");
 
   return lines.join("\n");
