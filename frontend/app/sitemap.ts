@@ -8,7 +8,7 @@ import type { PortfolioItem } from "@/lib/types";
  * Generates sitemap.xml including static pages, blog posts, and portfolio items
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://aegontech.dev";
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.aegontech.dev";
 
   // Remove trailing slash from base URL for consistency
   const siteUrl = baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
