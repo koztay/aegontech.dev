@@ -35,6 +35,14 @@ function applySecurityHeaders(response: NextResponse) {
 
 export function middleware(request: Request) {
   const url = new URL(request.url);
+
+  // Redirect non-www to www for SEO canonicalization
+  const hostname = url.hostname;
+  if (hostname === 'aegontech.dev') {
+    url.hostname = 'www.aegontech.dev';
+    return NextResponse.redirect(url, 301);
+  }
+
   const isApi = url.pathname.startsWith("/api/");
   const isStatic =
     url.pathname.startsWith("/_next/") ||

@@ -16,8 +16,7 @@ export function getContactInfo(): ContactInfo {
         address: "8 The Green, Suite B, Dover, DE 19901",
         email: "support@aegontech.dev",
         phone: "+1 (415) 650-2529",
-        mapEmbedUrl:
-            "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3191.8514062272557!2d-75.52716622470389!3d39.15586722710242!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c764aa7c38b56d%3A0x1c6368e17a8edc56!2s8%20The%20Green%20Suite%20B%2C%20Dover%2C%20DE%2019910%2C%20USA!5e0!3m2!1sen!2str!4v1766932429361!5m2!1sen!2str",
+        mapEmbedUrl: `https://www.google.com/maps/embed/v1/place?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ''}&q=8+The+Green+Suite+B,Dover,DE+19901,USA`,
     };
 }
 
