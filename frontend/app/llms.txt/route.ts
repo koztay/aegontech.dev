@@ -110,12 +110,12 @@ function generateLlmsTxt(): string {
 
   // Authentication section (H2)
   lines.push("## Authentication");
-  lines.push("No authentication required for public APIs.");
+  lines.push("- No authentication required for public APIs");
   lines.push("");
 
   // Rate Limiting section (H2)
   lines.push("## Rate Limiting");
-  lines.push("100 requests per hour per IP address.");
+  lines.push("- 100 requests per hour per IP address");
   lines.push("");
 
   return lines.join("\n");
