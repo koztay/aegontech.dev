@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { BlogList } from "@/components/blog";
 import { PublicShell } from "@/components/shell/PublicShell";
 import { JsonLd } from "@/components/seo/JsonLd";
@@ -44,7 +45,9 @@ export default async function BlogPage() {
     >
       <JsonLd schema={websiteSchema} />
       <JsonLd schema={breadcrumbSchema} />
-      <BlogList />
+      <Suspense fallback={<div className="flex justify-center py-12">Loading...</div>}>
+        <BlogList />
+      </Suspense>
     </PublicShell>
   );
 }
