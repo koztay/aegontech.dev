@@ -28,7 +28,7 @@ const nextConfig = {
         headers: [
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; frame-src 'self' https://www.google.com https://maps.google.com; child-src 'self' https://www.google.com https://maps.google.com; script-src 'self' 'unsafe-inline' https://www.google.com https://maps.google.com; style-src 'self' 'unsafe-inline' https://www.google.com https://maps.google.com;",
+            value: "default-src 'self'; img-src 'self' data: blob: https:; frame-src 'self' https://www.google.com https://maps.google.com; child-src 'self' https://www.google.com https://maps.google.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.google.com https://maps.google.com; style-src 'self' 'unsafe-inline' https://www.google.com https://maps.google.com; font-src 'self' https:; connect-src 'self' https: wss:;",
           },
         ],
       },

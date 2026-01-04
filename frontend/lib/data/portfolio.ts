@@ -1,5 +1,5 @@
 import { query } from "@/lib/db/client";
-import { presignGet } from "@/lib/storage/minio";
+import { getPublicUrl } from "@/lib/storage/minio";
 import type { PortfolioItem } from "@/lib/types";
 
 export type { PortfolioItem } from "@/lib/types";
@@ -45,14 +45,10 @@ export async function getAllPortfolioItems(): Promise<PortfolioItem[]> {
     );
 
     if (rows.length > 0) {
-      return await Promise.all(rows.map(async (row) => {
+      return rows.map((row) => {
         let screenshotUrl = row.screenshot;
-        try {
-          if (screenshotUrl && !screenshotUrl.startsWith("http")) {
-            screenshotUrl = await presignGet(screenshotUrl, 300);
-          }
-        } catch (e) {
-          // fallback to stored value
+        if (screenshotUrl && !screenshotUrl.startsWith("http")) {
+          screenshotUrl = getPublicUrl(screenshotUrl);
         }
         return {
           id: row.id,
@@ -66,7 +62,7 @@ export async function getAllPortfolioItems(): Promise<PortfolioItem[]> {
             playStore: row.play_store_url || undefined,
           },
         };
-      }));
+      });
     }
   } catch (error) {
     console.warn("Falling back to placeholder portfolio items", error);
@@ -87,11 +83,9 @@ export async function getPortfolioItemBySlug(
     if (rows.length > 0) {
       const row = rows[0];
       let screenshotUrl = row.screenshot;
-      try {
-        if (screenshotUrl && !screenshotUrl.startsWith("http")) {
-          screenshotUrl = await presignGet(screenshotUrl, 300);
-        }
-      } catch (e) {}
+      if (screenshotUrl && !screenshotUrl.startsWith("http")) {
+        screenshotUrl = getPublicUrl(screenshotUrl);
+      }
       return {
         id: row.id,
         title: row.title,
