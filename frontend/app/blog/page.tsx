@@ -3,8 +3,6 @@ import { PublicShell } from "@/components/shell/PublicShell";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { buildPageMeta, buildWebsiteSchema, buildBreadcrumbSchema } from "@/lib/seo/meta";
 import type { Metadata } from "next";
-import { getBlogIndex } from "@/lib/data/blog";
-import Link from "next/link";
 
 export const metadata: Metadata = buildPageMeta({
   title: "Blog - Aegontech.dev",
@@ -14,8 +12,6 @@ export const metadata: Metadata = buildPageMeta({
 });
 
 export default async function BlogPage() {
-  const blogPosts = await getBlogIndex();
-
   const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://aegontech.dev";
 
   // Build WebSite schema with search action
@@ -48,7 +44,7 @@ export default async function BlogPage() {
     >
       <JsonLd schema={websiteSchema} />
       <JsonLd schema={breadcrumbSchema} />
-      <BlogList posts={blogPosts} />
+      <BlogList />
     </PublicShell>
   );
 }
