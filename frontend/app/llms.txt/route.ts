@@ -83,61 +83,39 @@ function generateLlmsTxt(): string {
 
   const lines: string[] = [];
 
-  // Header metadata (plain text, not markdown headers)
-  lines.push("Title: AegonTech API Documentation");
-  lines.push("Description: Public APIs for accessing AegonTech blog posts, portfolio items, and services");
-  lines.push(`URL: ${siteUrl}`);
-  lines.push(`Version: 1.0.0`);
-  lines.push(`Last Updated: ${new Date().toISOString()}`);
+  // H1 header - MUST be the first element
+  lines.push("# AegonTech API Documentation");
   lines.push("");
 
-  // API Endpoints section
-  lines.push("API Endpoints:");
-
-  for (const endpoint of API_ENDPOINTS) {
-    let endpointLine = `- ${endpoint.url}: ${endpoint.method} - ${endpoint.description}`;
-    
-    if (endpoint.parameters && endpoint.parameters.length > 0) {
-      endpointLine += `. Parameters: ${endpoint.parameters.map(p =>
-        `${p.name} (${p.type}, ${p.required ? "required" : "optional"}): ${p.description}`
-      ).join(", ")}`;
-    }
-    
-    if (typeof endpoint.response === "string") {
-      endpointLine += `. Response: ${endpoint.response}`;
-    } else {
-      endpointLine += `. Response: ${endpoint.response.type} with fields ${endpoint.response.fields.join(", ")}`;
-    }
-    
-    lines.push(endpointLine);
-  }
-
+  // Blockquote for description
+  lines.push("> AegonTech provides public APIs for accessing blog posts, portfolio items, and services. All endpoints return JSON data and require no authentication.");
   lines.push("");
 
-  // Data Schemas section
-  lines.push("Data Schemas:");
-
-  for (const [schemaName, schema] of Object.entries(DATA_SCHEMAS)) {
-    lines.push(`- ${schemaName}: ${schema.fields.join(", ")}`);
-  }
-
+  // API Endpoints section (H2)
+  lines.push("## API Endpoints");
+  lines.push("");
+  lines.push(`- [Blog Posts API](${siteUrl}/api/data/blog): GET - Retrieve all published blog posts with pagination support`);
+  lines.push(`- [Blog Post by Slug](${siteUrl}/api/data/blog/{slug}): GET - Retrieve a specific blog post by its slug`);
+  lines.push(`- [Portfolio Items API](${siteUrl}/api/data/portfolio): GET - Retrieve all portfolio items`);
+  lines.push(`- [Services API](${siteUrl}/api/data/services): GET - Retrieve all services offered`);
   lines.push("");
 
-  // Authentication section
-  lines.push("Authentication:");
-  lines.push("- Type: none (Public APIs do not require authentication)");
+  // Important Pages section (H2)
+  lines.push("## Important Pages");
+  lines.push("");
+  lines.push(`- [Home Page](${siteUrl}): Main landing page`);
+  lines.push(`- [Blog](${siteUrl}/blog): All blog posts with pagination`);
+  lines.push(`- [Portfolio](${siteUrl}/portfolio): Portfolio showcase`);
   lines.push("");
 
-  // Rate Limiting section
-  lines.push("Rate Limiting:");
-  lines.push("- 100 requests per hour per IP address");
+  // Authentication section (H2)
+  lines.push("## Authentication");
+  lines.push("No authentication required for public APIs.");
   lines.push("");
 
-  // Important URLs section
-  lines.push("Important URLs:");
-  lines.push(`- Home: ${siteUrl}`);
-  lines.push(`- Blog: ${siteUrl}/blog`);
-  lines.push(`- Portfolio: ${siteUrl}/portfolio`);
+  // Rate Limiting section (H2)
+  lines.push("## Rate Limiting");
+  lines.push("100 requests per hour per IP address.");
   lines.push("");
 
   return lines.join("\n");
