@@ -1,108 +1,15 @@
 /**
  * llms.txt generator for AegonTech API documentation
  * Provides structured information about public APIs for LLM consumption
+ *
+ * Format specification: https://llmstxt.org/
  */
-
-// ==================
-// Type Definitions
-// ==================
-
-/**
- * Schema for BlogPost objects
- */
-interface BlogPostSchema {
-  id: string;
-  slug: string;
-  title: string;
-  excerpt: string;
-  content: string;
-  featuredImage: string;
-  publishedAt: string;
-  status: "draft" | "published";
-}
-
-/**
- * Schema for PortfolioItem objects
- */
-interface PortfolioItemSchema {
-  id: string;
-  title: string;
-  description: string;
-  type: "saas" | "mobile";
-  screenshot: string;
-  links: {
-    website?: string;
-    appStore?: string;
-    playStore?: string;
-  };
-}
-
-/**
- * Schema for Service objects
- */
-interface ServiceSchema {
-  id: string;
-  icon: string;
-  title: string;
-  description: string;
-}
-
-/**
- * API endpoint documentation
- */
-interface ApiEndpoint {
-  url: string;
-  method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
-  description: string;
-  parameters?: Array<{
-    name: string;
-    type: string;
-    required: boolean;
-    description: string;
-  }>;
-  response: Record<string, unknown> | string;
-}
-
-/**
- * Authentication information
- */
-interface Authentication {
-  type: string;
-  description: string;
-}
-
-/**
- * Rate limiting information
- */
-interface RateLimit {
-  requestsPerHour: number;
-  per: string;
-}
-
-/**
- * Main llms.txt structure
- */
-interface LlmsTxt {
-  title: string;
-  description: string;
-  url: string;
-  version: string;
-  lastUpdated: string;
-  endpoints: ApiEndpoint[];
-  schemas: {
-    BlogPost: BlogPostSchema;
-    PortfolioItem: PortfolioItemSchema;
-    Service: ServiceSchema;
-  };
-  authentication: Authentication;
-  rateLimit: RateLimit;
-}
 
 // ==================
 // API Endpoint Definitions
 // ==================
 
-const API_ENDPOINTS: ApiEndpoint[] = [
+const API_ENDPOINTS = [
   {
     url: "/api/data/blog",
     method: "GET",
@@ -152,60 +59,90 @@ const API_ENDPOINTS: ApiEndpoint[] = [
 
 const DATA_SCHEMAS = {
   BlogPost: {
-    id: "string",
-    slug: "string",
-    title: "string",
-    excerpt: "string",
-    content: "string",
-    featuredImage: "string",
-    publishedAt: "string",
-    status: "draft" as const,
-  } as unknown as BlogPostSchema,
+    fields: ["id", "slug", "title", "excerpt", "content", "featuredImage", "publishedAt", "status"],
+  },
   PortfolioItem: {
-    id: "string",
-    title: "string",
-    description: "string",
-    type: "saas" as const,
-    screenshot: "string",
-    links: {
-      website: undefined,
-      appStore: undefined,
-      playStore: undefined,
-    },
-  } as unknown as PortfolioItemSchema,
+    fields: ["id", "title", "description", "type", "screenshot", "links"],
+  },
   Service: {
-    id: "string",
-    icon: "string",
-    title: "string",
-    description: "string",
-  } as ServiceSchema,
+    fields: ["id", "icon", "title", "description"],
+  },
 };
 
 // ==================
 // Main Export
 // ==================
 
-export default function llms(): LlmsTxt {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://aegontech.dev";
+export default function llms(): string {
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.aegontech.dev";
 
   // Remove trailing slash from base URL for consistency
   const siteUrl = baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
 
-  return {
-    title: "AegonTech API Documentation",
-    description: "Public APIs for accessing AegonTech blog posts, portfolio items, and services",
-    url: siteUrl,
-    version: "1.0.0",
-    lastUpdated: new Date().toISOString(),
-    endpoints: API_ENDPOINTS,
-    schemas: DATA_SCHEMAS,
-    authentication: {
-      type: "none",
-      description: "Public APIs do not require authentication",
-    },
-    rateLimit: {
-      requestsPerHour: 100,
-      per: "IP address",
-    },
-  };
+  const lines: string[] = [];
+
+  // Header
+  lines.push("# Title: AegonTech API Documentation");
+  lines.push("# Description: Public APIs for accessing AegonTech blog posts, portfolio items, and services");
+  lines.push(`# URL: ${siteUrl}`);
+  lines.push(`# Version: 1.0.0`);
+  lines.push(`# Last Updated: ${new Date().toISOString()}`);
+  lines.push("");
+
+  // API Endpoints section
+  lines.push("## API Endpoints");
+  lines.push("");
+
+  for (const endpoint of API_ENDPOINTS) {
+    lines.push(`### ${endpoint.url}`);
+    lines.push(`Method: ${endpoint.method}`);
+    lines.push(`Description: ${endpoint.description}`);
+    
+    if (endpoint.parameters && endpoint.parameters.length > 0) {
+      lines.push("Parameters:");
+      for (const param of endpoint.parameters) {
+        lines.push(`  - ${param.name} (${param.type}, ${param.required ? "required" : "optional"}): ${param.description}`);
+      }
+    }
+    
+    if (typeof endpoint.response === "string") {
+      lines.push(`Response: ${endpoint.response}`);
+    } else {
+      lines.push(`Response Type: ${endpoint.response.type}`);
+      lines.push(`Response Fields: ${endpoint.response.fields.join(", ")}`);
+    }
+    
+    lines.push("");
+  }
+
+  // Data Schemas section
+  lines.push("## Data Schemas");
+  lines.push("");
+
+  for (const [schemaName, schema] of Object.entries(DATA_SCHEMAS)) {
+    lines.push(`### ${schemaName}`);
+    lines.push(`Fields: ${schema.fields.join(", ")}`);
+    lines.push("");
+  }
+
+  // Authentication section
+  lines.push("## Authentication");
+  lines.push("Type: none");
+  lines.push("Description: Public APIs do not require authentication");
+  lines.push("");
+
+  // Rate Limiting section
+  lines.push("## Rate Limiting");
+  lines.push("Requests per hour: 100");
+  lines.push("Per: IP address");
+  lines.push("");
+
+  // Important URLs section
+  lines.push("## Important URLs");
+  lines.push(`- Home: ${siteUrl}`);
+  lines.push(`- Blog: ${siteUrl}/blog`);
+  lines.push(`- Portfolio: ${siteUrl}/portfolio`);
+  lines.push("");
+
+  return lines.join("\n");
 }
