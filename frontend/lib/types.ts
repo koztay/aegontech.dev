@@ -39,7 +39,7 @@ export interface FeaturedPortfolioItem {
     type: "saas" | "mobile";
     description: string;
     imageUrl: string;
-    url: string;
+    url?: string;
 }
 
 export interface ContactInfo {
