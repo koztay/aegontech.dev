@@ -39,7 +39,6 @@ export default async function MarketingPage() {
     type: item.type,
     description: item.description,
     imageUrl: item.screenshot,
-    url: item.links?.website || item.links?.appStore || item.links?.playStore || `/portfolio/${item.id}`,
   }));
 
   const heroContent = getHeroContent();
@@ -59,7 +58,7 @@ export default async function MarketingPage() {
     { label: "Home", href: "/" },
     { label: "Portfolio", href: "/portfolio" },
     { label: "Blog", href: "/blog" },
-    { label: "Contact", href: "#contact" },
+    { label: "Contact", href: "/#contact" },
   ];
 
   return (

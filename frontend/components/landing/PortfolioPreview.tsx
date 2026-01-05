@@ -28,7 +28,7 @@ function PortfolioCard({
 
     return (
         <Link
-            href={item.url}
+            href="/portfolio"
             className="group cursor-pointer"
             style={{ width: "240px", minWidth: "240px", maxWidth: "240px" }}
         >

@@ -36,7 +36,7 @@ export default async function PortfolioPage() {
     { label: "Home", href: "/" },
     { label: "Portfolio", href: "/portfolio" },
     { label: "Blog", href: "/blog" },
-    { label: "Contact", href: "#contact" },
+    { label: "Contact", href: "/#contact" },
   ];
 
   return (

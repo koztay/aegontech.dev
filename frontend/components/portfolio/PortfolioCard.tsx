@@ -49,17 +49,7 @@ export function PortfolioCard({ item }: PortfolioCardProps) {
 
                 {/* Links */}
                 <div className="flex flex-wrap gap-2">
-                    {item.links.website && (
-                        <a
-                            href={item.links.website}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium rounded-lg transition-colors"
-                        >
-                            <ExternalLink className="w-4 h-4" />
-                            Visit Website
-                        </a>
-                    )}
+                    {/* Priority: Show App Store and Play Store if both exist, otherwise show available store + website */}
                     {item.links.appStore && (
                         <a
                             href={item.links.appStore}
@@ -84,6 +74,18 @@ export function PortfolioCard({ item }: PortfolioCardProps) {
                                 <path d="M3,20.5V3.5C3,2.91 3.34,2.39 3.84,2.15L13.69,12L3.84,21.85C3.34,21.6 3,21.09 3,20.5M16.81,15.12L6.05,21.34L14.54,12.85L16.81,15.12M20.16,10.81C20.5,11.08 20.75,11.5 20.75,12C20.75,12.5 20.53,12.9 20.18,13.18L17.89,14.5L15.39,12L17.89,9.5L20.16,10.81M6.05,2.66L16.81,8.88L14.54,11.15L6.05,2.66Z" />
                             </svg>
                             Play Store
+                        </a>
+                    )}
+                    {/* Show website only if both stores are not available */}
+                    {item.links.website && !(item.links.appStore && item.links.playStore) && (
+                        <a
+                            href={item.links.website}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium rounded-lg transition-colors"
+                        >
+                            <ExternalLink className="w-4 h-4" />
+                            Visit Website
                         </a>
                     )}
                 </div>
