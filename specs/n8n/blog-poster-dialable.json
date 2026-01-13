@@ -1,0 +1,456 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 13
+            }
+          ]
+        }
+      },
+      "id": "97adc0d5-5198-454f-9055-d1040ccf7d58",
+      "name": "Daily Schedule2",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -1408,
+        2400
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const aiResponse = $input.item.json.choices[0].message.content;\n\n// JSON repair function for common LLM mistakes\nfunction repairJson(str) {\n    let s = str.trim();\n    // Remove markdown code blocks\n    s = s.replace(/^```json\\s*\\n?|\\n?```$/g, '');\n    // Count brackets to detect imbalance\n    let opens = { '{': 0, '[': 0 };\n    let closes = { '}': 0, ']': 0 };\n    for (const c of s) {\n        if (c === '{') opens['{']++;\n        if (c === '[') opens['[']++;\n        if (c === '}') closes['}']++;\n        if (c === ']') closes[']']++;\n    }\n    // Add missing closing brackets\n    while (closes['}'] < opens['{']) { s += '}'; closes['}']++; }\n    while (closes[']'] < opens['[']) { s += ']'; closes[']']++; }\n    // Fix pattern: \\\"...\\\"\\n    ] where } is missing before ]\n    s = s.replace(/(\\\"[^\\\"]*\\\")\\s*\\n?\\s*\\]/g, (match, p1) => {\n        const beforeMatch = s.substring(0, s.indexOf(match));\n        const lastOpen = Math.max(beforeMatch.lastIndexOf('{'), beforeMatch.lastIndexOf('['));\n        if (beforeMatch[lastOpen] === '{') {\n            return p1 + '}]';\n        }\n        return match;\n    });\n    return s;\n}\n\nlet parsedData;\ntry {\n    parsedData = JSON.parse(aiResponse);\n} catch (e) {\n    try {\n        const repaired = repairJson(aiResponse);\n        parsedData = JSON.parse(repaired);\n    } catch (e2) {\n        throw new Error('JSON parse failed: ' + e.message + ' | Repaired attempt: ' + e2.message);\n    }\n}\n\n// Helper to safely get prompts\nconst getPrompt = (arr, type) => {\n    if (!arr || !Array.isArray(arr)) return '';\n    const found = arr.find(p => p && p.type === type);\n    return found ? found.prompt : '';\n};\n\nreturn {\n    json: {\n        ...parsedData,\n        featured_prompt: getPrompt(parsedData.image_prompts, 'featured'),\n        inline_prompts: (parsedData.image_prompts || []).filter(p => p && p.type === 'inline')\n    }\n};"
+      },
+      "id": "153bb96e-9b98-4caf-8b8e-cf5ae9cd02d5",
+      "name": "Parse AI Response2",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -960,
+        2400
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://fal.run/fal-ai/nano-banana",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"prompt\": 'Photorealistic professional photograph, high-resolution, natural lighting, real-world scene: ' + $json.featured_prompt, \"image_size\": \"landscape_16_9\", \"num_images\": 1 } }}",
+        "options": {}
+      },
+      "id": "4e06417c-cbfd-488a-ba8b-af471ec3e34e",
+      "name": "Fal.ai (Featured)1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        -288,
+        2304
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "EnSy6MlA0fNgaGb9",
+          "name": "Fal.ai"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.images[0].url }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "file"
+            }
+          }
+        }
+      },
+      "id": "b00eda4e-f4b1-423a-aad6-9a8f2ea233cd",
+      "name": "Download Featured Image1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        -64,
+        2304
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://dialable.world/api/blog/upload",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "file"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "cb0fdaa9-88a2-4757-a128-18d01dcabcd9",
+      "name": "Upload Featured Image2",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        160,
+        2304
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "ELKdvuAM7P07XzGY",
+          "name": "Dialable Upload Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "inline_prompts",
+        "options": {}
+      },
+      "id": "b15d0fcf-b248-40c6-acb7-7c140db9661c",
+      "name": "Split Inline Images2",
+      "type": "n8n-nodes-base.itemLists",
+      "typeVersion": 3,
+      "position": [
+        -736,
+        2496
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://fal.run/fal-ai/nano-banana",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"prompt\": 'Photorealistic professional photograph, high-resolution, natural lighting, real-world scene: ' + $json.prompt, \"image_size\": \"square\", \"num_images\": 1 } }}",
+        "options": {}
+      },
+      "id": "2b2ff2ea-ec68-4239-be5d-2bd2e74675fc",
+      "name": "Fal.ai (Inline)1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        -512,
+        2496
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "EnSy6MlA0fNgaGb9",
+          "name": "Fal.ai"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.images[0].url }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "file"
+            }
+          }
+        }
+      },
+      "id": "3e5ea238-cccf-4086-9695-feeb2ccf4716",
+      "name": "Download Inline Image1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        -288,
+        2496
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://dialable.world/api/blog/upload",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "file"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "00f496f6-0291-4ea0-a282-685d2bcc6201",
+      "name": "Upload Inline Image2",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        -64,
+        2496
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "ELKdvuAM7P07XzGY",
+          "name": "Dialable Upload Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const allItems = $input.all();\nconst urls = allItems.map(item => item.json.url);\nreturn [{ json: { urls } }];"
+      },
+      "id": "f3ea4091-64fb-415b-878c-4866f784313b",
+      "name": "Aggregate Images2",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        160,
+        2496
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const contentData = $(\"Parse AI Response2\").first().json;\nconst featuredImg = $(\"Upload Featured Image2\").first().json.url;\n\n// Get inline image URLs from the Aggregate Images node\nconst aggregateData = $(\"Aggregate Images2\").first().json;\nconst inlineImgs = aggregateData.urls || [];\n\nlet finalContent = contentData.content;\n\ninlineImgs.forEach((url, index) => {\n    const placeholder = `<<IMAGE_PLACEHOLDER_${index + 1}>>`;\n    const markdownImage = `![Blog Image](${url})`;\n    finalContent = finalContent.replace(placeholder, markdownImage);\n});\n\nreturn [{\n    json: {\n        title: contentData.title,\n        slug: contentData.slug,\n        excerpt: contentData.excerpt,\n        featured_image: featuredImg,\n        seo_title: contentData.seo_title,\n        seo_description: contentData.seo_description,\n        seo_keywords: contentData.seo_keywords,\n        content: finalContent,\n        is_published: true\n    }\n}];"
+      },
+      "id": "88a46fc0-c574-4880-9f25-bbd26d96ba04",
+      "name": "Prepare Payload2",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        608,
+        2400
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://dialable.world/api/blog",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "13f7e3a1-5ad2-456b-8c0b-d3eac535e4b9",
+      "name": "Post to Dialable2",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        832,
+        2400
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "ELKdvuAM7P07XzGY",
+          "name": "Dialable Upload Key"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        384,
+        2400
+      ],
+      "id": "3ea845ad-4581-45ca-861f-926310343c5d",
+      "name": "Merge2"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"model\": \"gpt-4-turbo\", \"response_format\": { \"type\": \"json_object\" }, \"messages\": [ { \"role\": \"system\", \"content\": \"You are a Senior SEO Content Strategist and Copywriter specializing in SaaS and Telecommunications.\\n\\nThe Product (Context): You are writing for Dialable.world, a product by AEGONTECH LLC (https://www.aegontech.dev).\\n\\nWhat it is: A browser-based AUDIO CALLING platform that allows users to call any landline or mobile phone number globally directly from their web browser. IMPORTANT: This is an AUDIO-ONLY service. We do NOT support video calls, video conferencing, or any video features.\\n\\nUSP (Unique Selling Proposition): No downloads, no installations, no heavy software updates. The best Skype alternative for landline calls with cheap international calls to landlines. Instant access via WebRTC. Call from browser instantly - just dial world and connect.\\n\\nTarget Audience: Digital nomads, international business travelers, expats, freelancers, and users frustrated with bloated legacy software who need to make a call from browser to landlines worldwide.\\n\\nTone: Modern, frictionless, professional, persuasive, and innovative.\\n\\nCompany Context: Dialable.world is developed and maintained by AEGONTECH LLC, a technology company focused on innovative communication solutions. Learn more at https://www.aegontech.dev.\\n\\nThe Task: Write a compelling, SEO-optimized blog post for the daily blog.\\n\\nContent Requirements:\\n\\nTopic: You MUST generate a UNIQUE and CREATIVE topic each time. NEVER use 'Beyond the App' or similar titles. Choose randomly from these DIFFERENT angles: digital nomad communication tips, expat calling solutions, cheap international calls to landlines, international business travel tech, freelancer productivity tools, startup communication stack, WebRTC technology explained, VoIP cost comparison, Skype alternative for landline calls, browser-first software movement, cloud communication trends, cross-border business calls, mobile-light communication, legacy software problems, instant global connectivity, call browser solutions, world dial accessibility. Create a completely fresh and unique title and angle every single time.\\n\\nGoal: Convince the reader that downloading apps for calling is outdated and that browser-based AUDIO calling is the future. Emphasize that users can call from browser to any landline or mobile worldwide.\\n\\nStructure:\\n\\nHook: Start with a relatable pain point (e.g., waiting for updates, heavy apps slowing down the PC, expensive international calls to landlines).\\n\\nThe \\\"Aha\\\" Moment: Introduce the concept of the \\\"Browser Phone\\\" - a Skype international calls alternative that works instantly.\\n\\nThe Solution: Explain how Dialable solves the problem (Instant, Cheap, Global). Mention it's developed by AEGONTECH LLC with a link to https://www.aegontech.dev.\\n\\nCTA: A clear Call to Action to try Dialable immediately - dial world from your browser now.\\n\\nKeywords to Integrate (Use naturally - MANDATORY):\\n\\nPrimary: Skype alternative for landline calls, cheap international calls to landlines, call from browser, call browser, dial world, global call.\\n\\nSecondary: Skype international calls alternative, world dial, make a call from browser, WebRTC calling, VoIP without download, frictionless communication, global connectivity.\\n\\nConstraint: Do not keyword stuff. Ensure the flow is natural. Include at least one backlink to AEGONTECH LLC (https://www.aegontech.dev) in each post.\\n\\nFormatting:\\n\\nUse Markdown formatting (H2, H3, bolding for emphasis).\\n\\nKeep paragraphs short (2-3 sentences) for readability.\\n\\nInclude placeholders for images like [Image: Description of image] where appropriate.\\n\\nTone Guidelines:\\n\\nAvoid corporate jargon.\\n\\nBe confident but not arrogant.\\n\\nFocus on Speed and Simplicity.\\n\\nOutput strictly valid JSON.\" }, { \"role\": \"user\", \"content\": \"Generate a blog post with a COMPLETELY NEW AND UNIQUE topic. Do NOT reuse any previous titles. Current timestamp for uniqueness: \" + Date.now() + \".\\n\\n**REQUIREMENTS:**\\n1. **Topic**: Create a FRESH, UNIQUE topic. Pick a random angle from: remote work, digital nomad life, international business, expat tips, startup tools, freelancer hacks, VoIP tech, WebRTC innovations, legacy software problems, browser-first future, cheap international calls to landlines, Skype alternative for landline calls. The title MUST be different from any common titles.\\n2. **Format**: Return the result as a VALID JSON object (and ONLY JSON) with the following schema:\\n    ```json\\n    {\\n      \\\"title\\\": \\\"Catchy Title\\\",\\n      \\\"slug\\\": \\\"catchy-title-slug\\\",\\n      \\\"excerpt\\\": \\\"Short 2-sentence summary\\\",\\n      \\\"seo_title\\\": \\\"SEO Optimized Title\\\",\\n      \\\"seo_description\\\": \\\"meta description\\\",\\n      \\\"seo_keywords\\\": [\\\"keyword1\\\", \\\"keyword2\\\"],\\n      \\\"content\\\": \\\"Markdown content...\\\",\\n      \\\"image_prompts\\\": [\\n          {\\\"type\\\": \\\"featured\\\", \\\"prompt\\\": \\\"Detailed prompt for main cover image\\\"},\\n          {\\\"type\\\": \\\"inline\\\", \\\"prompt\\\": \\\"Detailed prompt for inline image 1\\\"},\\n          {\\\"type\\\": \\\"inline\\\", \\\"prompt\\\": \\\"Detailed prompt for inline image 2\\\"}\\n      ]\\n    }\\n    ```\\n3. **Content Body**: \\n    -   Use proper Markdown headings (##, ###).\\n    -   Length: At least 800 words.\\n    -   **Important**: Where you want the inline images to appear, insert the placeholder text: `<<IMAGE_PLACEHOLDER_1>>`, `<<IMAGE_PLACEHOLDER_2>>`, etc., corresponding to the order in the `image_prompts` array (skipping the featured one).\\n    -   Ensure there are at least 2 inline images.\\n    -   **MANDATORY**: Include at least one backlink to AEGONTECH LLC using this format: [AEGONTECH LLC](https://www.aegontech.dev) somewhere in the content.\\n    -   **MANDATORY**: Naturally integrate these keywords: 'Skype alternative for landline calls', 'cheap international calls to landlines', 'call from browser', 'dial world', 'global call'.\\n4. **Image Prompts**: Each image prompt MUST describe a REAL PHOTOGRAPH of AUDIO CALLING scenarios. Use: 'Professional stock photo of...', 'Real photograph showing...', 'Authentic candid photo of...'. Describe real people using phones, headsets, or laptops for AUDIO calls. Show people talking on phone calls, using headsets for voice calls, or making international landline calls from browser.\\n5. **Image Negative Constraints**: \\n    -   NEVER show video calls, video conferencing, webcams, video chat screens, Zoom-style grid layouts, or any video-related imagery. This is AUDIO-ONLY.\\n    -   NEVER include any religious references, symbols, attire, or iconography in the image prompts.\\n    -   Avoid hijabs, crosses, religious buildings, prayer imagery, or any cultural/religious clothing.\\n    -   Keep images neutral, modern, secular, and globally inclusive.\\n    -   Focus on diverse professionals in contemporary business casual or smart casual attire making AUDIO phone calls.\\n    -   Show phone handsets, headsets with microphones, people talking (not looking at screens for video), landline phones, or browser interfaces showing dial pads (NOT video grids).\" } ] } }}",
+        "options": {}
+      },
+      "id": "bfe104b1-5f74-405b-bd62-d3b02fb96428",
+      "name": "AI Content Agent",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        -1168,
+        2400
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "1UPsIUoaAyTpIRuS",
+          "name": "Open AI"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Daily Schedule2": {
+      "main": [
+        [
+          {
+            "node": "AI Content Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse AI Response2": {
+      "main": [
+        [
+          {
+            "node": "Fal.ai (Featured)1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Split Inline Images2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fal.ai (Featured)1": {
+      "main": [
+        [
+          {
+            "node": "Download Featured Image1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Featured Image1": {
+      "main": [
+        [
+          {
+            "node": "Upload Featured Image2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Featured Image2": {
+      "main": [
+        [
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Inline Images2": {
+      "main": [
+        [
+          {
+            "node": "Fal.ai (Inline)1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fal.ai (Inline)1": {
+      "main": [
+        [
+          {
+            "node": "Download Inline Image1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Inline Image1": {
+      "main": [
+        [
+          {
+            "node": "Upload Inline Image2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Inline Image2": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Images2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate Images2": {
+      "main": [
+        [
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Prepare Payload2": {
+      "main": [
+        [
+          {
+            "node": "Post to Dialable2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge2": {
+      "main": [
+        [
+          {
+            "node": "Prepare Payload2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Content Agent": {
+      "main": [
+        [
+          {
+            "node": "Parse AI Response2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "495481f5f4ddde18c82827077397d5fb058466368fd2c3275b9a5cd849415675"
+  }
+}

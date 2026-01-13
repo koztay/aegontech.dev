@@ -5,7 +5,7 @@
         "rule": {
           "interval": [
             {
-              "triggerAtHour": 13
+              "triggerAtHour": 14
             }
           ]
         }
@@ -27,7 +27,7 @@
         "genericAuthType": "httpHeaderAuth",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ { \"model\": \"gpt-4-turbo\", \"messages\": [ { \"role\": \"system\", \"content\": $json.system_prompt }, { \"role\": \"user\", \"content\": $json.user_prompt } ] } }}",
+        "jsonBody": "={{ { \"model\": \"gpt-4-turbo\", \"response_format\": { \"type\": \"json_object\" }, \"messages\": [ { \"role\": \"system\", \"content\": $json.system_prompt }, { \"role\": \"user\", \"content\": $json.user_prompt } ] } }}",
         "options": {}
       },
       "id": "bdac3402-bd5e-4366-abb3-1949dfb7a4cb",
@@ -47,7 +47,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const aiResponse = $input.item.json.choices[0].message.content;\nlet parsedData;\ntry {\n    parsedData = JSON.parse(aiResponse);\n} catch (e) {\n    const cleanJson = aiResponse.replace(/^```json\\n|\\n```$/g, '');\n    parsedData = JSON.parse(cleanJson);\n}\n\n// Helper to normalize prompt objects\nconst normalize = (p) => {\n    const typeKey = Object.keys(p).find(k => k.toLowerCase() === 'type');\n    const promptKey = Object.keys(p).find(k => k.toLowerCase() === 'prompt');\n    return {\n        type: typeKey ? String(p[typeKey]).trim().toLowerCase() : '',\n        prompt: promptKey ? p[promptKey] : ''\n    };\n};\n\nconst normalizedPrompts = (parsedData.image_prompts || []).map(normalize);\n\nreturn {\n    json: {\n        ...parsedData,\n        featured_prompt: (normalizedPrompts.find(p => p.type === 'featured') || {}).prompt,\n        inline_prompts: normalizedPrompts.filter(p => p.type === 'inline')\n    }\n};"
+        "jsCode": "const aiResponse = $input.item.json.choices[0].message.content;\n\n// JSON repair function for common LLM mistakes\nfunction repairJson(str) {\n    let s = str.trim();\n    // Remove markdown code blocks\n    s = s.replace(/^```json\\s*\\n?|\\n?```$/g, '');\n    // Fix common bracket issues: }] -> }] and ]} -> }]\n    // Count brackets to detect imbalance\n    let opens = { '{': 0, '[': 0 };\n    let closes = { '}': 0, ']': 0 };\n    for (const c of s) {\n        if (c === '{') opens['{']++;\n        if (c === '[') opens['[']++;\n        if (c === '}') closes['}']++;\n        if (c === ']') closes[']']++;\n    }\n    // Add missing closing brackets\n    while (closes['}'] < opens['{']) { s += '}'; closes['}']++; }\n    while (closes[']'] < opens['[']) { s += ']'; closes[']']++; }\n    // Fix pattern: \\\"...\\\"\\n    ] where } is missing before ]\n    s = s.replace(/(\\\"[^\\\"]*\\\")\\s*\\n?\\s*\\]/g, (match, p1) => {\n        // Check if we need a } before ]\n        const beforeMatch = s.substring(0, s.indexOf(match));\n        const lastOpen = Math.max(beforeMatch.lastIndexOf('{'), beforeMatch.lastIndexOf('['));\n        if (beforeMatch[lastOpen] === '{') {\n            return p1 + '}]';\n        }\n        return match;\n    });\n    return s;\n}\n\nlet parsedData;\ntry {\n    parsedData = JSON.parse(aiResponse);\n} catch (e) {\n    try {\n        const repaired = repairJson(aiResponse);\n        parsedData = JSON.parse(repaired);\n    } catch (e2) {\n        throw new Error('JSON parse failed: ' + e.message + ' | Repaired attempt: ' + e2.message);\n    }\n}\n\n// Helper to normalize prompt objects\nconst normalize = (p) => {\n    if (!p || typeof p !== 'object') return { type: '', prompt: '' };\n    const typeKey = Object.keys(p).find(k => k.toLowerCase() === 'type');\n    const promptKey = Object.keys(p).find(k => k.toLowerCase() === 'prompt');\n    return {\n        type: typeKey ? String(p[typeKey]).trim().toLowerCase() : '',\n        prompt: promptKey ? p[promptKey] : ''\n    };\n};\n\nconst normalizedPrompts = (parsedData.image_prompts || []).map(normalize);\n\nreturn {\n    json: {\n        ...parsedData,\n        featured_prompt: (normalizedPrompts.find(p => p.type === 'featured') || {}).prompt,\n        inline_prompts: normalizedPrompts.filter(p => p.type === 'inline')\n    }\n};"
       },
       "id": "fae01491-8821-4da4-bc79-2d9367edb5e8",
       "name": "Parse AI Response",
