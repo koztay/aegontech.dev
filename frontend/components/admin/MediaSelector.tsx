@@ -15,7 +15,7 @@ export default function MediaSelector({ onSelect, onClose }: { onSelect: (path: 
     try {
       const res = await fetch(`/api/media/list?limit=64`);
       const json = await res.json();
-      setItems(json.items || []);
+      setItems(json.media || []);
     } catch (e) {
       console.error(e);
     } finally { setLoading(false) }
@@ -27,7 +27,7 @@ export default function MediaSelector({ onSelect, onClose }: { onSelect: (path: 
     try {
       const res = await fetch(`/api/media/list?q=${encodeURIComponent(q)}&limit=64`);
       const json = await res.json();
-      setItems(json.items || []);
+      setItems(json.media || []);
     } catch (e) { console.error(e) } finally { setLoading(false) }
   }
 

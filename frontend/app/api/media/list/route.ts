@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { query } from "@/lib/db/client";
 import { isAuthorized } from "@/lib/auth/api-auth";
+import { getPublicUrl } from "@/lib/storage/minio";
 
 export async function GET(request: Request) {
   try {
@@ -19,7 +20,11 @@ export async function GET(request: Request) {
     }
 
     // We can just return the rows directly since we configured public access
-    return NextResponse.json({ media: rows });
+    const normalized = rows.map((r: any) => ({
+      ...r,
+      url: r.url && !r.url.startsWith("http") ? getPublicUrl(r.url) : r.url,
+    }));
+    return NextResponse.json({ media: normalized });
   } catch (err: any) {
     console.error("media list error:", err);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
