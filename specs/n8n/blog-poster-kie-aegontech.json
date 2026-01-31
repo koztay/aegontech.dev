@@ -1,0 +1,852 @@
+{
+    "nodes": [
+        {
+            "parameters": {
+                "rule": {
+                    "interval": [
+                        {
+                            "triggerAtHour": 14
+                        }
+                    ]
+                }
+            },
+            "id": "33ef3e63-452e-4f03-8256-7c9c31042705",
+            "name": "Daily Schedule1",
+            "type": "n8n-nodes-base.scheduleTrigger",
+            "typeVersion": 1.1,
+            "position": [
+                -7248,
+                4192
+            ]
+        },
+        {
+            "parameters": {
+                "url": "https://aegontech.dev/api/blog/titles?limit=20",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "httpHeaderAuth",
+                "options": {}
+            },
+            "id": "f8a2c3d4-1234-5678-9abc-def012345678",
+            "name": "Fetch Recent Posts",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                -7024,
+                4192
+            ],
+            "credentials": {
+                "httpHeaderAuth": {
+                    "id": "4q4zxpvntZvPXRnF",
+                    "name": "Aegontech Blog Poster API Key"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "jsCode": "// Extract recent titles from the API response\nconst titlesData = $input.item.json.titles || [];\nconst recentTitles = titlesData.map(t => t.title).filter(Boolean);\n\n// Topic angles - customized for Ageontech's software development services\nconst topicAngles = [\n  {\n    angle: \"Legacy System Modernization Horror Stories\",\n    hook: \"the nightmare of maintaining 20-year-old codebases that nobody wants to touch\",\n    focus: \"how systematic modernization strategies save businesses from technical debt disasters\"\n  },\n  {\n    angle: \"The Hidden Cost of Off-the-Shelf Software\",\n    hook: \"when 'affordable' enterprise software costs more than custom development\",\n    focus: \"ROI analysis of custom vs packaged solutions for growing businesses\"\n  },\n  {\n    angle: \"Why Your Startup's MVP Failed (And How to Fix It)\",\n    hook: \"common technical mistakes that doom promising startups before launch\",\n    focus: \"lean MVP development strategies that actually validate business ideas\"\n  },\n  {\n    angle: \"The Cloud Migration Playbook Nobody Talks About\",\n    hook: \"real challenges enterprises face when moving from on-premise to cloud\",\n    focus: \"proven cloud migration patterns that minimize downtime and risk\"\n  },\n  {\n    angle: \"AI Integration: Beyond the Hype\",\n    hook: \"separating genuinely useful AI implementations from expensive gimmicks\",\n    focus: \"practical AI use cases that deliver measurable business value\"\n  },\n  {\n    angle: \"The Outsourcing vs In-House Development Dilemma\",\n    hook: \"when to build your own team vs partnering with development agencies\",\n    focus: \"strategic considerations for different business stages and budgets\"\n  },\n  {\n    angle: \"Mobile App Development in 2024: Native vs Cross-Platform\",\n    hook: \"the eternal debate with new players like Flutter and React Native\",\n    focus: \"choosing the right mobile strategy based on actual business requirements\"\n  },\n  {\n    angle: \"Scaling Web Applications: Lessons from High-Traffic Sites\",\n    hook: \"what happens when your viral moment crashes your servers\",\n    focus: \"architecture patterns for building scalable web applications from day one\"\n  },\n  {\n    angle: \"The Real Cost of Technical Debt\",\n    hook: \"how shortcuts today become roadblocks tomorrow\",\n    focus: \"strategic approaches to managing and reducing technical debt\"\n  },\n  {\n    angle: \"Digital Transformation Beyond Buzzwords\",\n    hook: \"what successful digital transformation actually looks like in practice\",\n    focus: \"measurable transformation outcomes and realistic timelines\"\n  },\n  {\n    angle: \"API-First Development Strategy\",\n    hook: \"why your next software project should start with the API\",\n    focus: \"building flexible, future-proof systems through API-first design\"\n  },\n  {\n    angle: \"The DevOps Implementation Journey\",\n    hook: \"moving from chaotic deployments to continuous delivery\",\n    focus: \"practical DevOps adoption strategies for teams of all sizes\"\n  },\n  {\n    angle: \"Security-First Software Development\",\n    hook: \"why security cannot be an afterthought in modern applications\",\n    focus: \"building security into the development lifecycle from the start\"\n  },\n  {\n    angle: \"Microservices: When to Use Them (And When Not To)\",\n    hook: \"the microservices architecture isn't always the answer\",\n    focus: \"choosing the right architecture for your specific needs\"\n  },\n  {\n    angle: \"The Future of Enterprise Software\",\n    hook: \"emerging trends reshaping how businesses build and use software\",\n    focus: \"preparing your technology strategy for the next decade\"\n  }\n];\n\n// Randomly select a topic\nconst randomIndex = Math.floor(Math.random() * topicAngles.length);\nconst selectedTopic = topicAngles[randomIndex];\n\n// Build the system prompt\nconst systemPrompt = `You are a Senior SEO Content Strategist for Ageontech LLC.\n\nThe Company: Ageontech LLC.\nWhat we do: We build high-performance web applications, mobile apps, and enterprise software solutions.\nTone: Professional, authoritative, technical yet accessible, innovative.\n\nThe Task: Write a compelling, SEO-optimized blog post for our tech blog.\nTopics: Custom software vs off-the-shelf, Scalable architecture, Modern tech stacks (React, Node, Python), AI integration in business, Mobile app dev trends, Cloud infrastructure.\n\nGoal: Establish Ageontech as a thought leader and attract potential B2B clients looking for development services.\n\nStructure:\nHook: Address a common business/tech challenge.\nThe Solution: How modern software solves it.\nAgeontech's Approach: Our expertise.\nCTA: Contact Ageontech for a consultation.\n\nFormatting:\nUse Markdown formatting (H2, H3, bolding for emphasis).\nKeep paragraphs short (2-3 sentences) for readability.\nInclude placeholders for images like [Image: Description of image] where appropriate.\n\nOutput strictly valid JSON.`;\n\n// Build the user prompt with titles to avoid and mandatory topic\nconst userPrompt = `Generate a blog post with a COMPLETELY NEW AND UNIQUE topic.\n\n**TITLES TO AVOID** (these have already been published - DO NOT use similar titles or topics):\n${JSON.stringify(recentTitles, null, 2)}\n\n**MANDATORY TOPIC ANGLE FOR THIS POST:**\n- Angle: ${selectedTopic.angle}\n- Hook to start with: ${selectedTopic.hook}\n- Main focus: ${selectedTopic.focus}\n\nYou MUST write about the above angle. Do not deviate to a different topic.\n\n**REQUIREMENTS:**\n1. **Topic**: Your title and content MUST be about the specified angle above. The title MUST be different from all the titles listed above.\n2. **Format**: Return the result as a VALID JSON object (and ONLY JSON) with the following schema:\n    \\`\\`\\`json\n    {\n      \"title\": \"Catchy Title\",\n      \"slug\": \"catchy-title-slug\",\n      \"excerpt\": \"Short 2-sentence summary\",\n      \"seo_title\": \"SEO Optimized Title\",\n      \"seo_description\": \"meta description\",\n      \"seo_keywords\": [\"keyword1\", \"keyword2\"],\n      \"content\": \"Markdown content...\",\n      \"image_prompts\": [\n          {\"type\": \"featured\", \"prompt\": \"Detailed prompt for main cover image\"},\n          {\"type\": \"inline\", \"prompt\": \"Detailed prompt for inline image 1\"},\n          {\"type\": \"inline\", \"prompt\": \"Detailed prompt for inline image 2\"}\n      ]\n    }\n    \\`\\`\\`\n3. **Content Body**: \n    -   Use proper Markdown headings (##, ###).\n    -   Length: At least 800 words.\n    -   **Important**: Where you want the inline images to appear, insert the placeholder text: \\`<<IMAGE_PLACEHOLDER_1>>\\`, \\`<<IMAGE_PLACEHOLDER_2>>\\`, etc., corresponding to the order in the \\`image_prompts\\` array (skipping the featured one).\n    -   Ensure there are at least 2 inline images.\n    -   **CRITICAL**: The number of inline items in \\`image_prompts\\` MUST MATCH EXACTLY the number of placeholders you inserted in the specific content. If you use 3 placeholders, provide 3 inline prompts.\n4. **Image Prompts**: Each image prompt MUST describe a REAL PHOTOGRAPH. Use: 'Professional stock photo of...', 'Real photograph showing...', 'Authentic candid photo of...'. Describe real people, real offices, real devices. NO illustrations, NO digital art, NO 3D renders, NO cartoons, NO anime style.\n5. **Image Negative Constraints**: NEVER include any religious references, symbols, attire, or iconography in the image prompts. Avoid hijabs, crosses, religious buildings, prayer imagery, or any cultural/religious clothing. Keep images neutral, modern, secular, and globally inclusive. Focus on diverse professionals in contemporary business casual or smart casual attire.`;\n\nreturn [{\n  json: {\n    recentTitles: recentTitles,\n    selectedAngle: selectedTopic.angle,\n    selectedHook: selectedTopic.hook,\n    selectedFocus: selectedTopic.focus,\n    system_prompt: systemPrompt,\n    user_prompt: userPrompt,\n    timestamp: Date.now()\n  }\n}];"
+            },
+            "id": "a1b2c3d4-5678-90ab-cdef-123456789abc",
+            "name": "Prepare Topic Context",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                -6912,
+                4192
+            ]
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "https://api.openai.com/v1/chat/completions",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "httpHeaderAuth",
+                "sendBody": true,
+                "specifyBody": "json",
+                "jsonBody": "={{ { \"model\": \"gpt-4-turbo\", \"response_format\": { \"type\": \"json_object\" }, \"messages\": [ { \"role\": \"system\", \"content\": $json.system_prompt }, { \"role\": \"user\", \"content\": $json.user_prompt } ] } }}",
+                "options": {}
+            },
+            "id": "823a3f9e-dc7e-4078-8597-f70ccc6a5469",
+            "name": "AI Content Agent1",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                -6800,
+                4192
+            ],
+            "credentials": {
+                "httpHeaderAuth": {
+                    "id": "1UPsIUoaAyTpIRuS",
+                    "name": "Open AI"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "jsCode": "const aiResponse = $input.item.json.choices[0].message.content;\n\n// JSON repair function for common LLM mistakes\nfunction repairJson(str) {\n    let s = str.trim();\n    // Remove markdown code blocks\n    s = s.replace(/^```json\\s*\\n?|\\n?```$/g, '');\n    // Fix common bracket issues: }] -> }] and ]} -> }]\n    // Count brackets to detect imbalance\n    let opens = { '{': 0, '[': 0 };\n    let closes = { '}': 0, ']': 0 };\n    for (const c of s) {\n        if (c === '{') opens['{']++;\n        if (c === '[') opens['[']++;\n        if (c === '}') closes['}']++;\n        if (c === ']') closes[']']++;\n    }\n    // Add missing closing brackets\n    while (closes['}'] < opens['{']) { s += '}'; closes['}']++; }\n    while (closes[']'] < opens['[']) { s += ']'; closes[']']++; }\n    // Fix pattern: \\\"...\\\"\\n    ] where } is missing before ]\n    s = s.replace(/(\\\"[^\\\"]*\\\")\\s*\\n?\\s*\\]/g, (match, p1) => {\n        // Check if we need a } before ]\n        const beforeMatch = s.substring(0, s.indexOf(match));\n        const lastOpen = Math.max(beforeMatch.lastIndexOf('{'), beforeMatch.lastIndexOf('['));\n        if (beforeMatch[lastOpen] === '{') {\n            return p1 + '}]';\n        }\n        return match;\n    });\n    return s;\n}\n\nlet parsedData;\ntry {\n    parsedData = JSON.parse(aiResponse);\n} catch (e) {\n    try {\n        const repaired = repairJson(aiResponse);\n        parsedData = JSON.parse(repaired);\n    } catch (e2) {\n        throw new Error('JSON parse failed: ' + e.message + ' | Repaired attempt: ' + e2.message);\n    }\n}\n\n// Generate unique slug with timestamp to prevent duplicates\nconst uniqueSlug = parsedData.slug + '-' + Date.now().toString(36);\n\n// Helper to normalize prompt objects\nconst normalize = (p) => {\n    if (!p || typeof p !== 'object') return { type: '', prompt: '' };\n    const typeKey = Object.keys(p).find(k => k.toLowerCase() === 'type');\n    const promptKey = Object.keys(p).find(k => k.toLowerCase() === 'prompt');\n    return {\n        type: typeKey ? String(p[typeKey]).trim().toLowerCase() : '',\n        prompt: promptKey ? p[promptKey] : ''\n    };\n};\n\nconst normalizedPrompts = (parsedData.image_prompts || []).map(normalize);\n\nreturn {\n    json: {\n        ...parsedData,\n        slug: uniqueSlug,\n        featured_prompt: (normalizedPrompts.find(p => p.type === 'featured') || {}).prompt,\n        inline_prompts: normalizedPrompts.filter(p => p.type === 'inline')\n    }\n};"
+            },
+            "id": "a5781553-41e0-46d7-b855-ecb990dd34cb",
+            "name": "Parse AI Response1",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                -6576,
+                4192
+            ]
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "https://aegontech.dev/api/media/upload",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "httpHeaderAuth",
+                "sendBody": true,
+                "contentType": "multipart-form-data",
+                "bodyParameters": {
+                    "parameters": [
+                        {
+                            "parameterType": "formBinaryData",
+                            "name": "file",
+                            "inputDataFieldName": "file"
+                        },
+                        {
+                            "name": "altText",
+                            "value": "Featured Image"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "id": "a7ade708-0df8-411e-b1be-559bc543d882",
+            "name": "Upload Featured Image1",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                -3888,
+                4024
+            ],
+            "credentials": {
+                "httpHeaderAuth": {
+                    "id": "4q4zxpvntZvPXRnF",
+                    "name": "Aegontech Blog Poster API Key"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "https://aegontech.dev/api/media/upload",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "httpHeaderAuth",
+                "sendBody": true,
+                "contentType": "multipart-form-data",
+                "bodyParameters": {
+                    "parameters": [
+                        {
+                            "parameterType": "formBinaryData",
+                            "name": "file",
+                            "inputDataFieldName": "file"
+                        },
+                        {
+                            "name": "altText",
+                            "value": "Inline Blog Image"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "id": "778f1c73-982f-4cf4-bac1-8c0b973c87aa",
+            "name": "Upload Inline Image1",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                -4112,
+                4336
+            ],
+            "credentials": {
+                "httpHeaderAuth": {
+                    "id": "4q4zxpvntZvPXRnF",
+                    "name": "Aegontech Blog Poster API Key"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "jsCode": "const allItems = $input.all();\nconst urls = allItems.map(item => item.json.media.url);\nreturn [{ json: { urls } }];"
+            },
+            "id": "4bc44ec0-3417-4e5b-b7b2-f245331976a9",
+            "name": "Aggregate Images1",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                -3888,
+                4336
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "const contentData = $(\"Parse AI Response1\").first().json;\nconst featuredImg = $(\"Upload Featured Image1\").first().json.media.url;\n\n// Get inline image URLs from the Aggregate Images node\nconst aggregateData = $(\"Aggregate Images1\").first().json;\nconst inlineImgs = aggregateData.urls || [];\n\nlet finalContent = contentData.content;\n\ninlineImgs.forEach((url, index) => {\n    const placeholder = `<<IMAGE_PLACEHOLDER_${index + 1}>>`;\n    const markdownImage = `![Blog Image](${url})`;\n    finalContent = finalContent.replace(placeholder, markdownImage);\n});\n\n// Cleanup unused placeholders\nfinalContent = finalContent.replace(/<<IMAGE_PLACEHOLDER_\\d+>>/g, '');\n\nreturn [{\n    json: {\n        title: contentData.title,\n        slug: contentData.slug,\n        excerpt: contentData.excerpt,\n        featuredImage: featuredImg,\n        seo_title: contentData.seo_title,\n        seo_description: contentData.seo_description,\n        seo_keywords: contentData.seo_keywords,\n        content: finalContent,\n        is_published: true\n    }\n}];"
+            },
+            "id": "2a83bb44-9e73-440b-8614-c7ec4f315e80",
+            "name": "Prepare Payload1",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                -3440,
+                4192
+            ]
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "https://aegontech.dev/api/blog/publish",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "httpHeaderAuth",
+                "sendBody": true,
+                "specifyBody": "json",
+                "jsonBody": "={{ $json }}",
+                "options": {}
+            },
+            "id": "d62f5072-ecb6-48d8-82be-f430fc2b8a1c",
+            "name": "Post to Ageontech",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                -3216,
+                4192
+            ],
+            "credentials": {
+                "httpHeaderAuth": {
+                    "id": "4q4zxpvntZvPXRnF",
+                    "name": "Aegontech Blog Poster API Key"
+                }
+            }
+        },
+        {
+            "parameters": {},
+            "type": "n8n-nodes-base.merge",
+            "typeVersion": 3.2,
+            "position": [
+                -3664,
+                4192
+            ],
+            "id": "923aaebe-9ea1-4651-8094-ef6993d7be55",
+            "name": "Merge1"
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "https://api.kie.ai/api/v1/jobs/createTask",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "httpHeaderAuth",
+                "sendBody": true,
+                "specifyBody": "json",
+                "jsonBody": "={{ { \"model\": \"z-image\", \"input\": { \"prompt\": \"Photorealistic professional photograph, high-resolution, natural lighting, real-world scene: \" + $json.featured_prompt, \"aspect_ratio\": \"16:9\" } } }}",
+                "options": {}
+            },
+            "id": "895da5f0-e54f-45b0-bca4-ed26c8724cb1",
+            "name": "Kie.ai Submit (Featured)",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                -5232,
+                4024
+            ],
+            "credentials": {
+                "httpHeaderAuth": {
+                    "id": "hdTAaUzSEtcbWOsV",
+                    "name": "Kie.ai API Key"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "amount": 5,
+                "unit": "seconds"
+            },
+            "id": "12ded079-66a1-42e2-97e0-51769e746fdb",
+            "name": "Wait 5s (Featured)",
+            "type": "n8n-nodes-base.wait",
+            "typeVersion": 1,
+            "position": [
+                -5008,
+                4024
+            ],
+            "webhookId": "0351a867-efd9-4fe3-8a65-42510d562fa7"
+        },
+        {
+            "parameters": {
+                "url": "https://api.kie.ai/api/v1/jobs/recordInfo",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "httpHeaderAuth",
+                "sendQuery": true,
+                "queryParameters": {
+                    "parameters": [
+                        {
+                            "name": "taskId",
+                            "value": "={{ $json.data.taskId }}"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "id": "1576428c-2c63-4a12-973c-689f67c0f50b",
+            "name": "Check Status (Featured)",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                -4784,
+                3952
+            ],
+            "credentials": {
+                "httpHeaderAuth": {
+                    "id": "hdTAaUzSEtcbWOsV",
+                    "name": "Kie.ai API Key"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "string": [
+                        {
+                            "value1": "={{ $json.data.state }}",
+                            "value2": "success"
+                        }
+                    ]
+                }
+            },
+            "id": "02b5fb83-55ac-4998-847d-dc92e986e833",
+            "name": "Is Success? (Featured)",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 1,
+            "position": [
+                -4560,
+                4024
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "const resultJson = JSON.parse($input.item.json.data.resultJson);\nconst url = resultJson.resultUrls[0];\nreturn [{ json: { url } }];"
+            },
+            "id": "db215e29-2220-4fe6-8dea-0aef12b6d36a",
+            "name": "Parse URL (Featured)",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                -4336,
+                4024
+            ]
+        },
+        {
+            "parameters": {
+                "method": "POST",
+                "url": "https://api.kie.ai/api/v1/jobs/createTask",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "httpHeaderAuth",
+                "sendBody": true,
+                "specifyBody": "json",
+                "jsonBody": "={{ { \"model\": \"z-image\", \"input\": { \"prompt\": \"Photorealistic professional photograph, high-resolution, natural lighting, real-world scene: \" + $json.prompt, \"aspect_ratio\": \"1:1\" } } }}",
+                "options": {}
+            },
+            "id": "dbb0171e-1348-40a7-b74b-6b56b9f7302d",
+            "name": "Kie.ai Submit (Inline)",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                -6128,
+                4336
+            ],
+            "credentials": {
+                "httpHeaderAuth": {
+                    "id": "hdTAaUzSEtcbWOsV",
+                    "name": "Kie.ai API Key"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "jsCode": "// Collect all taskIds from Kie.ai Submit responses into a single item\nconst allItems = $input.all();\nconst taskIds = allItems.map(item => item.json.data.taskId);\n\n// Reset static data for fresh run\nconst staticData = $getWorkflowStaticData('global');\nstaticData.collectedUrls = [];\n\nreturn [{ json: { taskIds, collectedUrls: [] } }];"
+            },
+            "id": "3362b6db-8e81-4bfe-969a-42b007690157",
+            "name": "Collect All TaskIds",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                -5904,
+                4336
+            ]
+        },
+        {
+            "parameters": {
+                "amount": 5,
+                "unit": "seconds"
+            },
+            "id": "87ecad27-a688-4577-ac75-c837165f4f3f",
+            "name": "Wait 5s (Inline)",
+            "type": "n8n-nodes-base.wait",
+            "typeVersion": 1,
+            "position": [
+                -5680,
+                4336
+            ],
+            "webhookId": "7e279f2e-a43b-4e0e-aae8-c5b3dd11d40f"
+        },
+        {
+            "parameters": {
+                "jsCode": "// Prepare items for status check - split taskIds back into individual items\nconst { taskIds, collectedUrls } = $input.first().json;\n\n// Store collectedUrls in static data (HTTP Request will overwrite input data)\nconst staticData = $getWorkflowStaticData('global');\nstaticData.collectedUrls = collectedUrls || [];\n\nreturn taskIds.map(taskId => ({ json: { taskId } }));"
+            },
+            "id": "d6839258-c67f-437a-9275-b9c4cd10927e",
+            "name": "Prepare Poll Items",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                -5456,
+                4264
+            ]
+        },
+        {
+            "parameters": {
+                "url": "https://api.kie.ai/api/v1/jobs/recordInfo",
+                "authentication": "genericCredentialType",
+                "genericAuthType": "httpHeaderAuth",
+                "sendQuery": true,
+                "queryParameters": {
+                    "parameters": [
+                        {
+                            "name": "taskId",
+                            "value": "={{ $json.taskId }}"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "id": "16f14ae9-95ac-45e4-afc7-98a2c5783bec",
+            "name": "Check Status (Inline)",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                -5232,
+                4264
+            ],
+            "credentials": {
+                "httpHeaderAuth": {
+                    "id": "hdTAaUzSEtcbWOsV",
+                    "name": "Kie.ai API Key"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "jsCode": "// Aggregate all status check results and determine completion\nconst allItems = $input.all();\n\n// Get collectedUrls from static data (preserved across HTTP request)\nconst staticData = $getWorkflowStaticData('global');\nconst collectedUrls = staticData.collectedUrls || [];\n\nconst newUrls = [];\nconst pendingTaskIds = [];\n\nfor (const item of allItems) {\n  const state = item.json.data?.state;\n  // taskId is in the Kie.ai response, not our input (HTTP overwrites input)\n  const taskId = item.json.data?.taskId;\n  \n  if (state === 'success') {\n    try {\n      const resultJson = JSON.parse(item.json.data.resultJson);\n      newUrls.push(resultJson.resultUrls[0]);\n    } catch (e) {\n      if (taskId) pendingTaskIds.push(taskId);\n    }\n  } else if (taskId) {\n    pendingTaskIds.push(taskId);\n  }\n}\n\nconst allUrls = [...collectedUrls, ...newUrls];\nconst allComplete = pendingTaskIds.length === 0;\n\n// Update static data for next iteration\nstaticData.collectedUrls = allUrls;\n\nreturn [{\n  json: {\n    allComplete,\n    urls: allUrls,\n    taskIds: pendingTaskIds,\n    collectedUrls: allUrls\n  }\n}];"
+            },
+            "id": "059762c1-be7f-4301-8bba-42ca4780657f",
+            "name": "Evaluate All Results",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                -5008,
+                4264
+            ]
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "boolean": [
+                        {
+                            "value1": "={{ $json.allComplete }}",
+                            "value2": true
+                        }
+                    ]
+                }
+            },
+            "id": "998474d6-ed85-464b-81fa-01fbbcda543b",
+            "name": "Is All Complete?",
+            "type": "n8n-nodes-base.if",
+            "typeVersion": 1,
+            "position": [
+                -4784,
+                4336
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "// Extract URLs and split into individual items for download\nconst urls = $input.first().json.urls;\nreturn urls.map(url => ({ json: { url } }));"
+            },
+            "id": "0facc5ec-019e-4d96-8f6e-3d393199ef05",
+            "name": "Extract URLs",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                -4560,
+                4336
+            ]
+        },
+        {
+            "parameters": {
+                "url": "={{ $json.url }}",
+                "options": {
+                    "response": {
+                        "response": {
+                            "responseFormat": "file",
+                            "outputPropertyName": "file"
+                        }
+                    }
+                }
+            },
+            "id": "5174c32e-91e0-4fad-a2f6-d54865581344",
+            "name": "Download Featured Image",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                -4112,
+                4024
+            ]
+        },
+        {
+            "parameters": {
+                "fieldToSplitOut": "inline_prompts",
+                "options": {}
+            },
+            "id": "b3188114-a0ab-42d2-9b96-171243c90f35",
+            "name": "Split Inline Images",
+            "type": "n8n-nodes-base.itemLists",
+            "typeVersion": 3,
+            "position": [
+                -6352,
+                4336
+            ]
+        },
+        {
+            "parameters": {
+                "url": "={{ $json.url }}",
+                "options": {
+                    "response": {
+                        "response": {
+                            "responseFormat": "file",
+                            "outputPropertyName": "file"
+                        }
+                    }
+                }
+            },
+            "id": "692ab0f8-1d36-4fc2-9f8f-e5801208d231",
+            "name": "Download Inline Image",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 4.1,
+            "position": [
+                -4336,
+                4336
+            ]
+        }
+    ],
+    "connections": {
+        "Daily Schedule1": {
+            "main": [
+                [
+                    {
+                        "node": "Fetch Recent Posts",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Fetch Recent Posts": {
+            "main": [
+                [
+                    {
+                        "node": "Prepare Topic Context",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Prepare Topic Context": {
+            "main": [
+                [
+                    {
+                        "node": "AI Content Agent1",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "AI Content Agent1": {
+            "main": [
+                [
+                    {
+                        "node": "Parse AI Response1",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Parse AI Response1": {
+            "main": [
+                [
+                    {
+                        "node": "Kie.ai Submit (Featured)",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Split Inline Images",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Upload Featured Image1": {
+            "main": [
+                [
+                    {
+                        "node": "Merge1",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Upload Inline Image1": {
+            "main": [
+                [
+                    {
+                        "node": "Aggregate Images1",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Aggregate Images1": {
+            "main": [
+                [
+                    {
+                        "node": "Merge1",
+                        "type": "main",
+                        "index": 1
+                    }
+                ]
+            ]
+        },
+        "Prepare Payload1": {
+            "main": [
+                [
+                    {
+                        "node": "Post to Ageontech",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Merge1": {
+            "main": [
+                [
+                    {
+                        "node": "Prepare Payload1",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Kie.ai Submit (Featured)": {
+            "main": [
+                [
+                    {
+                        "node": "Wait 5s (Featured)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Wait 5s (Featured)": {
+            "main": [
+                [
+                    {
+                        "node": "Check Status (Featured)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Check Status (Featured)": {
+            "main": [
+                [
+                    {
+                        "node": "Is Success? (Featured)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Is Success? (Featured)": {
+            "main": [
+                [
+                    {
+                        "node": "Parse URL (Featured)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Wait 5s (Featured)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Parse URL (Featured)": {
+            "main": [
+                [
+                    {
+                        "node": "Download Featured Image",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Kie.ai Submit (Inline)": {
+            "main": [
+                [
+                    {
+                        "node": "Collect All TaskIds",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Collect All TaskIds": {
+            "main": [
+                [
+                    {
+                        "node": "Wait 5s (Inline)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Wait 5s (Inline)": {
+            "main": [
+                [
+                    {
+                        "node": "Prepare Poll Items",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Prepare Poll Items": {
+            "main": [
+                [
+                    {
+                        "node": "Check Status (Inline)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Check Status (Inline)": {
+            "main": [
+                [
+                    {
+                        "node": "Evaluate All Results",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Evaluate All Results": {
+            "main": [
+                [
+                    {
+                        "node": "Is All Complete?",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Is All Complete?": {
+            "main": [
+                [
+                    {
+                        "node": "Extract URLs",
+                        "type": "main",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "node": "Wait 5s (Inline)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Extract URLs": {
+            "main": [
+                [
+                    {
+                        "node": "Download Inline Image",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Download Featured Image": {
+            "main": [
+                [
+                    {
+                        "node": "Upload Featured Image1",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Split Inline Images": {
+            "main": [
+                [
+                    {
+                        "node": "Kie.ai Submit (Inline)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Download Inline Image": {
+            "main": [
+                [
+                    {
+                        "node": "Upload Inline Image1",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "pinData": {},
+    "meta": {
+        "instanceId": "495481f5f4ddde18c82827077397d5fb058466368fd2c3275b9a5cd849415675"
+    }
+}
