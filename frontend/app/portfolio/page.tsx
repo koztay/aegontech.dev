@@ -5,6 +5,8 @@ import { buildPageMeta, buildWebsiteSchema, buildBreadcrumbSchema } from "@/lib/
 import type { Metadata } from "next";
 import { getAllPortfolioItems } from "@/lib/data/portfolio";
 
+export const revalidate = 60;
+
 export const metadata: Metadata = buildPageMeta({
   title: "Portfolio - Aegontech.dev",
   description: "Explore our portfolio of successful projects and case studies",

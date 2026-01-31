@@ -19,6 +19,8 @@ import type { Metadata } from "next";
 import { getServices } from "@/lib/data/landing";
 import { getAllPortfolioItems } from "@/lib/data/portfolio";
 
+export const revalidate = 60;
+
 export const metadata: Metadata = buildPageMeta({
   title: "Aegontech.dev - Modern SaaS and Mobile Product Studio",
   description: "We build innovative SaaS products and mobile applications that drive business growth",
@@ -29,7 +31,7 @@ export const metadata: Metadata = buildPageMeta({
 export default async function MarketingPage() {
   const services = await getServices();
   const portfolioData = await getAllPortfolioItems();
-  
+
   const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://aegontech.dev";
 
   // Map PortfolioItem to FeaturedPortfolioItem
