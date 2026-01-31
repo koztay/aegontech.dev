@@ -14,6 +14,7 @@ export default function EditPortfolioItem() {
   const [item, setItem] = useState<any>(null);
   const [showSelector, setShowSelector] = useState(false);
   const [screenshotUrl, setScreenshotUrl] = useState<string>("");
+  const [previewUrl, setPreviewUrl] = useState<string>("");
 
   useEffect(() => {
     fetch(`/api/admin/portfolio/${params.id}`)
@@ -23,7 +24,10 @@ export default function EditPortfolioItem() {
   }, [params.id]);
 
   useEffect(() => {
-    if (item) setScreenshotUrl(item.screenshot || "");
+    if (item) {
+      setScreenshotUrl(item.screenshot || "");
+      setPreviewUrl(item.screenshot_url || item.screenshot || "");
+    }
   }, [item]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -151,12 +155,12 @@ export default function EditPortfolioItem() {
                 name="screenshot"
                 required
                 value={screenshotUrl}
-                onChange={(e)=>setScreenshotUrl(String(e.target.value))}
+                onChange={(e) => setScreenshotUrl(String(e.target.value))}
                 className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <div className="flex flex-col items-center gap-2">
-                <button type="button" className="px-3 py-1 border rounded" onClick={()=>setShowSelector(true)}>Choose</button>
-                {screenshotUrl ? <img src={screenshotUrl} alt="screenshot" className="w-24 h-16 object-cover rounded border" /> : null}
+                <button type="button" className="px-3 py-1 border rounded" onClick={() => setShowSelector(true)}>Choose</button>
+                {previewUrl ? <img src={previewUrl} alt="screenshot" className="w-24 h-16 object-cover rounded border" /> : null}
               </div>
             </div>
           </div>
@@ -224,7 +228,7 @@ export default function EditPortfolioItem() {
         </form>
       </Card>
       {showSelector ? (
-        <MediaSelector onSelect={(url)=>{setScreenshotUrl(url); setShowSelector(false)}} onClose={()=>setShowSelector(false)} />
+        <MediaSelector onSelect={(path, url) => { setScreenshotUrl(path); setPreviewUrl(url); setShowSelector(false) }} onClose={() => setShowSelector(false)} />
       ) : null}
     </div>
   );

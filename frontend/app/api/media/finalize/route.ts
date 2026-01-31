@@ -29,7 +29,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Object not found in storage" }, { status: 404 });
     }
 
-    const mime = stat.metaData?.["content-type"] || stat.mimeType || null;
+    const mime = stat.metaData?.["content-type"] || (stat as any).mimeType || null;
     const size = stat.size || null;
     const checksum = stat.etag || null;
     const storagePath = objectKey;

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getDbPool } from "@/lib/db/client";
-import { removeObject } from "@/lib/storage/minio";
+import { removeObject, getPublicUrl } from "@/lib/storage/minio";
 import { logAudit } from "@/lib/observability/audit";
 
 export async function GET(
@@ -22,7 +22,15 @@ export async function GET(
       );
     }
 
-    return NextResponse.json(result.rows[0]);
+    const item = result.rows[0];
+    const screenshotUrl = item.screenshot && !item.screenshot.startsWith("http")
+      ? getPublicUrl(item.screenshot)
+      : item.screenshot;
+
+    return NextResponse.json({
+      ...item,
+      screenshot_url: screenshotUrl,
+    });
   } catch (error) {
     console.error("Error fetching portfolio item:", error);
     return NextResponse.json(

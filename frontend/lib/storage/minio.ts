@@ -35,39 +35,19 @@ const client = new MinioClient({
 });
 
 export async function presignPut(objectName: string, expiresSeconds = 300): Promise<string> {
-  return new Promise((resolve, reject) => {
-    client.presignedPutObject(bucket, objectName, expiresSeconds, (err: any, url: string) => {
-      if (err) return reject(err);
-      resolve(url);
-    });
-  });
+  return await client.presignedPutObject(bucket, objectName, expiresSeconds);
 }
 
 export async function presignGet(objectName: string, expiresSeconds = 300): Promise<string> {
-  return new Promise((resolve, reject) => {
-    client.presignedGetObject(bucket, objectName, expiresSeconds, (err: any, url: string) => {
-      if (err) return reject(err);
-      resolve(url);
-    });
-  });
+  return await client.presignedGetObject(bucket, objectName, expiresSeconds);
 }
 
 export async function statObject(objectName: string) {
-  return new Promise<any>((resolve, reject) => {
-    (client as any).statObject(bucket, objectName, (err: any, stat: any) => {
-      if (err) return reject(err);
-      resolve(stat);
-    });
-  });
+  return await client.statObject(bucket, objectName);
 }
 
 export async function removeObject(objectName: string) {
-  return new Promise<void>((resolve, reject) => {
-    client.removeObject(bucket, objectName, (err: any) => {
-      if (err) return reject(err);
-      resolve();
-    });
-  });
+  await client.removeObject(bucket, objectName);
 }
 
 export function getPublicUrl(objectName: string) {
@@ -94,38 +74,24 @@ export async function setPublicPolicy() {
     ],
   };
 
-  return new Promise<void>((resolve, reject) => {
-    client.setBucketPolicy(bucket, JSON.stringify(policy), (err: any) => {
-      // Ignore if error is just about existing policy (optional refinement), 
-      // but usually we want to overwrite to ensure it's public.
-      if (err) {
-        console.warn("Failed to set public bucket policy:", err);
-        // Don't reject, just warn, so we don't block app startup if user lacks permissions
-        return resolve();
-      }
-      resolve();
-    });
-  });
+  try {
+    await client.setBucketPolicy(bucket, JSON.stringify(policy));
+  } catch (err) {
+    console.warn("Failed to set public bucket policy:", err);
+    // Don't reject, just warn
+  }
 }
 
 export async function ensureBucketExists() {
-  return new Promise<void>((resolve, reject) => {
-    (client as any).bucketExists(bucket, (err: any, exists: boolean) => {
-      if (err) return reject(err);
-
-      const finish = async () => {
-        await setPublicPolicy();
-        resolve();
-      };
-
-      if (exists) return finish();
-
-      (client as any).makeBucket(bucket, "us-east-1", (err2: any) => {
-        if (err2) return reject(err2);
-        finish();
-      });
-    });
-  });
+  try {
+    const exists = await client.bucketExists(bucket);
+    if (!exists) {
+      await client.makeBucket(bucket, "us-east-1");
+    }
+    await setPublicPolicy();
+  } catch (err) {
+    throw err;
+  }
 }
 
 export default client;
