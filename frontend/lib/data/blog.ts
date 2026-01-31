@@ -77,6 +77,24 @@ export async function getBlogIndex(): Promise<BlogPost[]> {
   return [SAMPLE_POST];
 }
 
+export async function getAllBlogSlugs(): Promise<{ slug: string; publishedAt: string }[]> {
+  try {
+    const rows = await query<any>(
+      "SELECT slug, published_at FROM blog_posts WHERE status = 'published' ORDER BY published_at DESC"
+    );
+
+    if (rows.length > 0) {
+      return rows.map((row) => ({
+        slug: row.slug,
+        publishedAt: row.published_at,
+      }));
+    }
+  } catch (err) {
+    console.warn("Blog slugs fetch failed", err);
+  }
+  return [];
+}
+
 export function blogUrl(slug: string) {
   const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://aegontech.dev";
   return `${SITE_URL}/blog/${slug}`;

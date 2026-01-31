@@ -1,7 +1,9 @@
 import { MetadataRoute } from "next";
-import { getBlogIndex } from "@/lib/data/blog";
+import { getAllBlogSlugs, getBlogIndex } from "@/lib/data/blog";
 import { getAllPortfolioItems } from "@/lib/data/portfolio";
 import type { PortfolioItem } from "@/lib/types";
+
+export const revalidate = 60;
 
 /**
  * Dynamic sitemap generator for Next.js 15 App Router
@@ -38,7 +40,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Dynamic blog posts
   let blogPosts: MetadataRoute.Sitemap = [];
   try {
-    const posts = await getBlogIndex();
+    const posts = await getAllBlogSlugs();
     blogPosts = posts.map((post) => ({
       url: `${siteUrl}/blog/${post.slug}`,
       lastModified: new Date(post.publishedAt),
