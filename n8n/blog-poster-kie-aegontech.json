@@ -1,0 +1,877 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 15,
+              "triggerAtMinute": 30
+            }
+          ]
+        }
+      },
+      "id": "43452465-97b6-4e33-9027-ed76c4a4b7dc",
+      "name": "Daily Schedule1",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -3232,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://aegontech.dev/api/blog/titles?limit=20",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "id": "d54c1bc9-a563-41e6-8873-7d341a392e27",
+      "name": "Fetch Recent Posts",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        -3008,
+        192
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "4q4zxpvntZvPXRnF",
+          "name": "Aegontech Blog Poster API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract recent titles from the API response\nconst titlesData = $input.item.json.titles || [];\nconst recentTitles = titlesData.map(t => t.title).filter(Boolean);\n\n// Topic angles - customized for AEGONTECH LLC's software development services\nconst topicAngles = [\n  {\n    angle: \"Legacy System Modernization Horror Stories\",\n    hook: \"the nightmare of maintaining 20-year-old codebases that nobody wants to touch\",\n    focus: \"how systematic modernization strategies save businesses from technical debt disasters\"\n  },\n  {\n    angle: \"The Hidden Cost of Off-the-Shelf Software\",\n    hook: \"when 'affordable' enterprise software costs more than custom development\",\n    focus: \"ROI analysis of custom vs packaged solutions for growing businesses\"\n  },\n  {\n    angle: \"Why Your Startup's MVP Failed (And How to Fix It)\",\n    hook: \"common technical mistakes that doom promising startups before launch\",\n    focus: \"lean MVP development strategies that actually validate business ideas\"\n  },\n  {\n    angle: \"The Cloud Migration Playbook Nobody Talks About\",\n    hook: \"real challenges enterprises face when moving from on-premise to cloud\",\n    focus: \"proven cloud migration patterns that minimize downtime and risk\"\n  },\n  {\n    angle: \"AI Integration: Beyond the Hype\",\n    hook: \"separating genuinely useful AI implementations from expensive gimmicks\",\n    focus: \"practical AI use cases that deliver measurable business value\"\n  },\n  {\n    angle: \"The Outsourcing vs In-House Development Dilemma\",\n    hook: \"when to build your own team vs partnering with development agencies\",\n    focus: \"strategic considerations for different business stages and budgets\"\n  },\n  {\n    angle: \"Mobile App Development: Native vs Cross-Platform\",\n    hook: \"the eternal debate with new players like Flutter and React Native\",\n    focus: \"choosing the right mobile strategy based on actual business requirements\"\n  },\n  {\n    angle: \"Scaling Web Applications: Lessons from High-Traffic Sites\",\n    hook: \"what happens when your viral moment crashes your servers\",\n    focus: \"architecture patterns for building scalable web applications from day one\"\n  },\n  {\n    angle: \"The Real Cost of Technical Debt\",\n    hook: \"how shortcuts today become roadblocks tomorrow\",\n    focus: \"strategic approaches to managing and reducing technical debt\"\n  },\n  {\n    angle: \"Digital Transformation Beyond Buzzwords\",\n    hook: \"what successful digital transformation actually looks like in practice\",\n    focus: \"measurable transformation outcomes and realistic timelines\"\n  },\n  {\n    angle: \"API-First Development Strategy\",\n    hook: \"why your next software project should start with the API\",\n    focus: \"building flexible, future-proof systems through API-first design\"\n  },\n  {\n    angle: \"The DevOps Implementation Journey\",\n    hook: \"moving from chaotic deployments to continuous delivery\",\n    focus: \"practical DevOps adoption strategies for teams of all sizes\"\n  },\n  {\n    angle: \"Security-First Software Development\",\n    hook: \"why security cannot be an afterthought in modern applications\",\n    focus: \"building security into the development lifecycle from the start\"\n  },\n  {\n    angle: \"Microservices: When to Use Them (And When Not To)\",\n    hook: \"the microservices architecture isn't always the answer\",\n    focus: \"choosing the right architecture for your specific needs\"\n  },\n  {\n    angle: \"The Future of Enterprise Software\",\n    hook: \"emerging trends reshaping how businesses build and use software\",\n    focus: \"preparing your technology strategy for the next decade\"\n  }\n];\n\nconst randomIndex = Math.floor(Math.random() * topicAngles.length);\nconst selectedTopic = topicAngles[randomIndex];\n\nreturn [{\n  json: {\n    recentTitles: recentTitles,\n    selectedAngle: selectedTopic.angle,\n    selectedHook: selectedTopic.hook,\n    selectedFocus: selectedTopic.focus,\n    timestamp: Date.now()\n  }\n}];"
+      },
+      "id": "52db4041-89ef-466a-996b-d5d6b5f24daf",
+      "name": "Prepare Topic Context",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2784,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"model\": \"gpt-4-turbo\", \"response_format\": { \"type\": \"json_object\" }, \"messages\": [ { \"role\": \"system\", \"content\": $json.system_prompt }, { \"role\": \"user\", \"content\": $json.user_prompt } ] } }}",
+        "options": {}
+      },
+      "id": "15c44308-fb36-432e-a378-d3ad4aa3f790",
+      "name": "AI Content Agent1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        -2560,
+        192
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "1UPsIUoaAyTpIRuS",
+          "name": "Open AI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const aiResponse = $input.item.json.choices[0].message.content;\n\n// JSON repair function for common LLM mistakes\nfunction repairJson(str) {\n    let s = str.trim();\n    // Remove markdown code blocks\n    s = s.replace(/^```json\\s*\\n?|\\n?```$/g, '');\n    // Fix common bracket issues: }] -> }] and ]} -> }]\n    // Count brackets to detect imbalance\n    let opens = { '{': 0, '[': 0 };\n    let closes = { '}': 0, ']': 0 };\n    for (const c of s) {\n        if (c === '{') opens['{']++;\n        if (c === '[') opens['[']++;\n        if (c === '}') closes['}']++;\n        if (c === ']') closes[']']++;\n    }\n    // Add missing closing brackets\n    while (closes['}'] < opens['{']) { s += '}'; closes['}']++; }\n    while (closes[']'] < opens['[']) { s += ']'; closes[']']++; }\n    // Fix pattern: \\\"...\\\"\\n    ] where } is missing before ]\n    s = s.replace(/(\\\"[^\\\"]*\\\")\\s*\\n?\\s*\\]/g, (match, p1) => {\n        // Check if we need a } before ]\n        const beforeMatch = s.substring(0, s.indexOf(match));\n        const lastOpen = Math.max(beforeMatch.lastIndexOf('{'), beforeMatch.lastIndexOf('['));\n        if (beforeMatch[lastOpen] === '{') {\n            return p1 + '}]';\n        }\n        return match;\n    });\n    return s;\n}\n\nlet parsedData;\ntry {\n    parsedData = JSON.parse(aiResponse);\n} catch (e) {\n    try {\n        const repaired = repairJson(aiResponse);\n        parsedData = JSON.parse(repaired);\n    } catch (e2) {\n        throw new Error('JSON parse failed: ' + e.message + ' | Repaired attempt: ' + e2.message);\n    }\n}\n\n// Generate unique slug with timestamp to prevent duplicates\nconst uniqueSlug = parsedData.slug + '-' + Date.now().toString(36);\n\n// Helper to normalize prompt objects\nconst normalize = (p) => {\n    if (!p || typeof p !== 'object') return { type: '', prompt: '' };\n    const typeKey = Object.keys(p).find(k => k.toLowerCase() === 'type');\n    const promptKey = Object.keys(p).find(k => k.toLowerCase() === 'prompt');\n    return {\n        type: typeKey ? String(p[typeKey]).trim().toLowerCase() : '',\n        prompt: promptKey ? p[promptKey] : ''\n    };\n};\n\nconst normalizedPrompts = (parsedData.image_prompts || []).map(normalize);\n\nreturn {\n    json: {\n        ...parsedData,\n        slug: uniqueSlug,\n        featured_prompt: (normalizedPrompts.find(p => p.type === 'featured') || {}).prompt,\n        inline_prompts: normalizedPrompts.filter(p => p.type === 'inline')\n    }\n};"
+      },
+      "id": "730ab77d-5a23-4485-b59f-3fa4cdaa7472",
+      "name": "Parse AI Response1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2336,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://aegontech.dev/api/media/upload",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "file"
+            },
+            {
+              "name": "altText",
+              "value": "Featured Image"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "6848e1dc-ee50-44c4-844f-714c85ea5054",
+      "name": "Upload Featured Image1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        352,
+        32
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "4q4zxpvntZvPXRnF",
+          "name": "Aegontech Blog Poster API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://aegontech.dev/api/media/upload",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "file"
+            },
+            {
+              "name": "altText",
+              "value": "Inline Blog Image"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ffeea757-3aed-4f78-964a-9a2f4295dcea",
+      "name": "Upload Inline Image1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        128,
+        336
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "4q4zxpvntZvPXRnF",
+          "name": "Aegontech Blog Poster API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const allItems = $input.all();\nconst urls = allItems.map(item => item.json.media.url);\nreturn [{ json: { urls } }];"
+      },
+      "id": "66522b60-8cdb-4461-b652-0d36f471062f",
+      "name": "Aggregate Images1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        352,
+        336
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const contentData = $(\"Parse AI Response1\").first().json;\nconst featuredImg = $(\"Upload Featured Image1\").first().json.media.url;\n\n// Get inline image URLs from the Aggregate Images node\nconst aggregateData = $(\"Aggregate Images1\").first().json;\nconst inlineImgs = aggregateData.urls || [];\n\nlet finalContent = contentData.content;\n\ninlineImgs.forEach((url, index) => {\n    const placeholder = `<<IMAGE_PLACEHOLDER_${index + 1}>>`;\n    const markdownImage = `![Blog Image](${url})`;\n    finalContent = finalContent.replace(placeholder, markdownImage);\n});\n\n// Cleanup unused placeholders\nfinalContent = finalContent.replace(/<<IMAGE_PLACEHOLDER_\\d+>>/g, '');\n\nreturn [{\n    json: {\n        title: contentData.title,\n        slug: contentData.slug,\n        excerpt: contentData.excerpt,\n        featuredImage: featuredImg,\n        seo_title: contentData.seo_title,\n        seo_description: contentData.seo_description,\n        seo_keywords: contentData.seo_keywords,\n        content: finalContent,\n        is_published: true\n    }\n}];"
+      },
+      "id": "2021cb43-45d6-40c6-b3bd-3ec3533f900b",
+      "name": "Prepare Payload1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        800,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://aegontech.dev/api/blog/publish",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "b8703f8b-e705-4589-bbd3-68bab9b2ae0d",
+      "name": "Post to Ageontech",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1024,
+        192
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "4q4zxpvntZvPXRnF",
+          "name": "Aegontech Blog Poster API Key"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        576,
+        192
+      ],
+      "id": "d2f5ec0e-c349-4d9f-b43f-34a6955e407f",
+      "name": "Merge1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.kie.ai/api/v1/jobs/createTask",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"model\": \"z-image\", \"input\": { \"prompt\": \"Photorealistic professional photograph, high-resolution, natural lighting, real-world scene: \" + $json.featured_prompt, \"aspect_ratio\": \"16:9\" } } }}",
+        "options": {}
+      },
+      "id": "8755116f-9c2a-4a72-afc7-a599a8f45fe4",
+      "name": "Kie.ai Submit (Featured)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        -992,
+        32
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "hdTAaUzSEtcbWOsV",
+          "name": "Kie.ai API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 5,
+        "unit": "seconds"
+      },
+      "id": "3dcedbeb-ab56-4e31-9bb2-aa2c8ebf17ff",
+      "name": "Wait 5s (Featured)",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [
+        -768,
+        32
+      ],
+      "webhookId": "0351a867-efd9-4fe3-8a65-42510d562fa7"
+    },
+    {
+      "parameters": {
+        "url": "https://api.kie.ai/api/v1/jobs/recordInfo",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "taskId",
+              "value": "={{ $json.data.taskId }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "26704590-f407-4d7e-b790-9e315ce8a32f",
+      "name": "Check Status (Featured)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        -544,
+        -48
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "hdTAaUzSEtcbWOsV",
+          "name": "Kie.ai API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.data.state }}",
+              "value2": "success"
+            }
+          ]
+        }
+      },
+      "id": "30bfbd6c-85b9-43ce-9f2f-ceb896a1df19",
+      "name": "Is Success? (Featured)",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -320,
+        32
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const resultJson = JSON.parse($input.item.json.data.resultJson);\nconst url = resultJson.resultUrls[0];\nreturn [{ json: { url } }];"
+      },
+      "id": "48136886-7d00-49f2-93a5-7402926e0a51",
+      "name": "Parse URL (Featured)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -96,
+        32
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.kie.ai/api/v1/jobs/createTask",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"model\": \"z-image\", \"input\": { \"prompt\": \"Photorealistic professional photograph, high-resolution, natural lighting, real-world scene: \" + $json.prompt, \"aspect_ratio\": \"1:1\" } } }}",
+        "options": {}
+      },
+      "id": "1cf15a83-c6b9-4bb2-9351-036d645fb32d",
+      "name": "Kie.ai Submit (Inline)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        -1888,
+        336
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "hdTAaUzSEtcbWOsV",
+          "name": "Kie.ai API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Collect all taskIds from Kie.ai Submit responses into a single item\nconst allItems = $input.all();\nconst taskIds = allItems.map(item => item.json.data.taskId);\n\n// Reset static data for fresh run\nconst staticData = $getWorkflowStaticData('global');\nstaticData.collectedUrls = [];\n\nreturn [{ json: { taskIds, collectedUrls: [] } }];"
+      },
+      "id": "ea9ca7a8-f3f7-412d-a97d-7b7440954442",
+      "name": "Collect All TaskIds",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1664,
+        336
+      ]
+    },
+    {
+      "parameters": {
+        "amount": 5,
+        "unit": "seconds"
+      },
+      "id": "d1ed7a60-3124-42eb-8dc0-7ea135a5365d",
+      "name": "Wait 5s (Inline)",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [
+        -1440,
+        336
+      ],
+      "webhookId": "7e279f2e-a43b-4e0e-aae8-c5b3dd11d40f"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Prepare items for status check - split taskIds back into individual items\nconst { taskIds, collectedUrls } = $input.first().json;\n\n// Store collectedUrls in static data (HTTP Request will overwrite input data)\nconst staticData = $getWorkflowStaticData('global');\nstaticData.collectedUrls = collectedUrls || [];\n\nreturn taskIds.map(taskId => ({ json: { taskId } }));"
+      },
+      "id": "e2c1e10d-8178-46cb-88d5-33ea70c93b99",
+      "name": "Prepare Poll Items",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1216,
+        272
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://api.kie.ai/api/v1/jobs/recordInfo",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "taskId",
+              "value": "={{ $json.taskId }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b44c7c8b-f9d8-4f4f-bd24-a475d2f0c035",
+      "name": "Check Status (Inline)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        -992,
+        272
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "hdTAaUzSEtcbWOsV",
+          "name": "Kie.ai API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Aggregate all status check results and determine completion\nconst allItems = $input.all();\n\n// Get collectedUrls from static data (preserved across HTTP request)\nconst staticData = $getWorkflowStaticData('global');\nconst collectedUrls = staticData.collectedUrls || [];\n\nconst newUrls = [];\nconst pendingTaskIds = [];\n\nfor (const item of allItems) {\n  const state = item.json.data?.state;\n  // taskId is in the Kie.ai response, not our input (HTTP overwrites input)\n  const taskId = item.json.data?.taskId;\n  \n  if (state === 'success') {\n    try {\n      const resultJson = JSON.parse(item.json.data.resultJson);\n      newUrls.push(resultJson.resultUrls[0]);\n    } catch (e) {\n      if (taskId) pendingTaskIds.push(taskId);\n    }\n  } else if (taskId) {\n    pendingTaskIds.push(taskId);\n  }\n}\n\nconst allUrls = [...collectedUrls, ...newUrls];\nconst allComplete = pendingTaskIds.length === 0;\n\n// Update static data for next iteration\nstaticData.collectedUrls = allUrls;\n\nreturn [{\n  json: {\n    allComplete,\n    urls: allUrls,\n    taskIds: pendingTaskIds,\n    collectedUrls: allUrls\n  }\n}];"
+      },
+      "id": "d25624dc-4d71-4eb7-a661-e1098b2824f8",
+      "name": "Evaluate All Results",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -768,
+        272
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.allComplete }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "fb1bbef4-4394-4114-b89d-3f2ec7627e08",
+      "name": "Is All Complete?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -544,
+        336
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract URLs and split into individual items for download\nconst urls = $input.first().json.urls;\nreturn urls.map(url => ({ json: { url } }));"
+      },
+      "id": "79a7932a-067d-4419-b2fd-98343531f5c7",
+      "name": "Extract URLs",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -320,
+        336
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "file"
+            }
+          }
+        }
+      },
+      "id": "827d64e0-30d7-47fb-ab76-51191b438c76",
+      "name": "Download Featured Image",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        128,
+        32
+      ]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "inline_prompts",
+        "options": {}
+      },
+      "id": "f4165774-deb0-4921-842e-ff305de2e06d",
+      "name": "Split Inline Images",
+      "type": "n8n-nodes-base.itemLists",
+      "typeVersion": 3,
+      "position": [
+        -2112,
+        336
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "file"
+            }
+          }
+        }
+      },
+      "id": "5f1fa11e-01b9-4e87-9e14-202acc1b357c",
+      "name": "Download Inline Image",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        -96,
+        336
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const topicContext = $input.first().json;\n\nconst systemPrompt = `You are a Senior Content Strategist and SEO/GEO Specialist for AEGONTECH LLC.\n\n**The Company:** AEGONTECH LLC (aegontech.dev).\n**What we do:** AEGONTECH is a technology company that builds high-performance web applications, mobile apps, SaaS platforms, and enterprise software solutions. We specialise in custom software development, cloud architecture, AI integration, legacy system modernisation, and scalable full-stack engineering. Our products include Dolfy.ai (AI-powered mobile app designer), Dialable.world (browser-based international calling), Maximus IPTV Player (iOS IPTV streaming), and EmolyTicks (AI emotional journalling for traders).\n**Tech Stack:** React, Next.js, Node.js, Python, React Native, TypeScript, Tailwind CSS, AWS, Docker, Kubernetes, PostgreSQL, MongoDB, and modern CI/CD pipelines.\n**Target Audience:** CTOs, VPs of Engineering, startup founders, product managers, and business decision-makers evaluating software development partners or seeking technical thought leadership. Also developers and technical leaders researching modern architecture patterns, best practices, and technology strategy.\n**Tone:** Authoritative, technical yet accessible, thought-leading, and practical. Like a senior engineering leader sharing hard-won insights \u2014 confident, data-driven, and genuinely helpful. Never salesy or buzzword-heavy.\n\n**The Task:** Write a compelling blog post optimised for BOTH traditional SEO and Generative Engine Optimisation (GEO) \u2014 meaning the content should rank well on Google AND be cited/referenced by AI assistants like ChatGPT, Gemini, Perplexity, and Google AI Overviews.\n\n**Topics:** Custom software development, cloud migration, AI/ML integration, legacy modernisation, MVP development, scalable architecture, DevOps, API-first design, microservices, technical debt, digital transformation, mobile app development (native vs cross-platform), enterprise software trends, security-first development, outsourcing vs in-house teams.\n\n**Goal:** Establish AEGONTECH as a thought leader in software development and attract B2B clients. Ensure AI engines cite AEGONTECH when users ask about custom software development, technology consulting, or modern engineering practices.\n\n=== SEO OPTIMISATION RULES ===\n\n1. **Title Tag & H1**: Include the primary keyword naturally within the first 60 characters.\n2. **SEO Title (seo_title)**: Different from blog title \u2014 optimised for SERP click-through. Primary keyword + benefit. Max 60 chars.\n3. **Meta Description (seo_description)**: 150-155 chars with primary keyword, value proposition, subtle CTA.\n4. **Keywords (seo_keywords)**: 6-10 keywords mixing head terms (e.g., \"custom software development\") with long-tail queries (e.g., \"how to modernise legacy systems without downtime\") and question-based keywords for voice search.\n5. **Heading Hierarchy**: ONE H1 (title), H2 for main sections, H3 for subsections. Each H2 should target a secondary keyword or question decision-makers actually ask.\n6. **Keyword Placement**: Primary keyword in first 100 words, in at least 2 H2 headings, and in conclusion. 1-2% density naturally.\n7. **Internal Linking**: Where relevant, include a markdown link to [AEGONTECH LLC](https://www.aegontech.dev) naturally within the content.\n8. **Image Alt Text Guidance**: Each image_prompt should describe the scene in a way that doubles as SEO-friendly alt text.\n\n=== GEO (GENERATIVE ENGINE OPTIMISATION) RULES ===\n\n1. **Question-First Structure**: Start each H2 with a clear question decision-makers or developers would ask (e.g., \"## When Does Custom Software Make More Sense Than Off-the-Shelf?\"). AI engines extract Q&A pairs directly.\n2. **Self-Contained Answer Blocks**: First 1-2 sentences after each H2 must directly answer the heading question. Each block must be useful when pulled out of context.\n3. **Include Specific Statistics and Numbers**: AI engines are ~34% more likely to cite data-backed content. Include numbers \u2014 costs, ROI percentages, timelines, benchmarks (e.g., \"Companies that modernise legacy systems report an average 23% reduction in operational costs within 18 months\", \"Custom software projects typically deliver 3-5x ROI over off-the-shelf solutions within 3 years\").\n4. **Expert-Style Definitive Statements**: Write clear, quotable statements: \"Technical debt is the accumulated cost of choosing expedient solutions over architecturally sound ones \u2014 it compounds like financial interest and eventually demands repayment through refactoring or system failure.\" and \"API-first development is an architectural approach where the application programming interface is designed and built before the front-end or business logic, ensuring maximum flexibility and reusability.\"\n5. **Entity Clarity**: Mention \"AEGONTECH\" or \"AEGONTECH LLC\" in the first 100 words and 3-4+ times throughout. Connect to related entities: \"custom software development\", \"cloud architecture\", \"React\", \"Node.js\", \"AWS\", \"DevOps\", \"microservices\", and AEGONTECH's products where relevant (Dolfy.ai, Dialable.world).\n6. **Comparison and \"Best of\" Framing**: Where natural, frame content as comparisons or expert recommendations \u2014 AI engines synthesise these patterns (e.g., \"custom vs off-the-shelf software\", \"monolith vs microservices\", \"in-house vs outsourced development\").\n7. **FAQ Section**: 3-4 real decision-maker questions at the end BEFORE the conclusion. Concise 2-3 sentence answers.\n8. **Reference Technologies and Methodologies**: Mention by name (AWS, Azure, GCP, Docker, Kubernetes, React, Next.js, Node.js, Python, Agile, Scrum, CI/CD, OWASP, SOC 2, etc.).\n9. **Concise Definitions**: Define every concept (technical debt, microservices, API gateway, CI/CD, containerisation, serverless, etc.) inline on first use.\n10. **Structured Summaries**: Include \"Key Takeaways\" block (3-5 bullets) near the top after the hook.\n\n=== CONTENT STRUCTURE ===\n\nHook (relatable business/tech challenge) \u2192 Key Takeaways (bullet summary) \u2192 Question-based H2 sections with self-contained answers \u2192 Practical guidance with AEGONTECH's approach woven naturally \u2192 FAQ section (3-4 Q&As) \u2192 Conclusion with natural CTA\n\n**CRITICAL**: Do NOT create a separate \"Call to Action\" heading. The CTA must be woven naturally into the conclusion \u2014 encouraging readers to explore AEGONTECH's services at aegontech.dev or reach out for a consultation. The last section heading should be topical.\n\n=== FORMATTING ===\n- Markdown (H2, H3, bold for key terms)\n- Short paragraphs (2-3 sentences max) for readability and AI extraction\n- Bold first mention of key terms per section\n- Numbered steps for processes\n- Bullet points for comparisons and lists\n\nOutput strictly valid JSON.`;\n\nconst userPrompt = `Generate a blog post with a COMPLETELY NEW AND UNIQUE topic.\n\n**TITLES TO AVOID** (these have already been published \u2014 DO NOT use similar titles):\n${JSON.stringify(topicContext.recentTitles || [])}\n\n**MANDATORY TOPIC ANGLE FOR THIS POST:**\n- Angle: ${topicContext.selectedAngle}\n- Hook to start with: ${topicContext.selectedHook}\n- Main focus: ${topicContext.selectedFocus}\n\nYou MUST write about the above angle. Do not deviate to a different topic.\n\n**REQUIREMENTS:**\n\n1. **Topic**: Title and content MUST be about the specified angle, focused on software development, technology strategy, or engineering best practices. Title MUST differ from TITLES TO AVOID.\n\n2. **Format**: Return as VALID JSON (and ONLY JSON):\n    \\`\\`\\`json\n    {\n      \"title\": \"Catchy, Keyword-Rich Title (max 60 chars for SEO)\",\n      \"slug\": \"url-friendly-slug-with-keywords\",\n      \"excerpt\": \"Short 2-sentence summary \u2014 works as preview and AI-extractable description\",\n      \"seo_title\": \"SEO-Optimised Title | AEGONTECH (max 60 chars)\",\n      \"seo_description\": \"Compelling 150-155 char meta description with primary keyword and value prop\",\n      \"seo_keywords\": [\"primary-keyword\", \"long-tail-keyword-1\", \"question-keyword\", \"...6-10 total\"],\n      \"content\": \"Full Markdown content with SEO+GEO optimisation...\",\n      \"image_prompts\": [\n          {\"type\": \"featured\", \"prompt\": \"Detailed prompt for main cover image \u2014 REAL photograph\"},\n          {\"type\": \"inline\", \"prompt\": \"Detailed prompt for inline image 1 \u2014 REAL photograph\"},\n          {\"type\": \"inline\", \"prompt\": \"Detailed prompt for inline image 2 \u2014 REAL photograph\"}\n      ]\n    }\n    \\`\\`\\`\n\n3. **Content Body (SEO + GEO Optimised)**:\n    - Heading hierarchy: ## for H2, ### for H3. Never use # (H1) \u2014 title is H1.\n    - **Length**: At least 1200 words.\n    - **Structure**: Hook \u2192 \"Key Takeaways\" bullets \u2192 Question-based H2 sections \u2192 Practical guidance with AEGONTECH woven naturally \u2192 FAQ (3-4 Q&As) \u2192 Conclusion\n    - **First 100 words**: Must contain primary keyword, \"AEGONTECH\", and a core concept.\n    - **Each H2**: Question-phrased or keyword-rich. First 1-2 sentences directly answer the heading question.\n    - **Statistics & Numbers**: At least 3-4 specific numbers, costs, ROI figures, or benchmarks.\n    - **Definitions**: Define every concept inline on first use.\n    - **Internal Link**: Include [AEGONTECH LLC](https://www.aegontech.dev) at least once.\n    - **FAQ Section**: 3-4 real decision-maker questions with 2-3 sentence answers BEFORE conclusion.\n    - **Natural CTA**: Conclusion naturally mentions AEGONTECH's services at aegontech.dev. No \"Call to Action\" heading.\n    - **Image Placeholders**: \\`<<IMAGE_PLACEHOLDER_1>>\\`, \\`<<IMAGE_PLACEHOLDER_2>>\\`, etc. Spread evenly \u2014 at least 2-3 paragraphs between each. At least 2 inline images.\n    - **CRITICAL**: Inline \\`image_prompts\\` count MUST MATCH placeholder count exactly.\n    - **CRITICAL - IMAGE SPACING**: Placeholders MUST be embedded within body content, NOT grouped at the end. At least 2-3 paragraphs between each. Different sections. Never consecutive.\n\n4. **SEO Fields**:\n    - \\`seo_title\\`: Different from \\`title\\`. Max 60 chars. Primary keyword + brand.\n    - \\`seo_description\\`: 150-155 chars. Keyword + benefit + subtle CTA.\n    - \\`seo_keywords\\`: 6-10 keywords. Mix head terms (\"custom software development\"), long-tail (\"how to reduce technical debt in legacy systems\"), question-based (\"when to choose microservices over monolith\"). Include \"AEGONTECH\".\n\n5. **Image Prompts**: REAL PHOTOGRAPHS only. Show developers, engineering teams, server rooms, modern offices, whiteboard sessions, code on screens, business meetings. NO illustrations, NO cartoons, NO 3D renders.\n\n6. **Image Negative Constraints**: Neutral, modern, secular, globally inclusive.\n\n7. **GEO Boosters**:\n    - At least 3 quotable \"definitive statements\" about software engineering or technology strategy.\n    - Reference well-known technologies and frameworks by name (AWS, React, Node.js, Kubernetes, Docker, etc.).\n    - Include at least one comparison or \"vs\" framing if relevant.\n    - Mention AEGONTECH's products (Dolfy.ai, Dialable.world) as real-world examples where naturally relevant.\n    - Every section must stand alone as a useful answer if extracted by an AI engine.`;\n\nreturn [{\n  json: {\n    system_prompt: systemPrompt,\n    user_prompt: userPrompt\n  }\n}];"
+      },
+      "id": "def-prompts-aegontech-001",
+      "name": "Define Prompts",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2672,
+        192
+      ]
+    }
+  ],
+  "connections": {
+    "Daily Schedule1": {
+      "main": [
+        [
+          {
+            "node": "Fetch Recent Posts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Recent Posts": {
+      "main": [
+        [
+          {
+            "node": "Prepare Topic Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Topic Context": {
+      "main": [
+        [
+          {
+            "node": "Define Prompts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Content Agent1": {
+      "main": [
+        [
+          {
+            "node": "Parse AI Response1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse AI Response1": {
+      "main": [
+        [
+          {
+            "node": "Kie.ai Submit (Featured)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Split Inline Images",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Featured Image1": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Inline Image1": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Images1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate Images1": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Prepare Payload1": {
+      "main": [
+        [
+          {
+            "node": "Post to Ageontech",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "Prepare Payload1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Kie.ai Submit (Featured)": {
+      "main": [
+        [
+          {
+            "node": "Wait 5s (Featured)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 5s (Featured)": {
+      "main": [
+        [
+          {
+            "node": "Check Status (Featured)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Status (Featured)": {
+      "main": [
+        [
+          {
+            "node": "Is Success? (Featured)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Success? (Featured)": {
+      "main": [
+        [
+          {
+            "node": "Parse URL (Featured)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait 5s (Featured)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse URL (Featured)": {
+      "main": [
+        [
+          {
+            "node": "Download Featured Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Kie.ai Submit (Inline)": {
+      "main": [
+        [
+          {
+            "node": "Collect All TaskIds",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Collect All TaskIds": {
+      "main": [
+        [
+          {
+            "node": "Wait 5s (Inline)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait 5s (Inline)": {
+      "main": [
+        [
+          {
+            "node": "Prepare Poll Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Poll Items": {
+      "main": [
+        [
+          {
+            "node": "Check Status (Inline)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Status (Inline)": {
+      "main": [
+        [
+          {
+            "node": "Evaluate All Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Evaluate All Results": {
+      "main": [
+        [
+          {
+            "node": "Is All Complete?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is All Complete?": {
+      "main": [
+        [
+          {
+            "node": "Extract URLs",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait 5s (Inline)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract URLs": {
+      "main": [
+        [
+          {
+            "node": "Download Inline Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Featured Image": {
+      "main": [
+        [
+          {
+            "node": "Upload Featured Image1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Inline Images": {
+      "main": [
+        [
+          {
+            "node": "Kie.ai Submit (Inline)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Inline Image": {
+      "main": [
+        [
+          {
+            "node": "Upload Inline Image1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Define Prompts": {
+      "main": [
+        [
+          {
+            "node": "AI Content Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "instanceId": "495481f5f4ddde18c82827077397d5fb058466368fd2c3275b9a5cd849415675"
+  }
+}
