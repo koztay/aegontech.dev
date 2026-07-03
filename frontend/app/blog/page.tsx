@@ -32,7 +32,7 @@ export default async function BlogPage() {
   });
 
   const navigationItems = [
-    { label: "Home", href: "/" },
+    { label: "Work", href: "/#work" },
     { label: "Portfolio", href: "/portfolio" },
     { label: "Blog", href: "/blog" },
     { label: "Contact", href: "/#contact" },

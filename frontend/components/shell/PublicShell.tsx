@@ -1,162 +1,227 @@
 "use client";
 
-import { Menu, X, Sun, Moon } from "lucide-react";
+import { Menu, X, Sun, Moon, ArrowUpRight } from "lucide-react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 
 interface NavItem {
-    label: string;
-    href: string;
-    isActive?: boolean;
+  label: string;
+  href: string;
+  isActive?: boolean;
 }
 
 interface PublicShellProps {
-    children: React.ReactNode;
-    navigationItems: NavItem[];
-    currentPath?: string;
+  children: React.ReactNode;
+  navigationItems: NavItem[];
+  currentPath?: string;
 }
 
 export function PublicShell({
-    children,
-    navigationItems,
-    currentPath = "/",
+  children,
+  navigationItems,
+  currentPath = "/",
 }: PublicShellProps) {
-    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-    const [isDarkMode, setIsDarkMode] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(true);
+  const [scrolled, setScrolled] = useState(false);
 
-    useEffect(() => {
-        // Check localStorage and system preference on mount
-        const savedTheme = localStorage.getItem("theme");
-        const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-        
-        const shouldBeDark = savedTheme === "dark" || (!savedTheme && systemPrefersDark);
-        setIsDarkMode(shouldBeDark);
-        
-        if (shouldBeDark) {
-            document.documentElement.classList.add("dark");
-        } else {
-            document.documentElement.classList.remove("dark");
-        }
-    }, []);
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("theme");
+    const shouldBeDark = savedTheme !== "light";
+    setIsDarkMode(shouldBeDark);
+    document.documentElement.classList.toggle("dark", shouldBeDark);
+  }, []);
 
-    const toggleDarkMode = () => {
-        const newDarkMode = !isDarkMode;
-        setIsDarkMode(newDarkMode);
-        localStorage.setItem("theme", newDarkMode ? "dark" : "light");
-        
-        if (newDarkMode) {
-            document.documentElement.classList.add("dark");
-        } else {
-            document.documentElement.classList.remove("dark");
-        }
-    };
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 16);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
-    return (
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
-            {/* Header */}
-            <header className="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
-                <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex items-center justify-between h-16">
-                        {/* Logo */}
-                        <div className="flex-shrink-0">
-                            <Link
-                                href="/"
-                                className="flex items-center gap-3 group"
-                            >
-                                <img
-                                    src="/assets/aegontech-logo.png"
-                                    alt="Aegontech Logo"
-                                    className="h-10 w-auto group-hover:opacity-90 transition-opacity"
-                                />
-                                <span className="text-xl font-bold text-indigo-600 dark:text-indigo-400">
-                                    AEGONTECH
-                                </span>
-                            </Link>
-                        </div>
+  const toggleDarkMode = () => {
+    const next = !isDarkMode;
+    setIsDarkMode(next);
+    localStorage.setItem("theme", next ? "dark" : "light");
+    document.documentElement.classList.toggle("dark", next);
+  };
 
-                        {/* Desktop Navigation */}
-                        <div className="hidden md:flex items-center space-x-8">
-                            {navigationItems.map((item) => (
-                                <Link
-                                    key={item.href}
-                                    href={item.href}
-                                    className={`text-sm font-medium transition-colors ${currentPath === item.href || item.isActive
-                                        ? "text-indigo-600 dark:text-indigo-400"
-                                        : "text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400"
-                                        }`}
-                                >
-                                    {item.label}
-                                </Link>
-                            ))}
-                        </div>
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header
+        className={`sticky top-0 z-50 transition-all duration-300 ${
+          scrolled
+            ? "border-b border-border bg-background/80 backdrop-blur-xl"
+            : "border-b border-transparent bg-transparent"
+        }`}
+      >
+        <nav className="mx-auto max-w-8xl px-6 sm:px-8 lg:px-16">
+          <div className="flex h-16 items-center justify-between">
+            {/* Logo */}
+            <Link href="/" className="group flex items-center gap-2.5">
+              <img
+                src="/assets/aegontech-logo.png"
+                alt="Aegontech"
+                className="h-8 w-auto transition-opacity group-hover:opacity-80"
+              />
+              <span className="font-display text-base font-semibold tracking-tight text-foreground">
+                AEGONTECH
+              </span>
+            </Link>
 
-                        {/* Right Section */}
-                        <div className="flex items-center space-x-4">
-                            {/* Dark Mode Toggle */}
-                            <button
-                                onClick={toggleDarkMode}
-                                className="p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                            >
-                                {isDarkMode ? (
-                                    <Sun className="w-5 h-5" />
-                                ) : (
-                                    <Moon className="w-5 h-5" />
-                                )}
-                            </button>
+            {/* Desktop nav */}
+            <div className="hidden items-center gap-8 md:flex">
+              {navigationItems.map((item) => {
+                const active = currentPath === item.href || item.isActive;
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`link-under font-mono text-[11px] uppercase tracking-[0.18em] transition-colors ${
+                      active
+                        ? "text-foreground"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </div>
 
-                            {/* Mobile Menu Button */}
-                            <button
-                                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                                className="md:hidden p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
-                            >
-                                {mobileMenuOpen ? (
-                                    <X className="w-6 h-6" />
-                                ) : (
-                                    <Menu className="w-6 h-6" />
-                                )}
-                            </button>
-                        </div>
-                    </div>
+            {/* Right */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={toggleDarkMode}
+                aria-label="Toggle theme"
+                className="rounded-sm p-2.5 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+              >
+                {isDarkMode ? (
+                  <Sun className="h-[18px] w-[18px]" />
+                ) : (
+                  <Moon className="h-[18px] w-[18px]" />
+                )}
+              </button>
 
-                    {/* Mobile Navigation */}
-                    {mobileMenuOpen && (
-                        <div className="md:hidden py-4 border-t border-slate-200 dark:border-slate-800">
-                            <div className="flex flex-col space-y-2">
-                                {navigationItems.map((item) => (
-                                    <Link
-                                        key={item.href}
-                                        href={item.href}
-                                        onClick={() => setMobileMenuOpen(false)}
-                                        className={`px-4 py-2 text-left rounded-lg transition-colors ${currentPath === item.href || item.isActive
-                                            ? "bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400"
-                                            : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
-                                            }`}
-                                    >
-                                        {item.label}
-                                    </Link>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-                </nav>
-            </header>
+              <Link
+                href="/#contact"
+                className="hidden items-center gap-1.5 rounded-sm bg-signal px-5 py-2 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-primary-foreground transition-colors hover:bg-signal-bright sm:inline-flex"
+              >
+                Start a project
+                <ArrowUpRight className="h-3.5 w-3.5" />
+              </Link>
 
-            {/* Main Content */}
-            <main>{children}</main>
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                aria-label="Toggle menu"
+                aria-expanded={mobileMenuOpen}
+                className="rounded-sm p-2.5 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground md:hidden"
+              >
+                {mobileMenuOpen ? (
+                  <X className="h-5 w-5" />
+                ) : (
+                  <Menu className="h-5 w-5" />
+                )}
+              </button>
+            </div>
+          </div>
 
-            {/* Footer */}
-            <footer className="bg-slate-900 dark:bg-slate-950 text-slate-400 py-12 mt-20">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex flex-col md:flex-row justify-between items-center">
-                        <div className="text-xl font-bold text-white mb-4 md:mb-0">
-                            AEGONTECH LLC
-                        </div>
-                        <div className="text-sm">
-                            © {new Date().getFullYear()} AEGONTECH LLC. All rights reserved.
-                        </div>
-                    </div>
-                </div>
-            </footer>
-        </div >
-    );
+          {/* Mobile nav */}
+          {mobileMenuOpen && (
+            <div className="border-t border-border py-4 md:hidden">
+              <div className="flex flex-col gap-1">
+                {navigationItems.map((item) => {
+                  const active = currentPath === item.href || item.isActive;
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={`rounded-sm px-4 py-2.5 font-mono text-xs uppercase tracking-[0.16em] transition-colors ${
+                        active
+                          ? "bg-secondary text-foreground"
+                          : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+                      }`}
+                    >
+                      {item.label}
+                    </Link>
+                  );
+                })}
+                <Link
+                  href="/#contact"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="mt-2 inline-flex items-center justify-center gap-1.5 rounded-sm bg-signal px-5 py-2.5 font-mono text-xs font-medium uppercase tracking-[0.14em] text-primary-foreground"
+                >
+                  Start a project
+                  <ArrowUpRight className="h-4 w-4" />
+                </Link>
+              </div>
+            </div>
+          )}
+        </nav>
+      </header>
+
+      {/* Main */}
+      <main>{children}</main>
+
+      {/* Footer */}
+      <footer className="relative overflow-hidden border-t border-border bg-surface-2/40">
+        <div className="mx-auto max-w-8xl px-6 sm:px-8 lg:px-16">
+          <div className="flex flex-col gap-12 py-16 md:flex-row md:items-start md:justify-between">
+            <div className="max-w-sm">
+              <div className="flex items-center gap-2.5">
+                <img
+                  src="/assets/aegontech-logo.png"
+                  alt="Aegontech"
+                  className="h-8 w-auto"
+                />
+                <span className="font-display text-base font-semibold tracking-tight text-foreground">
+                  AEGONTECH
+                </span>
+              </div>
+              <p className="mt-5 text-sm leading-relaxed text-muted-foreground">
+                A software product studio. We design, build, and ship SaaS
+                platforms and mobile apps that businesses run on.
+              </p>
+            </div>
+
+            <div className="flex gap-16">
+              <div className="flex flex-col gap-3">
+                <span className="mono-label mb-1">Navigate</span>
+                {navigationItems.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="link-under text-sm text-muted-foreground transition-colors hover:text-foreground"
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+              <div className="flex flex-col gap-3">
+                <span className="mono-label mb-1">Studio</span>
+                <span className="font-mono text-[11px] leading-relaxed tracking-[0.14em] text-muted-foreground">
+                  39.1559&deg; N
+                  <br />
+                  75.5272&deg; W
+                </span>
+                <span className="text-sm text-muted-foreground">Dover, DE</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-col items-start justify-between gap-4 border-t border-border py-8 sm:flex-row sm:items-center">
+            <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
+              © {new Date().getFullYear()} Aegontech LLC
+            </p>
+            <p className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
+              <span className="signal-tick rotate-45" aria-hidden />
+              Built in Dover, DE
+            </p>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
 }

@@ -1,61 +1,50 @@
 import type { BlogCardProps } from "@/lib/types";
-import { Calendar } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 
 export function BlogCard({ post }: BlogCardProps) {
-    const formattedDate = new Date(post.publishedAt).toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-    });
+  const formattedDate = new Date(post.publishedAt).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
 
-    return (
-        <Link href={`/blog/${post.slug}`}>
-            <article
-                className="group cursor-pointer bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-200 dark:border-slate-800"
-            >
-            {/* Featured Image */}
-            <div
-                className="relative overflow-hidden bg-slate-100 dark:bg-slate-800"
-                style={{ height: "200px" }}
-            >
-                <Image
-                    src={post.featuredImage}
-                    alt={post.title}
-                    fill
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 400px"
-                    className="object-cover group-hover:scale-105 transition-transform duration-500"
-                    loading="lazy"
-                />
-            </div>
+  return (
+    <Link href={`/blog/${post.slug}`} className="group block">
+      <article className="panel flex h-full flex-col overflow-hidden rounded-md transition-colors group-hover:border-signal/40">
+        {/* Featured image */}
+        <div className="relative aspect-[16/10] overflow-hidden bg-surface-2">
+          <Image
+            src={post.featuredImage}
+            alt={post.title}
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            quality={85}
+            className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
+            loading="lazy"
+          />
+        </div>
 
-            {/* Content */}
-            <div className="p-5">
-                {/* Date */}
-                <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 text-sm mb-3">
-                    <Calendar className="w-4 h-4" />
-                    <time dateTime={post.publishedAt}>{formattedDate}</time>
-                </div>
-
-                {/* Title */}
-                <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors line-clamp-2">
-                    {post.title}
-                </h2>
-
-                {/* Excerpt */}
-                <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed line-clamp-3">
-                    {post.excerpt}
-                </p>
-
-                {/* Read More */}
-                <div className="mt-4">
-                    <span className="text-indigo-600 dark:text-indigo-400 text-sm font-medium group-hover:underline">
-                        Read More →
-                    </span>
-                </div>
-            </div>
-            </article>
-        </Link>
-    );
+        {/* Content */}
+        <div className="flex flex-1 flex-col p-6">
+          <time
+            dateTime={post.publishedAt}
+            className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground"
+          >
+            {formattedDate}
+          </time>
+          <h2 className="mt-3 font-display text-lg font-semibold leading-snug text-foreground transition-colors group-hover:text-signal">
+            {post.title}
+          </h2>
+          <p className="mt-2.5 flex-1 text-sm leading-relaxed text-muted-foreground line-clamp-3">
+            {post.excerpt}
+          </p>
+          <span className="mt-5 inline-flex items-center gap-1.5 border-t border-border pt-5 font-mono text-[11px] uppercase tracking-[0.16em] text-foreground/80 transition-colors group-hover:text-signal">
+            Read <ArrowUpRight className="h-3.5 w-3.5" />
+          </span>
+        </div>
+      </article>
+    </Link>
+  );
 }

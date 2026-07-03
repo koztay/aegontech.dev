@@ -1,6 +1,10 @@
 export { HeroSection } from "./HeroSection";
-export { ServicesSection } from "./ServicesSection";
-export { PortfolioPreview } from "./PortfolioPreview";
-export { TeamSection } from "./TeamSection";
-export { TestimonialsSection } from "./TestimonialsSection";
+export { Ticker } from "./Ticker";
+export { SelectedWork } from "./SelectedWork";
+export { Practice } from "./Practice";
+export { Method } from "./Method";
+export { Voices } from "./Voices";
+export { StudioRoster } from "./StudioRoster";
 export { ContactSection } from "./ContactSection";
+export { SpineRail } from "./SpineRail";
+export { Reveal } from "./Reveal";

@@ -1,84 +1,136 @@
-"use client";
-
-import type { HeroSectionProps } from "@/lib/types";
-import { ArrowRight, ChevronDown } from "lucide-react";
-import Link from "next/link";
 import Image from "next/image";
+import Link from "next/link";
+import { ArrowRight, ArrowDown } from "lucide-react";
 
-export function HeroSection({ content }: HeroSectionProps) {
-    return (
-        <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-slate-900">
-            {/* Background Image */}
-            <div className="absolute inset-0">
-                <Image
-                    src="/assets/hero-image.jpeg"
-                    alt="Tech background"
-                    fill
-                    priority
-                    sizes="100vw"
-                    quality={85}
-                    className="object-cover"
-                />
-                {/* Gradient overlay */}
-                <div className="absolute inset-0 bg-gradient-to-b from-slate-900/80 via-slate-900/70 to-slate-900" />
+interface HeroProps {
+  shippedCount: number;
+}
 
-                {/* Decorative gradient orbs */}
-                <div className="absolute top-1/4 -left-20 w-96 h-96 bg-indigo-600/30 rounded-full blur-[128px]" />
-                <div className="absolute bottom-1/4 -right-20 w-80 h-80 bg-cyan-500/20 rounded-full blur-[100px]" />
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-500/10 rounded-full blur-[150px]" />
+export function HeroSection({ shippedCount }: HeroProps) {
+  const count = String(shippedCount).padStart(2, "0");
 
-                {/* Grid pattern overlay */}
-                <div
-                    className="absolute inset-0 opacity-[0.03]"
-                    style={{
-                        backgroundImage: `linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px),
-                              linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px)`,
-                        backgroundSize: "64px 64px",
-                    }}
-                />
-            </div>
+  return (
+    <section
+      id="hero"
+      className="relative flex min-h-[100svh] scroll-mt-16 flex-col justify-center overflow-hidden bg-background"
+    >
+      {/* Generated hero visual — machined obsidian & gold, seamless motion loop */}
+      <div className="absolute inset-0">
+        {/* Static poster: the LCP paint + the reduced-motion fallback */}
+        <Image
+          src="/assets/hero-loop-poster.webp"
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          quality={85}
+          className="scale-105 object-cover object-[70%_center]"
+        />
+        {/* Motion layer: muted autoplay loop, hidden for reduced-motion via .hero-video */}
+        <video
+          className="hero-video absolute inset-0 h-full w-full scale-105 object-cover object-[70%_center]"
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
+          poster="/assets/hero-loop-poster.webp"
+          aria-hidden="true"
+        >
+          <source src="/assets/hero-loop.webm" type="video/webm" />
+          <source src="/assets/hero-loop.mp4" type="video/mp4" />
+        </video>
+        {/* Legibility scrims: darken the text side (left) and the bottom seam */}
+        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/85 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/40" />
+        <div className="absolute inset-0 bg-grid opacity-50" />
+        <div className="absolute inset-0 bg-noise opacity-[0.05] mix-blend-overlay" />
+      </div>
 
-            {/* Content */}
-            <div className="relative z-10 max-w-5xl mx-auto px-6 text-center py-20">
-                {/* Badge */}
-                <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/10 border border-white/20 text-base text-white mb-10 backdrop-blur-sm">
-                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
-                    Software Development Company
-                </div>
+      {/* Corner registration marks — instrument framing */}
+      <div className="pointer-events-none absolute right-6 top-24 hidden font-mono text-[10px] uppercase leading-relaxed tracking-[0.2em] text-muted-foreground/70 sm:block md:right-12">
+        <div className="text-right">39.1559&deg; N</div>
+        <div className="text-right">75.5272&deg; W</div>
+        <div className="mt-2 text-right text-signal">Index 00</div>
+      </div>
 
-                {/* Main Heading */}
-                <h1 className="text-6xl sm:text-7xl lg:text-8xl font-bold text-white leading-[1.05] tracking-tight mb-8">
-                    {content.tagline.split(" ").slice(0, 2).join(" ")}{" "}
-                    <span className="bg-gradient-to-r from-indigo-400 via-cyan-400 to-indigo-400 bg-clip-text text-transparent">
-                        {content.tagline.split(" ").slice(2).join(" ")}
-                    </span>
-                </h1>
+      {/* Content */}
+      <div className="relative z-10 mx-auto w-full max-w-8xl px-6 pt-28 sm:px-8 lg:px-16">
+        <div className="max-w-4xl">
+          <div className="animate-fade-up eyebrow" style={{ animationDelay: "40ms" }}>
+            <span className="signal-tick rotate-45" aria-hidden />
+            Software Product Studio
+            <span className="text-muted-foreground/50">— Dover, DE</span>
+          </div>
 
-                {/* Description */}
-                <p className="text-xl sm:text-2xl text-slate-200 max-w-3xl mx-auto mb-12 leading-relaxed">
-                    {content.description}
-                </p>
+          <h1
+            className="animate-fade-up mt-8 text-mega font-semibold text-foreground"
+            style={{ animationDelay: "140ms" }}
+          >
+            We build software products,
+            <br />
+            and <span className="text-signal">ship them.</span>
+          </h1>
 
-                {/* CTAs */}
-                <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                    <Link
-                        href="/portfolio"
-                        className="group inline-flex items-center gap-2 px-8 py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl transition-all duration-300 shadow-lg shadow-indigo-500/25 hover:shadow-xl hover:shadow-indigo-500/30"
-                    >
-                        {content.ctaText}
-                        <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                    </Link>
+          <p
+            className="animate-fade-up mt-8 max-w-xl text-lg leading-relaxed text-muted-foreground sm:text-xl"
+            style={{ animationDelay: "260ms" }}
+          >
+            Aegontech is a product studio. We design, engineer, and launch SaaS
+            platforms and mobile apps end to end — from the first sketch to the
+            App Store.
+          </p>
 
-                    <button className="inline-flex items-center gap-2 px-8 py-4 text-slate-300 hover:text-white font-medium transition-colors">
-                        Learn More
-                    </button>
-                </div>
-            </div>
+          <div
+            className="animate-fade-up mt-10 flex flex-col items-start gap-5 sm:flex-row sm:items-center"
+            style={{ animationDelay: "380ms" }}
+          >
+            <Link
+              href="#work"
+              className="group inline-flex items-center gap-2 rounded-sm bg-signal px-7 py-3.5 text-sm font-semibold text-primary-foreground transition-all duration-300 hover:bg-signal-bright hover:shadow-[0_10px_40px_-8px_hsl(var(--signal)/0.6)]"
+            >
+              See what we&apos;ve shipped
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+            </Link>
+            <Link
+              href="#contact"
+              className="link-under text-sm font-medium text-foreground/90 hover:text-foreground"
+            >
+              Start a project
+            </Link>
+          </div>
+        </div>
+      </div>
 
-            {/* Scroll indicator */}
-            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-slate-500 animate-bounce">
-                <ChevronDown className="w-6 h-6" />
-            </div>
-        </section>
-    );
+      {/* Instrument readout — real, verifiable metadata (not vanity stats) */}
+      <div className="relative z-10 mx-auto mt-16 w-full max-w-8xl px-6 pb-10 sm:px-8 lg:px-16">
+        <dl className="flex flex-wrap items-center gap-x-10 gap-y-4 border-t border-border/60 pt-6 font-mono text-xs">
+          <div className="flex items-baseline gap-2">
+            <dt className="text-signal">{count}</dt>
+            <dd className="uppercase tracking-[0.18em] text-muted-foreground">
+              Products shipped
+            </dd>
+          </div>
+          <div className="hidden h-3 w-px bg-border sm:block" />
+          <div className="uppercase tracking-[0.18em] text-muted-foreground">
+            SaaS · Mobile · AI
+          </div>
+          <div className="hidden h-3 w-px bg-border sm:block" />
+          <div className="uppercase tracking-[0.18em] text-muted-foreground">
+            Design → Build → Ship
+          </div>
+        </dl>
+      </div>
+
+      {/* Scroll cue */}
+      <a
+        href="#work"
+        aria-label="Scroll to selected work"
+        className="absolute bottom-6 left-1/2 z-10 hidden -translate-x-1/2 flex-col items-center gap-1.5 text-muted-foreground transition-colors hover:text-foreground lg:flex"
+      >
+        <span className="font-mono text-[10px] uppercase tracking-[0.25em]">Scroll</span>
+        <ArrowDown className="h-4 w-4 animate-bounce" />
+      </a>
+    </section>
+  );
 }
