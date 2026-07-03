@@ -2,7 +2,6 @@ const ITEMS = [
   "Dolfy",
   "Dialable",
   "Maximus IPTV",
-  "EmolyTicks",
   "SaaS Platforms",
   "Mobile Apps",
   "AI & Machine Learning",

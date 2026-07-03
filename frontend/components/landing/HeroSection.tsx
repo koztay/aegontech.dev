@@ -14,7 +14,8 @@ export function HeroSection({ shippedCount }: HeroProps) {
       id="hero"
       className="relative flex min-h-[100svh] scroll-mt-16 flex-col justify-center overflow-hidden bg-background"
     >
-      {/* Generated hero visual — machined obsidian & gold, seamless motion loop */}
+      {/* Generated hero visual — abstract software-studio background (gold node network,
+          glass panels, light streaks), muted autoplay loop */}
       <div className="absolute inset-0">
         {/* Static poster: the LCP paint + the reduced-motion fallback */}
         <Image
@@ -24,11 +25,11 @@ export function HeroSection({ shippedCount }: HeroProps) {
           priority
           sizes="100vw"
           quality={85}
-          className="scale-105 object-cover object-[70%_center]"
+          className="scale-105 object-cover object-center"
         />
         {/* Motion layer: muted autoplay loop, hidden for reduced-motion via .hero-video */}
         <video
-          className="hero-video absolute inset-0 h-full w-full scale-105 object-cover object-[70%_center]"
+          className="hero-video absolute inset-0 h-full w-full scale-105 object-cover object-center"
           autoPlay
           muted
           loop
@@ -41,7 +42,7 @@ export function HeroSection({ shippedCount }: HeroProps) {
           <source src="/assets/hero-loop.mp4" type="video/mp4" />
         </video>
         {/* Legibility scrims: darken the text side (left) and the bottom seam */}
-        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/85 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/75 to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/40" />
         <div className="absolute inset-0 bg-grid opacity-50" />
         <div className="absolute inset-0 bg-noise opacity-[0.05] mix-blend-overlay" />
