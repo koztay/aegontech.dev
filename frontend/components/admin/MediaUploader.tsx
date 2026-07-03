@@ -36,14 +36,14 @@ export default function MediaUploader({ associatedType, associatedId }:{associat
   }
 
   return (
-    <form onSubmit={handleUpload} className="p-4 bg-white rounded shadow mb-6">
-      <h4 className="font-semibold mb-2">Upload Media</h4>
+    <form onSubmit={handleUpload} className="p-4 bg-surface border border-border rounded-lg mb-6">
+      <h4 className="font-display font-semibold text-foreground mb-2">Upload Media</h4>
       <div className="flex flex-col gap-2">
-        <input type="file" accept="image/*" onChange={(e)=>setFile(e.target.files?.[0]||null)} />
-        <input type="text" placeholder="Alt text (required)" value={altText} onChange={(e)=>setAltText(e.target.value)} className="border rounded px-2 py-1" />
+        <input type="file" accept="image/*" onChange={(e)=>setFile(e.target.files?.[0]||null)} className="text-sm text-muted-foreground file:mr-3 file:rounded-md file:border-0 file:bg-secondary file:px-3 file:py-1.5 file:text-sm file:text-foreground hover:file:bg-secondary/80" />
+        <input type="text" placeholder="Alt text (required)" value={altText} onChange={(e)=>setAltText(e.target.value)} className="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/60 focus:border-signal focus:outline-none" />
         <div className="flex items-center gap-2">
-          <button type="submit" className="px-3 py-1 bg-blue-600 text-white rounded">Upload</button>
-          <span className="text-sm text-gray-600">{status}</span>
+          <button type="submit" className="rounded-md bg-signal px-3 py-1.5 text-sm text-primary-foreground transition-colors hover:bg-signal-bright">Upload</button>
+          <span className="text-sm text-muted-foreground">{status}</span>
         </div>
       </div>
     </form>

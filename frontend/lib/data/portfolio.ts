@@ -41,7 +41,7 @@ const PLACEHOLDER_ITEMS: PortfolioItem[] = [
 export async function getAllPortfolioItems(): Promise<PortfolioItem[]> {
   try {
     const rows = await query<any>(
-      "SELECT * FROM portfolio_items ORDER BY created_at DESC"
+      "SELECT * FROM portfolio_items WHERE published = true ORDER BY created_at DESC"
     );
 
     if (rows.length > 0) {
@@ -76,7 +76,7 @@ export async function getPortfolioItemBySlug(
 ): Promise<PortfolioItem | null> {
   try {
     const rows = await query<any>(
-      "SELECT * FROM portfolio_items WHERE title = $1 LIMIT 1",
+      "SELECT * FROM portfolio_items WHERE title = $1 AND published = true LIMIT 1",
       [slug.replace(/-/g, " ")]
     );
 

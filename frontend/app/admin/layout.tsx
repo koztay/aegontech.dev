@@ -15,50 +15,46 @@ export default async function AdminLayout({
     redirect("/admin-login");
   }
 
+  const navLink =
+    "flex items-center gap-3 rounded-md px-4 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground";
+
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="flex min-h-screen bg-background">
       {/* Sidebar */}
-      <aside className="w-64 bg-white shadow-lg flex flex-col">
-        <div className="p-6 border-b">
-          <h1 className="text-2xl font-bold text-gray-900">Admin Panel</h1>
+      <aside className="flex w-64 flex-col border-r border-border bg-surface">
+        <div className="border-b border-border p-6">
+          <h1 className="font-display text-lg font-semibold tracking-tight text-foreground">
+            AEGONTECH
+          </h1>
+          <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.2em] text-signal">
+            Admin
+          </p>
         </div>
-        <nav className="flex-1 p-4 space-y-2">
-          <Link
-            href="/admin"
-            className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100 transition-colors"
-          >
-            <LayoutDashboard className="w-5 h-5" />
+        <nav className="flex-1 space-y-1 p-4">
+          <Link href="/admin" className={navLink}>
+            <LayoutDashboard className="h-[18px] w-[18px]" />
             <span>Dashboard</span>
           </Link>
-          <Link
-            href="/admin/portfolio"
-            className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100 transition-colors"
-          >
-            <FolderKanban className="w-5 h-5" />
+          <Link href="/admin/portfolio" className={navLink}>
+            <FolderKanban className="h-[18px] w-[18px]" />
             <span>Portfolio</span>
           </Link>
-          <Link
-            href="/admin/blog"
-            className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100 transition-colors"
-          >
-            <FileText className="w-5 h-5" />
+          <Link href="/admin/blog" className={navLink}>
+            <FileText className="h-[18px] w-[18px]" />
             <span>Blog</span>
           </Link>
-          <Link
-            href="/admin/media"
-            className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100 transition-colors"
-          >
-            <ImageIcon className="w-5 h-5" />
+          <Link href="/admin/media" className={navLink}>
+            <ImageIcon className="h-[18px] w-[18px]" />
             <span>Media</span>
           </Link>
         </nav>
-        <div className="p-4 border-t">
+        <div className="border-t border-border p-4">
           <form action="/api/admin/logout" method="POST">
             <button
               type="submit"
-              className="flex items-center gap-3 px-4 py-3 w-full rounded-lg hover:bg-gray-100 transition-colors text-red-600"
+              className="flex w-full items-center gap-3 rounded-md px-4 py-2.5 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10"
             >
-              <LogOut className="w-5 h-5" />
+              <LogOut className="h-[18px] w-[18px]" />
               <span>Logout</span>
             </button>
           </form>
@@ -67,9 +63,7 @@ export default async function AdminLayout({
 
       {/* Main Content */}
       <main className="flex-1 p-8">
-        <div className="max-w-7xl mx-auto">
-          {children}
-        </div>
+        <div className="mx-auto max-w-7xl">{children}</div>
       </main>
     </div>
   );

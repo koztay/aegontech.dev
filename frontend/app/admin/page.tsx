@@ -23,7 +23,7 @@ export default async function AdminDashboard() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Dashboard</h2>
+        <h2 className="font-display text-2xl font-semibold text-foreground">Dashboard</h2>
         <form action="/api/admin/logout" method="POST">
           <Button variant="outline" type="submit">
             Logout
@@ -33,16 +33,16 @@ export default async function AdminDashboard() {
 
       <div className="grid gap-4 md:grid-cols-2">
         <Card className="p-6">
-          <h3 className="text-lg font-semibold mb-2">Portfolio Items</h3>
-          <p className="text-3xl font-bold">{stats.portfolioItems}</p>
+          <h3 className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Portfolio Items</h3>
+          <p className="mt-2 text-3xl font-semibold text-foreground">{stats.portfolioItems}</p>
           <Link href="/admin/portfolio">
             <Button className="mt-4">Manage Portfolio</Button>
           </Link>
         </Card>
 
         <Card className="p-6">
-          <h3 className="text-lg font-semibold mb-2">Blog Posts</h3>
-          <p className="text-3xl font-bold">{stats.blogPosts}</p>
+          <h3 className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Blog Posts</h3>
+          <p className="mt-2 text-3xl font-semibold text-foreground">{stats.blogPosts}</p>
           <Link href="/admin/blog">
             <Button className="mt-4">Manage Blog</Button>
           </Link>

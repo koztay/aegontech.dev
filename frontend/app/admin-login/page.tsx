@@ -36,34 +36,35 @@ export default function AdminLogin() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
+    <div className="min-h-screen flex items-center justify-center bg-background py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8 rounded-lg border border-border bg-surface p-8 shadow-sm">
         <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+          <p className="text-center font-mono text-[10px] uppercase tracking-[0.2em] text-signal">
+            AEGONTECH
+          </p>
+          <h2 className="mt-2 text-center font-display text-3xl font-semibold text-foreground">
             Admin Login
           </h2>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleLogin}>
-          <div className="rounded-md shadow-sm -space-y-px">
-            <div>
-              <label htmlFor="password" className="sr-only">
-                Password
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                required
-                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Admin password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
+          <div>
+            <label htmlFor="password" className="sr-only">
+              Password
+            </label>
+            <input
+              id="password"
+              name="password"
+              type="password"
+              required
+              className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/60 focus:border-signal focus:outline-none"
+              placeholder="Admin password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
           </div>
 
           {error && (
-            <div className="text-red-600 text-sm text-center">{error}</div>
+            <div className="text-destructive text-sm text-center">{error}</div>
           )}
 
           <div>

@@ -95,13 +95,13 @@ export default function EditPortfolioItem() {
         <Button variant="outline" onClick={() => router.back()}>
           ← Back
         </Button>
-        <h2 className="text-2xl font-bold">Edit Portfolio Item</h2>
+        <h2 className="font-display text-2xl font-semibold text-foreground">Edit Portfolio Item</h2>
       </div>
 
       <Card className="p-6">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="title" className="block text-sm font-medium mb-2">
+            <label htmlFor="title" className="block text-sm font-medium text-foreground mb-2">
               Title *
             </label>
             <input
@@ -110,12 +110,12 @@ export default function EditPortfolioItem() {
               name="title"
               required
               defaultValue={item.title}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/60 focus:border-signal focus:outline-none"
             />
           </div>
 
           <div>
-            <label htmlFor="description" className="block text-sm font-medium mb-2">
+            <label htmlFor="description" className="block text-sm font-medium text-foreground mb-2">
               Description *
             </label>
             <textarea
@@ -124,12 +124,12 @@ export default function EditPortfolioItem() {
               required
               rows={4}
               defaultValue={item.description}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/60 focus:border-signal focus:outline-none"
             />
           </div>
 
           <div>
-            <label htmlFor="type" className="block text-sm font-medium mb-2">
+            <label htmlFor="type" className="block text-sm font-medium text-foreground mb-2">
               Type *
             </label>
             <select
@@ -137,7 +137,7 @@ export default function EditPortfolioItem() {
               name="type"
               required
               defaultValue={item.type}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/60 focus:border-signal focus:outline-none"
             >
               <option value="saas">SaaS</option>
               <option value="mobile">Mobile</option>
@@ -145,7 +145,7 @@ export default function EditPortfolioItem() {
           </div>
 
           <div>
-            <label htmlFor="screenshot" className="block text-sm font-medium mb-2">
+            <label htmlFor="screenshot" className="block text-sm font-medium text-foreground mb-2">
               Screenshot URL *
             </label>
             <div className="flex items-start gap-3">
@@ -156,17 +156,17 @@ export default function EditPortfolioItem() {
                 required
                 value={screenshotUrl}
                 onChange={(e) => setScreenshotUrl(String(e.target.value))}
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="flex-1 rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/60 focus:border-signal focus:outline-none"
               />
               <div className="flex flex-col items-center gap-2">
-                <button type="button" className="px-3 py-1 border rounded" onClick={() => setShowSelector(true)}>Choose</button>
-                {previewUrl ? <img src={previewUrl} alt="screenshot" className="w-24 h-16 object-cover rounded border" /> : null}
+                <button type="button" className="rounded-md border border-border px-3 py-1 text-sm text-foreground transition-colors hover:bg-secondary" onClick={() => setShowSelector(true)}>Choose</button>
+                {previewUrl ? <img src={previewUrl} alt="screenshot" className="w-24 h-16 object-cover rounded border border-border" /> : null}
               </div>
             </div>
           </div>
 
           <div>
-            <label htmlFor="website_url" className="block text-sm font-medium mb-2">
+            <label htmlFor="website_url" className="block text-sm font-medium text-foreground mb-2">
               Website URL
             </label>
             <input
@@ -174,12 +174,12 @@ export default function EditPortfolioItem() {
               id="website_url"
               name="website_url"
               defaultValue={item.website_url || ""}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/60 focus:border-signal focus:outline-none"
             />
           </div>
 
           <div>
-            <label htmlFor="app_store_url" className="block text-sm font-medium mb-2">
+            <label htmlFor="app_store_url" className="block text-sm font-medium text-foreground mb-2">
               App Store URL
             </label>
             <input
@@ -187,12 +187,12 @@ export default function EditPortfolioItem() {
               id="app_store_url"
               name="app_store_url"
               defaultValue={item.app_store_url || ""}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/60 focus:border-signal focus:outline-none"
             />
           </div>
 
           <div>
-            <label htmlFor="play_store_url" className="block text-sm font-medium mb-2">
+            <label htmlFor="play_store_url" className="block text-sm font-medium text-foreground mb-2">
               Play Store URL
             </label>
             <input
@@ -200,12 +200,12 @@ export default function EditPortfolioItem() {
               id="play_store_url"
               name="play_store_url"
               defaultValue={item.play_store_url || ""}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/60 focus:border-signal focus:outline-none"
             />
           </div>
 
           {error && (
-            <div className="text-red-600 text-sm">{error}</div>
+            <div className="text-destructive text-sm">{error}</div>
           )}
 
           <div className="flex gap-4">
@@ -220,7 +220,7 @@ export default function EditPortfolioItem() {
               variant="outline"
               onClick={handleDelete}
               disabled={loading}
-              className="ml-auto text-red-600 hover:text-red-700"
+              className="ml-auto text-destructive hover:text-destructive"
             >
               Delete
             </Button>

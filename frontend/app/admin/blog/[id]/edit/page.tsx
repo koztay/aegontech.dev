@@ -83,13 +83,13 @@ export default function EditBlogPost() {
         <Button variant="outline" onClick={() => router.back()}>
           ← Back
         </Button>
-        <h2 className="text-2xl font-bold">Edit Blog Post</h2>
+        <h2 className="font-display text-2xl font-semibold text-foreground">Edit Blog Post</h2>
       </div>
 
       <Card className="p-6">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="title" className="block text-sm font-medium mb-2">
+            <label htmlFor="title" className="block text-sm font-medium text-foreground mb-2">
               Title *
             </label>
             <input
@@ -98,12 +98,12 @@ export default function EditBlogPost() {
               name="title"
               required
               defaultValue={post.title}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/60 focus:border-signal focus:outline-none"
             />
           </div>
 
           <div>
-            <label htmlFor="slug" className="block text-sm font-medium mb-2">
+            <label htmlFor="slug" className="block text-sm font-medium text-foreground mb-2">
               Slug *
             </label>
             <input
@@ -112,12 +112,12 @@ export default function EditBlogPost() {
               name="slug"
               required
               defaultValue={post.slug}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/60 focus:border-signal focus:outline-none"
             />
           </div>
 
           <div>
-            <label htmlFor="excerpt" className="block text-sm font-medium mb-2">
+            <label htmlFor="excerpt" className="block text-sm font-medium text-foreground mb-2">
               Excerpt *
             </label>
             <textarea
@@ -126,12 +126,12 @@ export default function EditBlogPost() {
               required
               rows={3}
               defaultValue={post.excerpt}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/60 focus:border-signal focus:outline-none"
             />
           </div>
 
           <div>
-            <label htmlFor="content" className="block text-sm font-medium mb-2">
+            <label htmlFor="content" className="block text-sm font-medium text-foreground mb-2">
               Content *
             </label>
             <textarea
@@ -140,12 +140,12 @@ export default function EditBlogPost() {
               required
               rows={10}
               defaultValue={post.content}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/60 focus:border-signal focus:outline-none"
             />
           </div>
 
           <div>
-            <label htmlFor="featured_image" className="block text-sm font-medium mb-2">
+            <label htmlFor="featured_image" className="block text-sm font-medium text-foreground mb-2">
               Featured Image URL *
             </label>
             <input
@@ -154,12 +154,12 @@ export default function EditBlogPost() {
               name="featured_image"
               required
               defaultValue={post.featured_image}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/60 focus:border-signal focus:outline-none"
             />
           </div>
 
           <div>
-            <label htmlFor="status" className="block text-sm font-medium mb-2">
+            <label htmlFor="status" className="block text-sm font-medium text-foreground mb-2">
               Status *
             </label>
             <select
@@ -167,7 +167,7 @@ export default function EditBlogPost() {
               name="status"
               required
               defaultValue={post.status}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/60 focus:border-signal focus:outline-none"
             >
               <option value="draft">Draft</option>
               <option value="published">Published</option>
@@ -175,7 +175,7 @@ export default function EditBlogPost() {
           </div>
 
           {error && (
-            <div className="text-red-600 text-sm">{error}</div>
+            <div className="text-destructive text-sm">{error}</div>
           )}
 
           <div className="flex gap-4">
@@ -190,7 +190,7 @@ export default function EditBlogPost() {
               variant="outline"
               onClick={handleDelete}
               disabled={loading}
-              className="ml-auto text-red-600 hover:text-red-700"
+              className="ml-auto text-destructive hover:text-destructive"
             >
               Delete
             </Button>

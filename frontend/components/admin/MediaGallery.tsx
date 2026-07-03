@@ -109,13 +109,13 @@ export default function MediaGallery() {
             {/* Header & Controls */}
             <div className="flex flex-col sm:flex-row justify-between gap-4 items-start sm:items-center">
                 <div className="relative w-full sm:w-96">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <input
                         type="text"
                         placeholder="Search media..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                        className="w-full rounded-md border border-border bg-background pl-10 pr-4 py-2 text-sm text-foreground placeholder:text-muted-foreground/60 focus:border-signal focus:outline-none"
                     />
                 </div>
 
@@ -130,7 +130,7 @@ export default function MediaGallery() {
                     />
                     <label
                         htmlFor="media-upload"
-                        className={`flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg cursor-pointer hover:bg-blue-700 transition-colors ${uploading ? "opacity-50 cursor-not-allowed" : ""
+                        className={`flex items-center gap-2 px-4 py-2 bg-signal text-primary-foreground rounded-md cursor-pointer hover:bg-signal-bright transition-colors ${uploading ? "opacity-50 cursor-not-allowed" : ""
                             }`}
                     >
                         {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
@@ -142,21 +142,21 @@ export default function MediaGallery() {
             {/* Grid */}
             {loading ? (
                 <div className="flex justify-center p-12">
-                    <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+                    <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
                 </div>
             ) : filteredMedia.length === 0 ? (
-                <div className="text-center p-12 bg-gray-50 rounded-lg border border-dashed">
-                    <p className="text-gray-500">No media found</p>
+                <div className="text-center p-12 bg-surface rounded-lg border border-dashed border-border">
+                    <p className="text-muted-foreground">No media found</p>
                 </div>
             ) : (
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     {filteredMedia.map((asset) => (
                         <div
                             key={asset.id}
-                            className="group relative bg-white rounded-lg border overflow-hidden hover:shadow-lg transition-shadow"
+                            className="group relative bg-surface rounded-lg border border-border overflow-hidden hover:shadow-lg transition-shadow"
                         >
                             {/* Image Preview */}
-                            <div className="aspect-square relative bg-gray-100">
+                            <div className="aspect-square relative bg-secondary">
                                 <img
                                     src={asset.url}
                                     alt={asset.alt_text || "Media Asset"}
@@ -168,14 +168,14 @@ export default function MediaGallery() {
                                 <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                                     <button
                                         onClick={() => copyToClipboard(asset.url)}
-                                        className="p-2 bg-white rounded-full hover:bg-blue-50 text-gray-700 transition"
+                                        className="p-2 bg-surface-2 rounded-full hover:bg-secondary text-foreground transition"
                                         title="Copy Markdown Link"
                                     >
                                         <LinkIcon className="w-4 h-4" />
                                     </button>
                                     <button
                                         onClick={() => handleDelete(asset)}
-                                        className="p-2 bg-white rounded-full hover:bg-red-50 text-red-600 transition"
+                                        className="p-2 bg-surface-2 rounded-full hover:bg-destructive/10 text-destructive transition"
                                         title="Delete Image"
                                     >
                                         <Trash2 className="w-4 h-4" />
@@ -185,10 +185,10 @@ export default function MediaGallery() {
 
                             {/* Meta Info */}
                             <div className="p-3">
-                                <p className="text-sm font-medium text-gray-900 truncate" title={asset.alt_text}>
+                                <p className="text-sm font-medium text-foreground truncate" title={asset.alt_text}>
                                     {asset.alt_text || "Untitled"}
                                 </p>
-                                <p className="text-xs text-gray-500 truncate" title={asset.created_at}>
+                                <p className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground truncate" title={asset.created_at}>
                                     {new Date(asset.created_at).toLocaleDateString()}
                                 </p>
                             </div>
@@ -200,7 +200,7 @@ export default function MediaGallery() {
             {/* Toast Notification */}
             {toast && (
                 <div
-                    className={`fixed bottom-4 right-4 px-4 py-2 rounded-lg shadow-lg text-white flex items-center gap-2 z-50 ${toast.type === "success" ? "bg-green-600" : "bg-red-600"
+                    className={`fixed bottom-4 right-4 px-4 py-2 rounded-md shadow-lg flex items-center gap-2 z-50 ${toast.type === "success" ? "bg-signal text-primary-foreground" : "bg-destructive text-destructive-foreground"
                         }`}
                 >
                     <span>{toast.message}</span>

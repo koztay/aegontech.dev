@@ -25,7 +25,7 @@ export default async function AdminBlog() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Blog Management</h2>
+        <h2 className="font-display text-2xl font-semibold text-foreground">Blog Management</h2>
         <Link href="/admin/blog/new">
           <Button>Create New Post</Button>
         </Link>
@@ -36,10 +36,10 @@ export default async function AdminBlog() {
           <Card key={post.id} className="p-6">
             <div className="flex justify-between items-start">
               <div>
-                <h3 className="text-lg font-semibold">{post.title}</h3>
-                <p className="text-sm text-gray-500">/{post.slug}</p>
-                <p className="text-sm text-gray-500">
-                  Status: {post.status} | Created: {new Date(post.created_at).toLocaleDateString()}
+                <h3 className="text-lg font-semibold text-foreground">{post.title}</h3>
+                <p className="text-sm text-muted-foreground">/{post.slug}</p>
+                <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                  Status: {post.status} · Created: {new Date(post.created_at).toLocaleDateString()}
                 </p>
               </div>
               <div className="flex gap-2">
@@ -56,7 +56,7 @@ export default async function AdminBlog() {
       </div>
 
       {posts.length === 0 && (
-        <div className="text-center py-12 text-gray-500">
+        <div className="rounded-lg border border-dashed border-border py-12 text-center text-muted-foreground">
           No blog posts yet. Create your first post to get started.
         </div>
       )}

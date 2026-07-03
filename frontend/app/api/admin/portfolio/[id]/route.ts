@@ -84,6 +84,55 @@ export async function PUT(
   }
 }
 
+export async function PATCH(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+    const data = await request.json();
+
+    if (typeof data.published !== "boolean") {
+      return NextResponse.json(
+        { error: "Expected a boolean `published` field" },
+        { status: 400 }
+      );
+    }
+
+    const pool = getDbPool();
+    const result = await pool.query(
+      "UPDATE portfolio_items SET published = $1 WHERE id = $2 RETURNING id, published",
+      [data.published, id]
+    );
+
+    if (result.rows.length === 0) {
+      return NextResponse.json({ error: "Item not found" }, { status: 404 });
+    }
+
+    try {
+      const actor = (request.headers.get("cookie") || "").includes("admin_session=")
+        ? "admin"
+        : null;
+      await logAudit({
+        action: data.published ? "portfolio.publish" : "portfolio.unpublish",
+        actor,
+        entity_type: "portfolio_item",
+        entity_id: id,
+      });
+    } catch (e) {
+      console.warn("audit warn:", e);
+    }
+
+    return NextResponse.json(result.rows[0]);
+  } catch (error) {
+    console.error("Error updating publish state:", error);
+    return NextResponse.json(
+      { error: "Failed to update publish state" },
+      { status: 500 }
+    );
+  }
+}
+
 export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
