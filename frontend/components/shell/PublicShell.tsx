@@ -16,6 +16,21 @@ interface PublicShellProps {
   currentPath?: string;
 }
 
+/* Brand mark tinted with the signal gold via CSS mask, so it tracks the theme
+   accent automatically (deeper gold on light, brighter on dark). Kept inline so
+   the mask url() resolves at runtime rather than through the CSS bundler. */
+const logoMarkStyle: React.CSSProperties = {
+  backgroundColor: "hsl(var(--signal))",
+  WebkitMaskImage: "url(/assets/aegontech-logo.png)",
+  maskImage: "url(/assets/aegontech-logo.png)",
+  WebkitMaskRepeat: "no-repeat",
+  maskRepeat: "no-repeat",
+  WebkitMaskPosition: "center",
+  maskPosition: "center",
+  WebkitMaskSize: "contain",
+  maskSize: "contain",
+};
+
 export function PublicShell({
   children,
   navigationItems,
@@ -60,10 +75,10 @@ export function PublicShell({
           <div className="flex h-16 items-center justify-between">
             {/* Logo */}
             <Link href="/" className="group flex items-center gap-2.5">
-              <img
-                src="/assets/aegontech-logo.png"
-                alt="Aegontech"
-                className="h-8 w-auto transition-opacity group-hover:opacity-80"
+              <span
+                aria-hidden
+                style={logoMarkStyle}
+                className="h-8 w-8 transition-opacity group-hover:opacity-80"
               />
               <span className="font-display text-base font-semibold tracking-tight text-foreground">
                 AEGONTECH
@@ -171,11 +186,7 @@ export function PublicShell({
           <div className="flex flex-col gap-12 py-16 md:flex-row md:items-start md:justify-between">
             <div className="max-w-sm">
               <div className="flex items-center gap-2.5">
-                <img
-                  src="/assets/aegontech-logo.png"
-                  alt="Aegontech"
-                  className="h-8 w-auto"
-                />
+                <span aria-hidden style={logoMarkStyle} className="h-8 w-8" />
                 <span className="font-display text-base font-semibold tracking-tight text-foreground">
                   AEGONTECH
                 </span>
