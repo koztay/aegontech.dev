@@ -1,7 +1,7 @@
 import "../styles/globals.css";
 import type { Metadata } from "next";
 import { ReactNode } from "react";
-import { GoogleTagManager } from "@next/third-parties/google";
+import { GoogleAnalytics } from "@next/third-parties/google";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { buildWebsiteSchema, buildLocalBusinessSchema } from "@/lib/seo/meta";
 import { Bricolage_Grotesque, Instrument_Sans, JetBrains_Mono } from "next/font/google";
@@ -31,9 +31,9 @@ const mono = JetBrains_Mono({
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://aegontech.dev";
 
-// GTM only loads when the container ID is present — set it in production (and
+// GA4 only loads when the Measurement ID is present — set it in production (and
 // preview if wanted) so local dev traffic stays out of analytics.
-const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID;
+const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
 
 export const metadata: Metadata = {
   title: "Aegontech.dev",
@@ -74,22 +74,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <JsonLd schema={websiteSchema} />
         <JsonLd schema={localBusinessSchema} />
       </head>
-      {GTM_ID && <GoogleTagManager gtmId={GTM_ID} />}
-      <body className={`${sans.className} min-h-screen antialiased`}>
-        {/* GTM noscript fallback — captures the rare JS-disabled visitor. The
-            @next/third-parties component only injects the <head> script. */}
-        {GTM_ID && (
-          <noscript>
-            <iframe
-              src={`https://www.googletagmanager.com/ns.html?id=${GTM_ID}`}
-              height="0"
-              width="0"
-              style={{ display: "none", visibility: "hidden" }}
-            />
-          </noscript>
-        )}
-        {children}
-      </body>
+      <body className={`${sans.className} min-h-screen antialiased`}>{children}</body>
+      {/* GA4 loaded directly (no GTM). Auto-tracks page views + enhanced
+          measurement; loads after hydration so it doesn't block first paint. */}
+      {GA_ID && <GoogleAnalytics gaId={GA_ID} />}
     </html>
   );
 }
