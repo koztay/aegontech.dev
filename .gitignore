@@ -5,8 +5,10 @@ node_modules/
 .vercel/
 .npmrc
 pnpm-lock.yaml
-package-lock.json
 yarn.lock
+# package-lock.json is tracked on purpose: CI resolves dependencies from
+# scratch, and an unpinned transitive upgrade broke the build with no code
+# change. Keep the lockfile committed so builds are reproducible.
 build/
 dist/
 coverage/
