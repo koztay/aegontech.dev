@@ -1,5 +1,6 @@
 import { query } from "@/lib/db/client";
 import { getPublicUrl } from "@/lib/storage/minio";
+import { slugify } from "@/lib/slug";
 import type { PortfolioItem } from "@/lib/types";
 
 export type { PortfolioItem } from "@/lib/types";
@@ -18,12 +19,15 @@ const PLACEHOLDER_ITEMS: PortfolioItem[] = [
   {
     id: "maximus",
     title: "Maximus IPTV Player",
-    description: "Feature-rich IPTV player for iOS with M3U and Xtream support",
+    description:
+      "Feature-rich IPTV player for iPhone, iPad, Android and Android TV — M3U and Xtream Codes, live EPG, casting, and offline downloads",
     type: "mobile",
     screenshot: "https://picsum.photos/seed/maximus5678/400/300",
     links: {
+      website: "https://www.maximusplayer.com",
       appStore:
         "https://apps.apple.com/app/maximus-iptv-player-m3u-xtream/id6744410529",
+      playStore: "https://play.google.com/store/apps/details?id=com.aegontech.maximus",
     },
   },
   {
@@ -38,6 +42,25 @@ const PLACEHOLDER_ITEMS: PortfolioItem[] = [
   },
 ];
 
+function mapRow(row: any): PortfolioItem {
+  let screenshotUrl = row.screenshot;
+  if (screenshotUrl && !screenshotUrl.startsWith("http")) {
+    screenshotUrl = getPublicUrl(screenshotUrl);
+  }
+  return {
+    id: row.id,
+    title: row.title,
+    description: row.description,
+    type: row.type,
+    screenshot: screenshotUrl,
+    links: {
+      website: row.website_url || undefined,
+      appStore: row.app_store_url || undefined,
+      playStore: row.play_store_url || undefined,
+    },
+  };
+}
+
 export async function getAllPortfolioItems(): Promise<PortfolioItem[]> {
   try {
     const rows = await query<any>(
@@ -45,24 +68,7 @@ export async function getAllPortfolioItems(): Promise<PortfolioItem[]> {
     );
 
     if (rows.length > 0) {
-      return rows.map((row) => {
-        let screenshotUrl = row.screenshot;
-        if (screenshotUrl && !screenshotUrl.startsWith("http")) {
-          screenshotUrl = getPublicUrl(screenshotUrl);
-        }
-        return {
-          id: row.id,
-          title: row.title,
-          description: row.description,
-          type: row.type,
-          screenshot: screenshotUrl,
-          links: {
-            website: row.website_url || undefined,
-            appStore: row.app_store_url || undefined,
-            playStore: row.play_store_url || undefined,
-          },
-        };
-      });
+      return rows.map(mapRow);
     }
   } catch (error) {
     console.warn("Falling back to placeholder portfolio items", error);
@@ -74,38 +80,12 @@ export async function getAllPortfolioItems(): Promise<PortfolioItem[]> {
 export async function getPortfolioItemBySlug(
   slug: string
 ): Promise<PortfolioItem | null> {
-  try {
-    const rows = await query<any>(
-      "SELECT * FROM portfolio_items WHERE title = $1 AND published = true LIMIT 1",
-      [slug.replace(/-/g, " ")]
-    );
-
-    if (rows.length > 0) {
-      const row = rows[0];
-      let screenshotUrl = row.screenshot;
-      if (screenshotUrl && !screenshotUrl.startsWith("http")) {
-        screenshotUrl = getPublicUrl(screenshotUrl);
-      }
-      return {
-        id: row.id,
-        title: row.title,
-        description: row.description,
-        type: row.type,
-        screenshot: screenshotUrl,
-        links: {
-          website: row.website_url || undefined,
-          appStore: row.app_store_url || undefined,
-          playStore: row.play_store_url || undefined,
-        },
-      };
-    }
-  } catch (error) {
-    console.warn("Error fetching portfolio item:", error);
-  }
-
-  // Fallback to placeholder
-  const item = PLACEHOLDER_ITEMS.find((item) => item.id === slug);
-  return item || null;
+  // Resolve through the same slugify() the sitemap and cards use rather than
+  // trying to invert the slug back into a title. The previous approach
+  // (slug.replace(/-/g, " ")) matched `title` case-sensitively in SQL, so every
+  // lookup missed and multi-word items 404'd.
+  const items = await getAllPortfolioItems();
+  return items.find((item) => slugify(item.title) === slug) ?? null;
 }
 
 export async function getFeaturedPortfolioItems(): Promise<PortfolioItem[]> {

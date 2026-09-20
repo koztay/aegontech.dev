@@ -25,7 +25,7 @@ INSERT INTO testimonials (quote, client_name, client_company, client_photo_url) 
 -- Insert portfolio items
 INSERT INTO portfolio_items (title, description, type, screenshot, website_url, app_store_url, play_store_url) VALUES
   ('Dialable', 'International calling platform with competitive rates worldwide.', 'saas', 'https://picsum.photos/seed/dialable/400/300', 'https://www.dialable.world', NULL, NULL),
-  ('Maximus IPTV Player', 'Feature-rich IPTV player for iOS with M3U and Xtream support.', 'mobile', 'https://picsum.photos/seed/maximus/400/300', NULL, 'https://apps.apple.com/app/maximus-iptv-player-m3u-xtream/id6744410529', NULL),
+  ('Maximus IPTV Player', 'Feature-rich IPTV player for iPhone, iPad, Android and Android TV — M3U and Xtream Codes, live EPG, casting, and offline downloads.', 'mobile', 'https://picsum.photos/seed/maximus/400/300', 'https://www.maximusplayer.com', 'https://apps.apple.com/app/maximus-iptv-player-m3u-xtream/id6744410529', 'https://play.google.com/store/apps/details?id=com.aegontech.maximus'),
   ('CloudSync Pro', 'Enterprise file synchronization and collaboration platform.', 'saas', 'https://picsum.photos/seed/cloudsync/400/300', 'https://cloudsync.example.com', NULL, NULL);
 
 -- Insert sample blog post

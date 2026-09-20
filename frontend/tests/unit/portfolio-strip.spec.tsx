@@ -4,9 +4,9 @@ import { vi } from "vitest";
 
 vi.mock("@/lib/data/portfolio", () => ({
   getFeaturedPortfolioItems: vi.fn().mockResolvedValue([
-    { id: "1", title: "One", summary: "A", type: "web", link: "#", order_rank: 1, image: "/assets/placeholder.svg" },
-    { id: "2", title: "Two", summary: "B", type: "app", link: "#", order_rank: 2, image: "/assets/placeholder.svg" },
-    { id: "3", title: "Three", summary: "C", type: "web", link: "#", order_rank: 3, image: "/assets/placeholder.svg" }
+    { id: "1", title: "One", description: "A", type: "saas", screenshot: "/assets/placeholder.svg", links: { website: "#" } },
+    { id: "2", title: "Two", description: "B", type: "mobile", screenshot: "/assets/placeholder.svg", links: { appStore: "#" } },
+    { id: "3", title: "Three", description: "C", type: "saas", screenshot: "/assets/placeholder.svg", links: {} }
   ])
 }));
 

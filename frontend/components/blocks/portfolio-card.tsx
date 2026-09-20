@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { PortfolioItem } from "@/lib/data/portfolio";
+import { slugify } from "@/lib/slug";
 
 type Props = {
   item: PortfolioItem;
@@ -7,7 +8,11 @@ type Props = {
 };
 
 export function PortfolioCard({ item, priority }: Props) {
-  const itemUrl = item.links.website || item.links.appStore || item.links.playStore || `/portfolio/${item.id}`;
+  const itemUrl =
+    item.links.website ||
+    item.links.appStore ||
+    item.links.playStore ||
+    `/portfolio/${slugify(item.title)}`;
   
   return (
     <a

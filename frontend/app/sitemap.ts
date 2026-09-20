@@ -1,6 +1,7 @@
 import { MetadataRoute } from "next";
 import { getAllBlogSlugs, getBlogIndex } from "@/lib/data/blog";
 import { getAllPortfolioItems } from "@/lib/data/portfolio";
+import { slugify } from "@/lib/slug";
 import type { PortfolioItem } from "@/lib/types";
 
 export const revalidate = 60;
@@ -56,8 +57,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     const items = await getAllPortfolioItems();
     portfolioItems = items.map((item: PortfolioItem) => {
-      // Convert title to slug format (replace spaces with hyphens)
-      const slug = item.title.toLowerCase().replace(/\s+/g, "-");
+      const slug = slugify(item.title);
       return {
         url: `${siteUrl}/portfolio/${slug}`,
         lastModified: new Date(),
