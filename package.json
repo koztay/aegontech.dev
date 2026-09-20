@@ -8,7 +8,7 @@
     "typescript": "5.9.3"
   },
   "scripts": {
-    "build": "cd frontend && npm install --loglevel=error && npm run build",
+    "build": "cd frontend && npm install --include=dev --loglevel=error && npm run build",
     "dev": "cd frontend && npm run dev",
     "start": "cd frontend && npm start"
   }
