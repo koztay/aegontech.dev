@@ -30,6 +30,21 @@ describe("slugify", () => {
     expect(slugify("Dialable")).toBe("dialable");
     expect(slugify("CloudSync Pro")).toBe("cloudsync-pro");
   });
+
+  test("transliterates Turkish letters instead of dropping them", () => {
+    // Without transliteration this collapses to "evre-temiz", because every
+    // character outside [a-z0-9] is treated as a separator.
+    expect(slugify("Çevre Temiz")).toBe("cevre-temiz");
+    expect(slugify("Işık Güneş")).toBe("isik-gunes");
+    expect(slugify("Şehir Ağı")).toBe("sehir-agi");
+    expect(slugify("İstanbul")).toBe("istanbul");
+  });
+
+  test("strips other diacritics and tidies separators", () => {
+    expect(slugify("Café Déjà")).toBe("cafe-deja");
+    expect(slugify("  Spaced  Out  ")).toBe("spaced-out");
+    expect(slugify("A/B — Test")).toBe("a-b-test");
+  });
 });
 
 describe("getPortfolioItemBySlug", () => {
