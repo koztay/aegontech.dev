@@ -74,4 +74,13 @@ describe("supabase-storage", () => {
     await m.ensureBucketExists();
     expect(storage.createBucket).toHaveBeenCalledWith("b", { public: true });
   });
+  it("throws a clear error when SUPABASE_STORAGE_BUCKET is unset (no silent default bucket)", async () => {
+    delete process.env.SUPABASE_STORAGE_BUCKET;
+    const m = await import("@/lib/storage/supabase-storage");
+    expect(() => m.getPublicUrl("k")).toThrow(/SUPABASE_STORAGE_BUCKET/);
+    await expect(m.removeObject("k")).rejects.toThrow(/SUPABASE_STORAGE_BUCKET/);
+    await expect(m.ensureBucketExists()).rejects.toThrow(/SUPABASE_STORAGE_BUCKET/);
+    process.env.SUPABASE_STORAGE_BUCKET = " ";
+    expect(() => m.getPublicUrl("k")).toThrow(/SUPABASE_STORAGE_BUCKET/);
+  });
 });

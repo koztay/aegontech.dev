@@ -1,3 +1,23 @@
+// Supabase Storage serves the public media (/storage/v1/object/public/...). Derive the host from
+// SUPABASE_URL; if it is unset (e.g. a build without env) just omit the pattern.
+function supabaseImagePattern() {
+  const raw = process.env.SUPABASE_URL;
+  if (!raw) return [];
+  try {
+    const u = new URL(raw);
+    return [
+      {
+        protocol: u.protocol.replace(':', ''),
+        hostname: u.hostname,
+        port: u.port,
+        pathname: '/storage/v1/object/public/**',
+      },
+    ];
+  } catch {
+    return [];
+  }
+}
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
@@ -9,12 +29,7 @@ const nextConfig = {
         port: '',
         pathname: '/**',
       },
-      {
-        protocol: 'https',
-        hostname: 'minio-h84840cco0c0k04g0ggg4w4g.37.27.176.89.sslip.io',
-        port: '',
-        pathname: '/**',
-      },
+      ...supabaseImagePattern(),
     ],
     formats: ['image/avif', 'image/webp'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],

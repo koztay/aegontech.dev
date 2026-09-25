@@ -3,8 +3,8 @@
  *
  * Behaviour differences vs MinIO that callers must know about:
  * - presignPut(objectName, expiresSeconds?): Supabase signed upload URLs have a FIXED expiry
- *   (2 hours); the expiresSeconds argument is accepted for compatibility but ignored, so the
- *   `expiresIn: 300` the presign route reports is not enforced server-side. The URL accepts a
+ *   (2 hours = 7200 s); the expiresSeconds argument is accepted for compatibility but ignored;
+ *   the presign route reports the real lifetime (`expiresIn: 7200`). The URL accepts a
  *   plain `PUT` with body + Content-Type (no signature headers). createSignedUploadUrl REJECTS
  *   ("The resource already exists") if the key already exists (MinIO would have overwritten).
  * - presignGet(objectName, expiresSeconds?): expiry is honoured (seconds), like MinIO. The bucket
@@ -13,11 +13,18 @@
  *   so finalize keeps working; it rejects if the object is missing (as MinIO did).
  * - getPublicUrl: built by supabase-js as {SUPABASE_URL}/storage/v1/object/public/{bucket}/{key}
  *   with the key percent-encoded (MinIO's version did not encode; sanitized keys are unaffected).
+ * - The bucket name comes from SUPABASE_STORAGE_BUCKET and there is no default: functions throw
+ *   "Missing SUPABASE_STORAGE_BUCKET environment variable" when it is unset (MinIO fell back to "public-media").
  * - The MinIO default client export is replaced by explicit functions (putObject).
  */
 import { getSupabase } from "@/lib/supabase/server";
 
-const bucketName = () => process.env.SUPABASE_STORAGE_BUCKET || "public-media";
+/** Bucket name from SUPABASE_STORAGE_BUCKET; there is deliberately no default (fail loudly). */
+const bucketName = () => {
+  const name = process.env.SUPABASE_STORAGE_BUCKET?.trim();
+  if (!name) throw new Error("Missing SUPABASE_STORAGE_BUCKET environment variable");
+  return name;
+};
 const bucket = () => getSupabase().storage.from(bucketName());
 
 function check<T>(res: { data: T | null; error: { message: string } | null }): T {
