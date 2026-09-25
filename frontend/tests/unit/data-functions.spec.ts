@@ -40,7 +40,7 @@ describe("lib/data/blog", () => {
     const all = await getAllBlogSlugs();
     expect(all).toHaveLength(1001);
     expect(all[1000].publishedAt).toBeInstanceOf(Date);
-    expect(db.find("blog_posts", "range")).toEqual([[0, 999], [1000, 1999]]);
+    expect(db.find("blog_posts", "range")).toEqual([[0, 999], [1000, 1999], [1001, 2000]]);
   });
   it("getAllBlogSlugs returns [] on error", async () => {
     db.queue("blog_posts", { error: { message: "x" } });

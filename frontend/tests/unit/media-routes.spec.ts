@@ -156,7 +156,7 @@ describe("GET /api/media/list", () => {
     const { GET } = await import("@/app/api/media/list/route");
     const res = await GET(get("?limit=5000"));
     expect((await res.json()).media).toHaveLength(1616);
-    expect(db.find("media_assets", "range")).toEqual([[0, 999], [1000, 1999]]);
+    expect(db.find("media_assets", "range")).toEqual([[0, 999], [1000, 1999], [1616, 2615]]);
   });
   it("401 for unauthenticated, 500 on db error", async () => {
     const { GET } = await import("@/app/api/media/list/route");

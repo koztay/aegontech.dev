@@ -6,6 +6,12 @@
 - browserless.io API key for screenshots
 - Vercel CLI (optional for deploy)
 
+## Environment (required)
+- `SUPABASE_URL`: project URL. Needed at BUILD time too (`next build` fails without it: next/image host is derived from it) and at runtime.
+- `SUPABASE_SERVICE_ROLE_KEY`: server-only, never expose to the browser.
+- `SUPABASE_STORAGE_BUCKET`: public media bucket, `aegontech` (no default; the app throws if unset).
+- `ADMIN_PASSWORD`, `NEXT_PUBLIC_SITE_URL` as before. Set all of these in Vercel for Production/Preview.
+
 ## Setup
 1) Install deps: `pnpm install`
 2) Environment (frontend/.env.local):

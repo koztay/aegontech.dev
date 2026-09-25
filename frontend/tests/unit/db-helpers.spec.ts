@@ -32,16 +32,32 @@ describe("fetchAll", () => {
     expect(all).toHaveLength(2500);
     expect(all[2499]).toEqual({ i: 2499 });
   });
-  it("stops on a short page and honours max", async () => {
+  it("honours max and stops at an empty page", async () => {
     expect(await fetchAll(build, { max: 1500 })).toHaveLength(1500);
     expect(await fetchAll(build, { max: 5 })).toHaveLength(5);
     expect(await fetchAll((f, t) => Promise.resolve({ data: rows.slice(f, Math.min(t + 1, 10)), error: null }))).toHaveLength(10);
   });
-  it("issues one request per page, exact multiple ends with an empty page", async () => {
+  it("does not stop on a short page: a server max-rows below the page size still yields every row", async () => {
+    const seen: Array<[number, number]> = [];
+    const cap = 300; // server returns at most 300 rows per request
+    const all = await fetchAll((f, t) => { seen.push([f, t]); return Promise.resolve({ data: rows.slice(f, Math.min(t + 1, f + cap)), error: null }); });
+    expect(all).toHaveLength(2500);
+    expect(all.map((r: any) => r.i)).toEqual(rows.map((r) => r.i));
+    expect(seen.slice(0, 3)).toEqual([[0, 999], [300, 1299], [600, 1599]]);
+  });
+  it("returns [] for an empty first page (one request)", async () => {
+    let calls = 0;
+    expect(await fetchAll(() => { calls++; return Promise.resolve({ data: [], error: null }); })).toEqual([]);
+    expect(calls).toBe(1);
+  });
+  it("exact multiple of the page size ends with an empty page", async () => {
     const seen: Array<[number, number]> = [];
     const exact = Array.from({ length: 2000 }, (_, i) => i);
     await fetchAll((f, t) => { seen.push([f, t]); return Promise.resolve({ data: exact.slice(f, t + 1), error: null }); });
     expect(seen).toEqual([[0, 999], [1000, 1999], [2000, 2999]]);
+  });
+  it("has a hard safety cap against a server that never stops returning rows", async () => {
+    await expect(fetchAll(() => Promise.resolve({ data: [1], error: null }), { pageSize: 1 })).rejects.toThrow(/exceeded/);
   });
   it("throws when a page errors", async () => {
     await expect(fetchAll(() => Promise.resolve({ data: null, error: { message: "bad" } }))).rejects.toThrow("bad");
