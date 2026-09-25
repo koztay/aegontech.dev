@@ -61,9 +61,10 @@ Navigate to: `http://localhost:3000/admin`
 ## Development Notes
 
 ### Session Management
-- Sessions are simple cookie-based tokens
-- No database persistence for sessions
-- Server restart = all sessions invalidated
+- Sessions are signed (HMAC-SHA256) tokens; nothing is stored server-side
+- A session lasts 24 hours, then expires
+- Restarting the server does NOT end sessions; they are invalidated only by rotating `SESSION_SECRET` (or by expiring)
+- Logout only removes the cookie in that browser; a copied token stays valid until it expires or `SESSION_SECRET` is rotated
 
 ### Database Queries
 - Direct PostgreSQL queries via `pg` library

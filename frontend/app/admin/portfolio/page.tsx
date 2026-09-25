@@ -1,3 +1,4 @@
+import { requireAdminPage } from "@/lib/auth/admin-page";
 import { getDb, reviveRows, fetchAll } from "@/lib/db/supabase";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -30,6 +31,7 @@ async function getPortfolioItems() {
 }
 
 export default async function AdminPortfolio() {
+  await requireAdminPage();
   const items = await getPortfolioItems();
   const MediaUploader = (await import("@/components/admin/MediaUploader")).default;
 

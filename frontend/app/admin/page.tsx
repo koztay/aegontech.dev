@@ -1,3 +1,4 @@
+import { requireAdminPage } from "@/lib/auth/admin-page";
 import Link from "next/link";
 import { getDb } from "@/lib/db/supabase";
 import { Card } from "@/components/ui/card";
@@ -20,6 +21,7 @@ async function getStats() {
 }
 
 export default async function AdminDashboard() {
+  await requireAdminPage();
   const stats = await getStats();
 
   return (
