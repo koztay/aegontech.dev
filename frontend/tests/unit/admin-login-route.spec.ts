@@ -63,4 +63,15 @@ describe("POST /api/admin/login", () => {
     expect(res.status).toBe(500);
     expect(jar.set).not.toHaveBeenCalled();
   });
+  it("a non-JSON body containing a password is never logged", async () => {
+    const { POST } = await import("@/app/api/admin/login/route");
+    const res = await POST(new Request("http://localhost/api/admin/login", { method: "POST", body: "password=hunter2" }));
+    expect(res.status).toBe(500);
+    expect(await res.json()).toEqual({ error: "Login failed" });
+    expect(jar.set).not.toHaveBeenCalled();
+    expect(errSpy).toHaveBeenCalled();
+    const dump = JSON.stringify(errSpy.mock.calls.map((c) => c.map((a) => (a instanceof Error ? { n: a.name, m: a.message, s: a.stack } : a))));
+    expect(dump).not.toContain("hunter2");
+    for (const c of errSpy.mock.calls) for (const a of c) expect(a instanceof Error).toBe(false);
+  });
 });

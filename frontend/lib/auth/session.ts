@@ -87,9 +87,11 @@ export async function verifySession(token: string | undefined | null): Promise<b
 
     const payload = JSON.parse(new TextDecoder().decode(payloadBytes));
     if (!payload || payload.v !== SESSION_VERSION) return false;
-    if (typeof payload.iat !== "number" || typeof payload.exp !== "number") return false;
+    const { iat, exp } = payload;
+    if (!Number.isInteger(iat) || !Number.isInteger(exp)) return false;
+    if (iat < 0 || exp <= iat || exp - iat > SESSION_MAX_AGE_SECONDS) return false;
     const now = Math.floor(Date.now() / 1000);
-    if (payload.exp <= now || payload.iat > now + 60) return false;
+    if (exp <= now || iat > now + 60) return false;
     return true;
   } catch {
     return false;

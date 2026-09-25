@@ -94,6 +94,37 @@ describe("signSession / verifySession", () => {
   });
 });
 
+describe("verifySession payload bounds", () => {
+  const now = () => Math.floor(Date.now() / 1000);
+  const ok = async (iat: number, exp: number) => verifySession(await craft({ v: 1, iat, exp }));
+  const rawCraft = async (json: string) => {
+    const p = b64url(json);
+    return `${p}.${b64url(await hmac(p))}`;
+  };
+  it("rejects exp far in the future (year 3000) and exp 1e400", async () => {
+    expect(await ok(now(), 32503680000)).toBe(false);
+    expect(await verifySession(await rawCraft(`{"v":1,"iat":${now()},"exp":1e400}`))).toBe(false);
+  });
+  it("rejects floats, negative iat and exp <= iat", async () => {
+    const n = now();
+    expect(await ok(n, n + 1000.5)).toBe(false);
+    expect(await ok(n + 0.5, n + 1000)).toBe(false);
+    expect(await ok(-5, n + 1000)).toBe(false);
+    expect(await ok(n, n)).toBe(false);
+    expect(await ok(n, n - 10)).toBe(false);
+  });
+  it("lifetime cap: just over rejected, exactly the cap accepted", async () => {
+    const n = now();
+    expect(await ok(n, n + SESSION_MAX_AGE_SECONDS + 1)).toBe(false);
+    expect(await ok(n, n + SESSION_MAX_AGE_SECONDS)).toBe(true);
+  });
+  it("clock skew: iat 30 s ahead accepted, 120 s ahead rejected", async () => {
+    const n = now();
+    expect(await ok(n + 30, n + 30 + 1000)).toBe(true);
+    expect(await ok(n + 120, n + 120 + 1000)).toBe(false);
+  });
+});
+
 describe("getSessionCookie", () => {
   const req = (cookie?: string) => new Request("http://x", { headers: cookie ? { cookie } : {} });
   it("returns the exact cookie value", () => {

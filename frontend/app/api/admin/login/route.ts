@@ -50,7 +50,8 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Login error:", error);
+    // Never log the error object/message: a JSON SyntaxError quotes the request body.
+    console.error("Login error:", error instanceof Error ? error.name : "unknown");
     return loginFailed();
   }
 }
