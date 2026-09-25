@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { requireAdmin } from "@/lib/auth/api-auth";
+import { getSessionCookie, verifySession } from "@/lib/auth/session";
 
 const cachePage = "public, s-maxage=300, stale-while-revalidate=60";
 const cacheApi = "no-store";
@@ -33,7 +35,7 @@ function applySecurityHeaders(response: NextResponse) {
     response.headers.set("Cross-Origin-Opener-Policy", "same-origin");
 }
 
-export function proxy(request: Request) {
+export async function proxy(request: Request) {
     const url = new URL(request.url);
 
     // Redirect non-www to www for SEO canonicalization
@@ -53,13 +55,26 @@ export function proxy(request: Request) {
     const response = NextResponse.next();
     applySecurityHeaders(response);
 
-    // Protect admin routes (except login page)
+    // Protect admin pages (except login page): the signed session cookie must verify.
     if (isAdmin && !isAdminLogin) {
-        const cookies = request.headers.get("cookie");
-        const hasSession = cookies?.includes("admin_session=");
-
-        if (!hasSession) {
+        if (!(await verifySession(getSessionCookie(request)))) {
             return NextResponse.redirect(new URL("/admin-login", request.url));
+        }
+    }
+
+    // Defence in depth for the admin API (route handlers stay the primary control):
+    // session, x-api-key or x-internal-secret required, except login/logout.
+    const isAdminApi =
+        url.pathname.startsWith("/api/admin/") &&
+        url.pathname !== "/api/admin/login" &&
+        url.pathname !== "/api/admin/logout";
+    if (isAdminApi) {
+        const auth = await requireAdmin(request);
+        if (!auth.ok) {
+            const denied = NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+            applySecurityHeaders(denied);
+            denied.headers.set("Cache-Control", cacheApi);
+            return denied;
         }
     }
 

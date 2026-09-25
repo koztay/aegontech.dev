@@ -10,6 +10,7 @@
 - `SUPABASE_URL`: project URL. Needed at BUILD time too (`next build` fails without it: next/image host is derived from it) and at runtime.
 - `SUPABASE_SERVICE_ROLE_KEY`: server-only, never expose to the browser.
 - `SUPABASE_STORAGE_BUCKET`: public media bucket, `aegontech` (no default; the app throws if unset).
+- `SESSION_SECRET`: at least 32 characters, required for admin login (signs the admin session cookie; login returns 500 and admin pages/APIs stay locked without it). Generate with `openssl rand -hex 32`. Changing it logs everyone out.
 - `ADMIN_PASSWORD`, `NEXT_PUBLIC_SITE_URL` as before. Set all of these in Vercel for Production/Preview.
 
 ## Setup
@@ -20,6 +21,7 @@ SUPABASE_URL=https://your-project.supabase.example
 SUPABASE_SERVICE_ROLE_KEY=...   # server-only
 SUPABASE_STORAGE_BUCKET=aegontech
 ADMIN_PASSWORD=...
+SESSION_SECRET=...              # >= 32 chars, `openssl rand -hex 32`
 BROWSERLESS_API_KEY=...
 APP_STORE_LOOKUP_BASE=https://itunes.apple.com/lookup
 ```

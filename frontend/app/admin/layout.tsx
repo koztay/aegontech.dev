@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import Link from "next/link";
+import { SESSION_COOKIE, verifySession } from "@/lib/auth/session";
 import { LayoutDashboard, FolderKanban, FileText, LogOut, Image as ImageIcon } from "lucide-react";
 
 export default async function AdminLayout({
@@ -9,9 +10,9 @@ export default async function AdminLayout({
   children: React.ReactNode;
 }) {
   const cookieStore = await cookies();
-  const session = cookieStore.get("admin_session");
+  const session = cookieStore.get(SESSION_COOKIE);
 
-  if (!session) {
+  if (!(await verifySession(session?.value))) {
     redirect("/admin-login");
   }
 

@@ -5,7 +5,9 @@
 1. **Set Admin Password**
    ```bash
    echo "ADMIN_PASSWORD=your_secure_password" >> .env
+   echo "SESSION_SECRET=$(openssl rand -hex 32)" >> .env
    ```
+   `SESSION_SECRET` (at least 32 characters) is required for admin login: it signs the session cookie.
 
 2. **Ensure Database is Running**
    - The admin panel uses a Supabase project (Postgres + Storage)
@@ -51,7 +53,8 @@ Navigate to: `http://localhost:3000/admin`
 
 - All admin routes protected by middleware
 - Password stored in environment variable
-- Session stored in httpOnly cookie
+- Session is a signed (HMAC-SHA256) token in an httpOnly cookie, verified on every admin page and API request
+- Admin API routes also require a valid session (or the `x-api-key` / `x-internal-secret` headers)
 - Automatic logout after 24 hours
 - Secure cookies in production (HTTPS only)
 
@@ -78,6 +81,7 @@ Navigate to: `http://localhost:3000/admin`
 
 ### "Invalid password" error
 - Check `ADMIN_PASSWORD` in `.env` file
+- A generic "Login failed" (500) usually means `SESSION_SECRET` is missing or shorter than 32 characters
 - Ensure no trailing spaces
 - Restart dev server after changing `.env`
 
