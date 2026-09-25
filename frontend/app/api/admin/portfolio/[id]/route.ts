@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { requireAdmin, unauthorizedResponse } from "@/lib/auth/api-auth";
 import { getDb, unwrap, reviveRow } from "@/lib/db/supabase";
 import { removeObject, getPublicUrl } from "@/lib/storage/supabase-storage";
 import { logAudit } from "@/lib/observability/audit";
@@ -7,6 +8,9 @@ export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const auth = await requireAdmin(request);
+  if (!auth.ok) return unauthorizedResponse();
+
   try {
     const { id } = await params;
     const item = reviveRow(
@@ -41,6 +45,9 @@ export async function PUT(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const auth = await requireAdmin(request);
+  if (!auth.ok) return unauthorizedResponse();
+
   try {
     const { id } = await params;
     const data = await request.json();
@@ -83,6 +90,9 @@ export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const auth = await requireAdmin(request);
+  if (!auth.ok) return unauthorizedResponse();
+
   try {
     const { id } = await params;
     const data = await request.json();
@@ -108,12 +118,9 @@ export async function PATCH(
     }
 
     try {
-      const actor = (request.headers.get("cookie") || "").includes("admin_session=")
-        ? "admin"
-        : null;
       await logAudit({
         action: data.published ? "portfolio.publish" : "portfolio.unpublish",
-        actor,
+        actor: auth.actor,
         entity_type: "portfolio_item",
         entity_id: id,
       });
@@ -135,6 +142,9 @@ export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const auth = await requireAdmin(request);
+  if (!auth.ok) return unauthorizedResponse();
+
   try {
     const { id } = await params;
     const db = getDb();
@@ -163,8 +173,7 @@ export async function DELETE(
     }
 
     try {
-      const actor = (request.headers.get("cookie") || "").includes("admin_session=") ? "admin" : null;
-      await logAudit({ action: "portfolio.delete", actor, entity_type: "portfolio_item", entity_id: id, details: { deleted_media_count: mediaRows.length } });
+      await logAudit({ action: "portfolio.delete", actor: auth.actor, entity_type: "portfolio_item", entity_id: id, details: { deleted_media_count: mediaRows.length } });
     } catch (e) {
       console.warn("audit warn:", e);
     }

@@ -1,18 +1,14 @@
 import { NextResponse } from "next/server";
+import { requireAdmin, unauthorizedResponse } from "@/lib/auth/api-auth";
 import { statObject, getPublicUrl } from "@/lib/storage/supabase-storage";
 import { getDb, unwrap, reviveRow } from "@/lib/db/supabase";
 import { logAudit } from "@/lib/observability/audit";
 
-function isAdmin(request: Request) {
-  const cookie = request.headers.get("cookie") || "";
-  return cookie.includes("admin_session=");
-}
-
 export async function POST(request: Request) {
+  const auth = await requireAdmin(request);
+  if (!auth.ok) return unauthorizedResponse();
+
   try {
-    if (!isAdmin(request)) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
 
     const body = await request.json();
     const { objectKey, altText, caption, associatedType, associatedId } = body || {};
@@ -58,8 +54,7 @@ export async function POST(request: Request) {
     );
 
     try {
-      const actor = (request.headers.get("cookie") || "").includes("admin_session=") ? "admin" : null;
-      await logAudit({ action: "media.finalize", actor, entity_type: "media_assets", entity_id: String(record.id), details: { storagePath, mime, size } });
+      await logAudit({ action: "media.finalize", actor: auth.actor, entity_type: "media_assets", entity_id: String(record.id), details: { storagePath, mime, size } });
     } catch (e) {
       console.warn("audit warn:", e);
     }

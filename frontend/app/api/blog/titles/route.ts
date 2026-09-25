@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
+import { requireAdmin, unauthorizedResponse } from "@/lib/auth/api-auth";
 import { getDb, unwrap } from "@/lib/db/supabase";
-import { isAuthorized } from "@/lib/auth/api-auth";
 
 export async function GET(request: NextRequest) {
+    const auth = await requireAdmin(request);
+    if (!auth.ok) return unauthorizedResponse();
+
     try {
-        const auth = isAuthorized(request);
-        if (!auth.ok) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        }
 
         const searchParams = request.nextUrl.searchParams;
         const limit = Math.min(parseInt(searchParams.get("limit") || "15"), 50);

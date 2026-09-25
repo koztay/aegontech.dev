@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { requireAdmin, unauthorizedResponse } from "@/lib/auth/api-auth";
 import { presignPut } from "@/lib/storage/supabase-storage";
 import { logAudit } from "@/lib/observability/audit";
 
@@ -7,16 +8,11 @@ const MAX_SIZE = Number(process.env.MAX_UPLOAD_BYTES || 5 * 1024 * 1024); // 5MB
 const SIGNED_UPLOAD_URL_TTL_SECONDS = 7200;
 const ALLOWED = ["image/png", "image/jpeg", "image/webp"];
 
-function isAdmin(request: Request) {
-  const cookie = request.headers.get("cookie") || "";
-  return cookie.includes("admin_session=");
-}
-
 export async function POST(request: Request) {
+  const auth = await requireAdmin(request);
+  if (!auth.ok) return unauthorizedResponse();
+
   try {
-    if (!isAdmin(request)) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
 
     const body = await request.json();
     const { filename, contentType, sizeBytes, purpose } = body || {};
@@ -40,8 +36,7 @@ export async function POST(request: Request) {
     const uploadUrl = await presignPut(objectKey);
 
     try {
-      const actor = (request.headers.get("cookie") || "").includes("admin_session=") ? "admin" : null;
-      await logAudit({ action: "media.presign", actor, entity_type: "object", entity_id: objectKey, details: { contentType, sizeBytes, purpose } });
+      await logAudit({ action: "media.presign", actor: auth.actor, entity_type: "object", entity_id: objectKey, details: { contentType, sizeBytes, purpose } });
     } catch (e) {
       console.warn("audit warn:", e);
     }

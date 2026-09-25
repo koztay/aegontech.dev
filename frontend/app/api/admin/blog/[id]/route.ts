@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { requireAdmin, unauthorizedResponse } from "@/lib/auth/api-auth";
 import { getDb, unwrap, reviveRow } from "@/lib/db/supabase";
 import { removeObject } from "@/lib/storage/supabase-storage";
 import { logAudit } from "@/lib/observability/audit";
@@ -7,6 +8,9 @@ export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const auth = await requireAdmin(request);
+  if (!auth.ok) return unauthorizedResponse();
+
   try {
     const { id } = await params;
     const row = unwrap(
@@ -34,6 +38,9 @@ export async function PUT(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const auth = await requireAdmin(request);
+  if (!auth.ok) return unauthorizedResponse();
+
   try {
     const { id } = await params;
     const data = await request.json();
@@ -76,6 +83,9 @@ export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const auth = await requireAdmin(request);
+  if (!auth.ok) return unauthorizedResponse();
+
   try {
     const { id } = await params;
     const db = getDb();
@@ -104,8 +114,7 @@ export async function DELETE(
     }
 
     try {
-      const actor = (request.headers.get("cookie") || "").includes("admin_session=") ? "admin" : null;
-      await logAudit({ action: "blog.delete", actor, entity_type: "blog_post", entity_id: id, details: { deleted_media_count: mediaRows.length } });
+      await logAudit({ action: "blog.delete", actor: auth.actor, entity_type: "blog_post", entity_id: id, details: { deleted_media_count: mediaRows.length } });
     } catch (e) {
       console.warn("audit warn:", e);
     }

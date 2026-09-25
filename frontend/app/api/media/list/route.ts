@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
+import { requireAdmin, unauthorizedResponse } from "@/lib/auth/api-auth";
 import { getDb, reviveRows, fetchAll, escapeLike, orValue } from "@/lib/db/supabase";
-import { isAuthorized } from "@/lib/auth/api-auth";
 import { getPublicUrl } from "@/lib/storage/supabase-storage";
 
 export async function GET(request: Request) {
+  const auth = await requireAdmin(request);
+  if (!auth.ok) return unauthorizedResponse();
+
   try {
-    const auth = isAuthorized(request);
-    if (!auth.ok) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const url = new URL(request.url);
     const q = url.searchParams.get("q") || null;
