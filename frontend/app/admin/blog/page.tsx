@@ -1,3 +1,4 @@
+import { requireAdminPage } from "@/lib/auth/admin-page";
 import { getDb, reviveRows, fetchAll } from "@/lib/db/supabase";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -24,6 +25,7 @@ async function getBlogPosts() {
 }
 
 export default async function AdminBlog() {
+  await requireAdminPage();
   const posts = await getBlogPosts();
 
   return (

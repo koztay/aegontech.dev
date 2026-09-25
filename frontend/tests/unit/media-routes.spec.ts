@@ -1,5 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { db } from "./helpers/supabase-mock";
+import { validCookie } from "./helpers/auth";
+
+const COOKIE = await validCookie();
 
 const storageMock = {
   presignPut: vi.fn(async (_k: string, _e?: number) => "https://s/signed-put"),
@@ -16,7 +19,7 @@ const dbRow = { id: "m1", storage_path: "k", url: "u", size_bytes: 7, created_at
 const jsonRow = { id: "m1", storage_path: "k", url: "u", size_bytes: "7", created_at: "2026-01-01T00:00:00.000Z" };
 vi.mock("@/lib/observability/audit", () => ({ logAudit: vi.fn(async () => undefined) }));
 
-const admin = { cookie: "admin_session=1", "content-type": "application/json" };
+const admin = { cookie: COOKIE, "content-type": "application/json" };
 const req = (url: string, body: any, headers: Record<string, string> = admin) =>
   new Request(`http://localhost${url}`, { method: "POST", headers, body: JSON.stringify(body) });
 
@@ -85,7 +88,7 @@ describe("POST /api/media/upload (JSON base64 path) and /proxy", () => {
     const fd = new FormData();
     fd.set("file", new File([new Uint8Array([1, 2, 3])], "y.png", { type: "image/png" }));
     fd.set("altText", "alt");
-    const res = await POST(new Request("http://localhost/api/media/proxy", { method: "POST", headers: { cookie: "admin_session=1" }, body: fd }));
+    const res = await POST(new Request("http://localhost/api/media/proxy", { method: "POST", headers: { cookie: COOKIE }, body: fd }));
     expect(res.status).toBe(200);
     expect((await res.json()).media.id).toBe("m1");
     expect(storageMock.putObject).toHaveBeenCalledTimes(1);
@@ -125,7 +128,7 @@ describe("association with a portfolio item / blog post", () => {
 
 describe("GET /api/media/list", () => {
   const listRow = { id: "m1", url: "https://h/u1", alt_text: "a", storage_path: "uploads/a.png", mime_type: "image/png", created_at: "2026-01-01T00:00:00+00:00" };
-  const get = (qs = "") => new Request(`http://localhost/api/media/list${qs}`, { headers: { cookie: "admin_session=1" } });
+  const get = (qs = "") => new Request(`http://localhost/api/media/list${qs}`, { headers: { cookie: COOKIE } });
   it("returns { media } newest first, url normalised, created_at serialised as before", async () => {
     db.reset();
     db.queue("media_assets", { data: [listRow, { ...listRow, id: "m2", url: "uploads/b.png" }] });

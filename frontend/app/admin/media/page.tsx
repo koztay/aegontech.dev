@@ -1,8 +1,9 @@
-
+import { requireAdminPage } from "@/lib/auth/admin-page";
 import MediaGallery from "@/components/admin/MediaGallery";
 import { Image as ImageIcon } from "lucide-react";
 
-export default function MediaPage() {
+export default async function MediaPage() {
+    await requireAdminPage();
     return (
         <div className="space-y-6">
             <div className="flex flex-col gap-2">

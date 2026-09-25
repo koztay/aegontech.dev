@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { requireAdmin, unauthorizedResponse } from "@/lib/auth/api-auth";
 import { getPublicUrl, ensureBucketExists, putObject } from "@/lib/storage/supabase-storage";
 import { getDb, unwrap, reviveRow } from "@/lib/db/supabase";
 import { logAudit } from "@/lib/observability/audit";
@@ -6,12 +7,12 @@ import { logAudit } from "@/lib/observability/audit";
 const MAX_SIZE = Number(process.env.MAX_UPLOAD_BYTES || 5 * 1024 * 1024); // 5MB
 const ALLOWED = ["image/png", "image/jpeg", "image/webp"];
 
-import { isAuthorized } from "@/lib/auth/api-auth";
 
 export async function POST(request: Request) {
+  const auth = await requireAdmin(request);
+  if (!auth.ok) return unauthorizedResponse();
+
   try {
-    const auth = isAuthorized(request);
-    if (!auth.ok) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     let filename, contentType, buffer, altText, caption, associatedType, associatedId;
 
@@ -121,7 +122,7 @@ export async function POST(request: Request) {
     }
 
     try {
-      await logAudit({ action: "media.upload", actor: auth.actor || null, entity_type: "media_assets", entity_id: String(record.id), details: { storagePath: objectKey, size: buffer.length } });
+      await logAudit({ action: "media.upload", actor: auth.actor, entity_type: "media_assets", entity_id: String(record.id), details: { storagePath: objectKey, size: buffer.length } });
     } catch (e) {
       console.warn("audit warn:", e);
     }

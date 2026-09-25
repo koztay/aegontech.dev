@@ -1,6 +1,11 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { db } from "./helpers/supabase-mock";
+import { validCookie } from "./helpers/auth";
+
+const SESSION = (await validCookie()).split("=")[1];
+vi.mock("next/headers", () => ({ cookies: async () => ({ get: (n: string) => (n === "admin_session" ? { name: n, value: SESSION } : undefined) }) }));
+vi.mock("next/navigation", () => ({ redirect: (to: string) => { throw new Error(`NEXT_REDIRECT:${to}`); } }));
 
 vi.mock("@/lib/supabase/server", async () => (await import("./helpers/supabase-mock")).serverModuleMock);
 vi.mock("@/components/admin/PortfolioRowActions", () => ({ default: () => null }));

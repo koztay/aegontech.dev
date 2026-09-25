@@ -1,13 +1,12 @@
 import { NextResponse } from "next/server";
+import { requireAdmin, unauthorizedResponse } from "@/lib/auth/api-auth";
 import { getDb, unwrap, reviveRow } from "@/lib/db/supabase";
-import { isAuthorized } from "@/lib/auth/api-auth";
 
 export async function POST(request: Request) {
+    const auth = await requireAdmin(request);
+    if (!auth.ok) return unauthorizedResponse();
+
     try {
-        const auth = isAuthorized(request);
-        if (!auth.ok) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        }
 
         const body = await request.json();
         const { title, slug, excerpt, content, featuredImage } = body;
