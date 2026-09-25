@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
-import { presignPut } from "@/lib/storage/minio";
+import { presignPut } from "@/lib/storage/supabase-storage";
 import { logAudit } from "@/lib/observability/audit";
 
 const MAX_SIZE = Number(process.env.MAX_UPLOAD_BYTES || 5 * 1024 * 1024); // 5MB default
+/** Fixed lifetime of a Supabase Storage signed upload URL (2 hours). */
+const SIGNED_UPLOAD_URL_TTL_SECONDS = 7200;
 const ALLOWED = ["image/png", "image/jpeg", "image/webp"];
 
 function isAdmin(request: Request) {
@@ -35,7 +37,7 @@ export async function POST(request: Request) {
     const id = Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 8);
     const objectKey = `${purpose || "uploads"}/${id}-${safeName}`;
 
-    const uploadUrl = await presignPut(objectKey, 300);
+    const uploadUrl = await presignPut(objectKey);
 
     try {
       const actor = (request.headers.get("cookie") || "").includes("admin_session=") ? "admin" : null;
@@ -44,7 +46,9 @@ export async function POST(request: Request) {
       console.warn("audit warn:", e);
     }
 
-    return NextResponse.json({ uploadUrl, objectKey, expiresIn: 300 });
+    // Supabase signed upload URLs have a fixed 2 hour lifetime that cannot be configured
+    // (MinIO honoured the 300 s we used to request), so report the real value.
+    return NextResponse.json({ uploadUrl, objectKey, expiresIn: SIGNED_UPLOAD_URL_TTL_SECONDS });
   } catch (err) {
     console.error("presign error:", err);
     return NextResponse.json({ error: "Server error" }, { status: 500 });

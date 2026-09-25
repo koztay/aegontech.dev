@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { getDbPool } from "@/lib/db/client";
-import { removeObject, getPublicUrl } from "@/lib/storage/minio";
+import { getDb, unwrap, reviveRow } from "@/lib/db/supabase";
+import { removeObject, getPublicUrl } from "@/lib/storage/supabase-storage";
 import { logAudit } from "@/lib/observability/audit";
 
 export async function GET(
@@ -9,20 +9,17 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const pool = getDbPool();
-    const result = await pool.query(
-      "SELECT * FROM portfolio_items WHERE id = $1",
-      [id]
+    const item = reviveRow(
+      unwrap(await getDb().from("portfolio_items").select("*").eq("id", id).maybeSingle())
     );
 
-    if (result.rows.length === 0) {
+    if (!item) {
       return NextResponse.json(
         { error: "Item not found" },
         { status: 404 }
       );
     }
 
-    const item = result.rows[0];
     const screenshotUrl = item.screenshot && !item.screenshot.startsWith("http")
       ? getPublicUrl(item.screenshot)
       : item.screenshot;
@@ -47,34 +44,32 @@ export async function PUT(
   try {
     const { id } = await params;
     const data = await request.json();
-    const pool = getDbPool();
 
-    const result = await pool.query(
-      `UPDATE portfolio_items 
-       SET title = $1, description = $2, type = $3, screenshot = $4, 
-           website_url = $5, app_store_url = $6, play_store_url = $7
-       WHERE id = $8
-       RETURNING *`,
-      [
-        data.title,
-        data.description,
-        data.type,
-        data.screenshot,
-        data.website_url,
-        data.app_store_url,
-        data.play_store_url,
-        id,
-      ]
+    const row = unwrap(
+      await getDb()
+        .from("portfolio_items")
+        .update({
+          title: data.title ?? null,
+          description: data.description ?? null,
+          type: data.type ?? null,
+          screenshot: data.screenshot ?? null,
+          website_url: data.website_url ?? null,
+          app_store_url: data.app_store_url ?? null,
+          play_store_url: data.play_store_url ?? null,
+        })
+        .eq("id", id)
+        .select()
+        .maybeSingle()
     );
 
-    if (result.rows.length === 0) {
+    if (!row) {
       return NextResponse.json(
         { error: "Item not found" },
         { status: 404 }
       );
     }
 
-    return NextResponse.json(result.rows[0]);
+    return NextResponse.json(reviveRow(row));
   } catch (error) {
     console.error("Error updating portfolio item:", error);
     return NextResponse.json(
@@ -99,13 +94,16 @@ export async function PATCH(
       );
     }
 
-    const pool = getDbPool();
-    const result = await pool.query(
-      "UPDATE portfolio_items SET published = $1 WHERE id = $2 RETURNING id, published",
-      [data.published, id]
+    const row = unwrap(
+      await getDb()
+        .from("portfolio_items")
+        .update({ published: data.published })
+        .eq("id", id)
+        .select("id, published")
+        .maybeSingle()
     );
 
-    if (result.rows.length === 0) {
+    if (!row) {
       return NextResponse.json({ error: "Item not found" }, { status: 404 });
     }
 
@@ -123,7 +121,7 @@ export async function PATCH(
       console.warn("audit warn:", e);
     }
 
-    return NextResponse.json(result.rows[0]);
+    return NextResponse.json(row);
   } catch (error) {
     console.error("Error updating publish state:", error);
     return NextResponse.json(
@@ -139,15 +137,13 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
-    const pool = getDbPool();
+    const db = getDb();
     // find associated media assets
-    const mediaRes = await pool.query(
-      "SELECT storage_path FROM media_assets WHERE portfolio_item_id = $1",
-      [id]
-    );
+    const mediaRows: { storage_path: string }[] =
+      unwrap(await db.from("media_assets").select("storage_path").eq("portfolio_item_id", id)) ?? [];
 
-    // attempt to remove objects from MinIO
-    for (const row of mediaRes.rows) {
+    // attempt to remove objects from storage
+    for (const row of mediaRows) {
       try {
         await removeObject(row.storage_path);
       } catch (e) {
@@ -156,20 +152,19 @@ export async function DELETE(
     }
 
     // remove media rows
-    await pool.query("DELETE FROM media_assets WHERE portfolio_item_id = $1", [id]);
+    unwrap(await db.from("media_assets").delete().eq("portfolio_item_id", id));
 
-    const result = await pool.query(
-      "DELETE FROM portfolio_items WHERE id = $1 RETURNING *",
-      [id]
+    const deleted = unwrap(
+      await db.from("portfolio_items").delete().eq("id", id).select().maybeSingle()
     );
 
-    if (result.rows.length === 0) {
+    if (!deleted) {
       return NextResponse.json({ error: "Item not found" }, { status: 404 });
     }
 
     try {
       const actor = (request.headers.get("cookie") || "").includes("admin_session=") ? "admin" : null;
-      await logAudit({ action: "portfolio.delete", actor, entity_type: "portfolio_item", entity_id: id, details: { deleted_media_count: mediaRes.rows.length } });
+      await logAudit({ action: "portfolio.delete", actor, entity_type: "portfolio_item", entity_id: id, details: { deleted_media_count: mediaRows.length } });
     } catch (e) {
       console.warn("audit warn:", e);
     }

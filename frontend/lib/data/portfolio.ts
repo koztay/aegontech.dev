@@ -1,5 +1,5 @@
-import { query } from "@/lib/db/client";
-import { getPublicUrl } from "@/lib/storage/minio";
+import { getDb, reviveRows, fetchAll } from "@/lib/db/supabase";
+import { getPublicUrl } from "@/lib/storage/supabase-storage";
 import { slugify } from "@/lib/slug";
 import type { PortfolioItem } from "@/lib/types";
 
@@ -63,8 +63,16 @@ function mapRow(row: any): PortfolioItem {
 
 export async function getAllPortfolioItems(): Promise<PortfolioItem[]> {
   try {
-    const rows = await query<any>(
-      "SELECT * FROM portfolio_items WHERE published = true ORDER BY created_at DESC"
+    const rows = reviveRows<any>(
+      await fetchAll((from, to) =>
+        getDb()
+          .from("portfolio_items")
+          .select("*")
+          .eq("published", true)
+          .order("created_at", { ascending: false })
+          .order("id")
+          .range(from, to)
+      )
     );
 
     if (rows.length > 0) {

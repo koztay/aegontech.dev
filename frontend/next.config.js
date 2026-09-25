@@ -1,5 +1,8 @@
+const { PHASE_PRODUCTION_BUILD } = require("next/constants");
+const { supabaseImagePatterns } = require("./config/supabase-image-patterns");
+
 /** @type {import('next').NextConfig} */
-const nextConfig = {
+const buildConfig = (isProductionBuild) => ({
   reactStrictMode: true,
   images: {
     remotePatterns: [
@@ -9,12 +12,7 @@ const nextConfig = {
         port: '',
         pathname: '/**',
       },
-      {
-        protocol: 'https',
-        hostname: 'minio-h84840cco0c0k04g0ggg4w4g.37.27.176.89.sslip.io',
-        port: '',
-        pathname: '/**',
-      },
+      ...supabaseImagePatterns(process.env, isProductionBuild),
     ],
     formats: ['image/avif', 'image/webp'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
@@ -34,6 +32,7 @@ const nextConfig = {
       },
     ];
   },
-};
+});
 
-module.exports = nextConfig;
+module.exports = (phase) =>
+  buildConfig(phase === PHASE_PRODUCTION_BUILD || (phase !== "phase-development-server" && !!process.env.VERCEL));

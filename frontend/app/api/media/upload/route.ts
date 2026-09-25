@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import client, { getPublicUrl, ensureBucketExists } from "@/lib/storage/minio";
-import { query } from "@/lib/db/client";
+import { getPublicUrl, ensureBucketExists, putObject } from "@/lib/storage/supabase-storage";
+import { getDb, unwrap, reviveRow } from "@/lib/db/supabase";
 import { logAudit } from "@/lib/observability/audit";
 
 const MAX_SIZE = Number(process.env.MAX_UPLOAD_BYTES || 5 * 1024 * 1024); // 5MB
@@ -87,35 +87,37 @@ export async function POST(request: Request) {
     const id = Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 8);
     const objectKey = `${associatedType || "uploads"}/${id}-${safeName}`;
 
-    // upload to MinIO
+    // upload to Supabase Storage
     await ensureBucketExists();
 
-    await new Promise<void>((resolve, reject) => {
-      client.putObject(
-        process.env.MINIO_S3_BUCKET_NAME || "public-media",
-        objectKey,
-        buffer,
-        buffer.length,
-        (err: any, etag: any) => {
-          if (err) return reject(err);
-          resolve();
-        }
-      );
-    });
+    await putObject(objectKey, buffer, contentType);
 
     const url = getPublicUrl(objectKey);
 
-    const rows = await query(
-      `INSERT INTO media_assets (storage_path, url, alt_text, caption, source, mime_type, size_bytes, checksum, created_by, created_at)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,NOW()) RETURNING *`,
-      [objectKey, url, altText, caption || null, "upload", contentType, buffer.length, null, null]
+    // created_at is filled by the column default now(), like the old NOW().
+    const record = reviveRow(
+      unwrap(
+        await getDb()
+          .from("media_assets")
+          .insert({
+            storage_path: objectKey,
+            url,
+            alt_text: altText,
+            caption: caption || null,
+            source: "upload",
+            mime_type: contentType,
+            size_bytes: buffer.length,
+            checksum: null,
+            created_by: null,
+          })
+          .select()
+          .single()
+      )
     );
-
-    const record = rows[0];
 
     if (associatedType && associatedId) {
       const field = associatedType === "portfolio" ? "portfolio_item_id" : "blog_post_id";
-      await query(`UPDATE media_assets SET ${field} = $1 WHERE id = $2`, [associatedId, record.id]);
+      unwrap(await getDb().from("media_assets").update({ [field]: associatedId }).eq("id", record.id));
     }
 
     try {

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { query } from "@/lib/db/client";
+import { getDb, unwrap } from "@/lib/db/supabase";
 import { isAuthorized } from "@/lib/auth/api-auth";
 
 export async function GET(request: NextRequest) {
@@ -12,15 +12,16 @@ export async function GET(request: NextRequest) {
         const searchParams = request.nextUrl.searchParams;
         const limit = Math.min(parseInt(searchParams.get("limit") || "15"), 50);
 
-        const result = await query<{ title: string; slug: string }>(
-            `SELECT title, slug FROM blog_posts
-             WHERE status = 'published'
-             ORDER BY published_at DESC
-             LIMIT $1`,
-            [limit]
-        );
+        const result = unwrap(
+            await getDb()
+                .from("blog_posts")
+                .select("title, slug")
+                .eq("status", "published")
+                .order("published_at", { ascending: false })
+                .limit(limit)
+        ) as { title: string; slug: string }[];
 
-        return NextResponse.json({ titles: result });
+        return NextResponse.json({ titles: result ?? [] });
     } catch (error) {
         console.error("Error fetching blog titles:", error);
         return NextResponse.json(

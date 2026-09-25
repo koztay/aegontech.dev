@@ -8,8 +8,8 @@
    ```
 
 2. **Ensure Database is Running**
-   - The admin panel requires a PostgreSQL database
-   - Connection configured via `DATABASE_URL` in `.env`
+   - The admin panel uses a Supabase project (Postgres + Storage)
+   - Configured via `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` and `SUPABASE_STORAGE_BUCKET` in `.env`
 
 3. **Start Development Server**
    ```bash
@@ -87,9 +87,9 @@ Navigate to: `http://localhost:3000/admin`
 - Verify session cookie is set (DevTools > Application > Cookies)
 
 ### Can't access database
-- Verify `DATABASE_URL` in `.env`
-- Check PostgreSQL is running
-- Test connection: `psql $DATABASE_URL`
+- Verify `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` in `.env`
+- Check the Supabase project is reachable
+- Test connection: `curl -s "$SUPABASE_URL/rest/v1/blog_posts?select=id&limit=1" -H "apikey: $SUPABASE_SERVICE_ROLE_KEY" -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY"`
 
 ## Next Steps (To Implement)
 

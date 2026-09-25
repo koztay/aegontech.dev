@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { getDbPool } from "@/lib/db/client";
-import { removeObject } from "@/lib/storage/minio";
+import { getDb, unwrap, reviveRow } from "@/lib/db/supabase";
+import { removeObject } from "@/lib/storage/supabase-storage";
 import { logAudit } from "@/lib/observability/audit";
 
 export async function GET(
@@ -9,20 +9,18 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const pool = getDbPool();
-    const result = await pool.query(
-      "SELECT * FROM blog_posts WHERE id = $1",
-      [id]
+    const row = unwrap(
+      await getDb().from("blog_posts").select("*").eq("id", id).maybeSingle()
     );
 
-    if (result.rows.length === 0) {
+    if (!row) {
       return NextResponse.json(
         { error: "Post not found" },
         { status: 404 }
       );
     }
 
-    return NextResponse.json(result.rows[0]);
+    return NextResponse.json(reviveRow(row));
   } catch (error) {
     console.error("Error fetching blog post:", error);
     return NextResponse.json(
@@ -39,34 +37,32 @@ export async function PUT(
   try {
     const { id } = await params;
     const data = await request.json();
-    const pool = getDbPool();
 
-    const result = await pool.query(
-      `UPDATE blog_posts 
-       SET title = $1, slug = $2, excerpt = $3, content = $4, 
-           featured_image = $5, status = $6, published_at = $7
-       WHERE id = $8
-       RETURNING *`,
-      [
-        data.title,
-        data.slug,
-        data.excerpt,
-        data.content,
-        data.featured_image,
-        data.status,
-        data.status === "published" ? new Date() : null,
-        id,
-      ]
+    const row = unwrap(
+      await getDb()
+        .from("blog_posts")
+        .update({
+          title: data.title ?? null,
+          slug: data.slug ?? null,
+          excerpt: data.excerpt ?? null,
+          content: data.content ?? null,
+          featured_image: data.featured_image ?? null,
+          status: data.status ?? null,
+          published_at: data.status === "published" ? new Date().toISOString() : null,
+        })
+        .eq("id", id)
+        .select()
+        .maybeSingle()
     );
 
-    if (result.rows.length === 0) {
+    if (!row) {
       return NextResponse.json(
         { error: "Post not found" },
         { status: 404 }
       );
     }
 
-    return NextResponse.json(result.rows[0]);
+    return NextResponse.json(reviveRow(row));
   } catch (error) {
     console.error("Error updating blog post:", error);
     return NextResponse.json(
@@ -82,15 +78,13 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
-    const pool = getDbPool();
+    const db = getDb();
     // find associated media assets
-    const mediaRes = await pool.query(
-      "SELECT storage_path FROM media_assets WHERE blog_post_id = $1",
-      [id]
-    );
+    const mediaRows: { storage_path: string }[] =
+      unwrap(await db.from("media_assets").select("storage_path").eq("blog_post_id", id)) ?? [];
 
-    // attempt to remove objects from MinIO
-    for (const row of mediaRes.rows) {
+    // attempt to remove objects from storage
+    for (const row of mediaRows) {
       try {
         await removeObject(row.storage_path);
       } catch (e) {
@@ -99,20 +93,19 @@ export async function DELETE(
     }
 
     // remove media rows
-    await pool.query("DELETE FROM media_assets WHERE blog_post_id = $1", [id]);
+    unwrap(await db.from("media_assets").delete().eq("blog_post_id", id));
 
-    const result = await pool.query(
-      "DELETE FROM blog_posts WHERE id = $1 RETURNING *",
-      [id]
+    const deleted = unwrap(
+      await db.from("blog_posts").delete().eq("id", id).select().maybeSingle()
     );
 
-    if (result.rows.length === 0) {
+    if (!deleted) {
       return NextResponse.json({ error: "Post not found" }, { status: 404 });
     }
 
     try {
       const actor = (request.headers.get("cookie") || "").includes("admin_session=") ? "admin" : null;
-      await logAudit({ action: "blog.delete", actor, entity_type: "blog_post", entity_id: id, details: { deleted_media_count: mediaRes.rows.length } });
+      await logAudit({ action: "blog.delete", actor, entity_type: "blog_post", entity_id: id, details: { deleted_media_count: mediaRows.length } });
     } catch (e) {
       console.warn("audit warn:", e);
     }

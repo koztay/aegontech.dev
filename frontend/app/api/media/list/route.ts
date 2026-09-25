@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { query } from "@/lib/db/client";
+import { getDb, reviveRows, fetchAll, escapeLike, orValue } from "@/lib/db/supabase";
 import { isAuthorized } from "@/lib/auth/api-auth";
-import { getPublicUrl } from "@/lib/storage/minio";
+import { getPublicUrl } from "@/lib/storage/supabase-storage";
 
 export async function GET(request: Request) {
   try {
@@ -12,12 +12,25 @@ export async function GET(request: Request) {
     const q = url.searchParams.get("q") || null;
     const limit = Number(url.searchParams.get("limit") || 50);
 
-    let rows;
-    if (q) {
-      rows = await query(`SELECT id, url, alt_text, storage_path, mime_type, created_at FROM media_assets WHERE alt_text ILIKE $1 OR storage_path ILIKE $1 ORDER BY created_at DESC LIMIT $2`, [`%${q}%`, limit]);
-    } else {
-      rows = await query(`SELECT id, url, alt_text, storage_path, mime_type, created_at FROM media_assets ORDER BY created_at DESC LIMIT $1`, [limit]);
-    }
+    // A bad LIMIT was a database error (-> 500) before; keep that.
+    if (!Number.isInteger(limit) || limit < 0) throw new Error("Invalid limit");
+
+    // Literal (escaped) substring match, case-insensitive, on alt_text or storage_path.
+    const pattern = q ? orValue(`%${escapeLike(q)}%`) : null;
+
+    // fetchAll pages with .range() so limits above PostgREST's 1000-row cap still work.
+    const rows = reviveRows<any>(
+      await fetchAll(
+        (from, to) => {
+          let qb = getDb()
+            .from("media_assets")
+            .select("id, url, alt_text, storage_path, mime_type, created_at");
+          if (pattern) qb = qb.or(`alt_text.ilike.${pattern},storage_path.ilike.${pattern}`);
+          return qb.order("created_at", { ascending: false }).order("id").range(from, to);
+        },
+        { max: limit }
+      )
+    );
 
     // We can just return the rows directly since we configured public access
     const normalized = rows.map((r: any) => ({

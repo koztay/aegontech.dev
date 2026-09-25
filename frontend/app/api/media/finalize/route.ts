@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { statObject, getPublicUrl } from "@/lib/storage/minio";
-import { query } from "@/lib/db/client";
+import { statObject, getPublicUrl } from "@/lib/storage/supabase-storage";
+import { getDb, unwrap, reviveRow } from "@/lib/db/supabase";
 import { logAudit } from "@/lib/observability/audit";
 
 function isAdmin(request: Request) {
@@ -36,13 +36,26 @@ export async function POST(request: Request) {
     const url = getPublicUrl(objectKey);
 
     // Insert into media_assets
-    const rows = await query(
-      `INSERT INTO media_assets (storage_path, url, alt_text, caption, source, mime_type, size_bytes, checksum, created_by, created_at)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,NOW()) RETURNING *`,
-      [storagePath, url, altText, caption || null, "upload", mime, size, checksum, null]
+    // created_at is filled by the column default now(), like the old NOW().
+    const record = reviveRow(
+      unwrap(
+        await getDb()
+          .from("media_assets")
+          .insert({
+            storage_path: storagePath,
+            url,
+            alt_text: altText,
+            caption: caption || null,
+            source: "upload",
+            mime_type: mime,
+            size_bytes: size,
+            checksum: checksum,
+            created_by: null,
+          })
+          .select()
+          .single()
+      )
     );
-
-    const record = rows[0];
 
     try {
       const actor = (request.headers.get("cookie") || "").includes("admin_session=") ? "admin" : null;
@@ -54,7 +67,7 @@ export async function POST(request: Request) {
     // Optionally associate with portfolio/blog
     if (associatedType && associatedId) {
       const field = associatedType === "portfolio" ? "portfolio_item_id" : "blog_post_id";
-      await query(`UPDATE media_assets SET ${field} = $1 WHERE id = $2`, [associatedId, record.id]);
+      unwrap(await getDb().from("media_assets").update({ [field]: associatedId }).eq("id", record.id));
     }
 
     return NextResponse.json({ media: record });

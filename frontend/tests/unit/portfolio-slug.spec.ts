@@ -1,13 +1,16 @@
 import { vi } from "vitest";
 import { slugify } from "@/lib/slug";
 
-const queryMock = vi.fn();
+import { db } from "./helpers/supabase-mock";
 
-vi.mock("@/lib/db/client", () => ({
-  query: (...args: unknown[]) => queryMock(...args),
-}));
+const getSupabaseMock = vi.fn();
 
-vi.mock("@/lib/storage/minio", () => ({
+vi.mock("@/lib/supabase/server", async () => {
+  const { db } = await import("./helpers/supabase-mock");
+  return { getSupabase: (...args: unknown[]) => getSupabaseMock(...args) ?? db.client };
+});
+
+vi.mock("@/lib/storage/supabase-storage", () => ({
   getPublicUrl: (key: string) => `https://cdn.example.com/${key}`,
 }));
 
@@ -50,12 +53,17 @@ describe("slugify", () => {
 describe("getPortfolioItemBySlug", () => {
   // Block body on purpose: mockReset() returns the mock, and Vitest calls a
   // function returned from a hook as its teardown.
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   beforeEach(() => {
-    queryMock.mockReset();
+    db.reset();
+    getSupabaseMock.mockReset();
   });
 
   test("resolves a multi-word title whose slug differs in case", async () => {
-    queryMock.mockResolvedValue([ROW]);
+    db.queue("portfolio_items", { data: [ROW] });
 
     const item = await getPortfolioItemBySlug("maximus-iptv-player");
 
@@ -66,20 +74,28 @@ describe("getPortfolioItemBySlug", () => {
   });
 
   test("returns null for a slug that matches no item", async () => {
-    queryMock.mockResolvedValue([ROW]);
+    db.queue("portfolio_items", { data: [ROW] });
     expect(await getPortfolioItemBySlug("not-a-real-project")).toBeNull();
   });
 
   test("falls back to placeholder items when the database is unreachable", async () => {
-    // Throws synchronously, like getDbPool() does when DATABASE_URL is unset;
-    // getAllPortfolioItems() catches both that and a rejected query the same way.
-    queryMock.mockImplementation(() => {
+    // getSupabase() throws synchronously when SUPABASE_URL/KEY are unset; a query can also
+    // come back with { error }. getAllPortfolioItems() treats both the same way.
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    getSupabaseMock.mockImplementation(() => {
       throw new Error("connection refused");
     });
 
     const item = await getPortfolioItemBySlug("maximus-iptv-player");
 
     expect(item).not.toBeNull();
+    expect(item!.links.playStore).toContain("com.aegontech.maximus");
+  });
+
+  test("falls back to placeholder items when the query returns an error", async () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    db.queue("portfolio_items", { error: { message: "permission denied" } });
+    const item = await getPortfolioItemBySlug("maximus-iptv-player");
     expect(item!.links.playStore).toContain("com.aegontech.maximus");
   });
 });

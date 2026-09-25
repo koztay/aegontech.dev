@@ -1,4 +1,4 @@
-import { query } from "@/lib/db/client";
+import { getDb, unwrap, reviveRows, fetchAll } from "@/lib/db/supabase";
 import type {
     Service,
     FeaturedPortfolioItem,
@@ -8,8 +8,15 @@ import type {
 
 export async function getServices(): Promise<Service[]> {
     try {
-        const rows = await query<any>(
-            "SELECT * FROM services ORDER BY sort_order ASC"
+        const rows = reviveRows<any>(
+            await fetchAll((from, to) =>
+                getDb()
+                    .from("services")
+                    .select("*")
+                    .order("sort_order", { ascending: true })
+                    .order("id")
+                    .range(from, to)
+            )
         );
 
         return rows.map((row) => ({
@@ -28,8 +35,14 @@ export async function getFeaturedPortfolioItems(): Promise<
     FeaturedPortfolioItem[]
 > {
     try {
-        const rows = await query<any>(
-            "SELECT * FROM portfolio_items ORDER BY created_at DESC LIMIT 6"
+        const rows = reviveRows<any>(
+            unwrap(
+                await getDb()
+                    .from("portfolio_items")
+                    .select("*")
+                    .order("created_at", { ascending: false })
+                    .limit(6)
+            )
         );
 
         return rows.map((row) => ({
@@ -48,8 +61,16 @@ export async function getFeaturedPortfolioItems(): Promise<
 
 export async function getBlogPosts(): Promise<BlogPost[]> {
     try {
-        const rows = await query<any>(
-            "SELECT * FROM blog_posts WHERE status = 'published' ORDER BY published_at DESC"
+        const rows = reviveRows<any>(
+            await fetchAll((from, to) =>
+                getDb()
+                    .from("blog_posts")
+                    .select("*")
+                    .eq("status", "published")
+                    .order("published_at", { ascending: false })
+                    .order("id")
+                    .range(from, to)
+            )
         );
 
         return rows.map((row) => ({
@@ -71,9 +92,10 @@ export async function getBlogPosts(): Promise<BlogPost[]> {
 export async function submitContactForm(
     data: ContactFormData
 ): Promise<void> {
-    await query(
-        "INSERT INTO contact_submissions (name, email, message) VALUES ($1, $2, $3)",
-        [data.name, data.email, data.message]
+    unwrap(
+        await getDb()
+            .from("contact_submissions")
+            .insert({ name: data.name, email: data.email, message: data.message })
     );
 
     // Send to n8n webhook if configured (fire-and-forget)

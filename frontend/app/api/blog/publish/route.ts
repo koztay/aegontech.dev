@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { query } from "@/lib/db/client";
+import { getDb, unwrap, reviveRow } from "@/lib/db/supabase";
 import { isAuthorized } from "@/lib/auth/api-auth";
 
 export async function POST(request: Request) {
@@ -21,14 +21,23 @@ export async function POST(request: Request) {
         }
 
         // Insert blog post into database
-        const result = await query(
-            `INSERT INTO blog_posts (title, slug, excerpt, content, featured_image, status, published_at)
-       VALUES ($1, $2, $3, $4, $5, 'published', NOW())
-       RETURNING id, title, slug, excerpt, content, featured_image, published_at, status`,
-            [title, slug, excerpt, content, featuredImage || "https://picsum.photos/800/400"]
+        const createdPost = reviveRow(
+            unwrap(
+                await getDb()
+                    .from("blog_posts")
+                    .insert({
+                        title,
+                        slug,
+                        excerpt,
+                        content,
+                        featured_image: featuredImage || "https://picsum.photos/800/400",
+                        status: "published",
+                        published_at: new Date().toISOString(),
+                    })
+                    .select("id, title, slug, excerpt, content, featured_image, published_at, status")
+                    .single()
+            )
         );
-
-        const createdPost = result[0];
 
         return NextResponse.json({
             success: true,

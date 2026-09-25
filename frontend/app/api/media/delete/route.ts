@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { removeObject } from "@/lib/storage/minio";
-import { query } from "@/lib/db/client";
+import { removeObject } from "@/lib/storage/supabase-storage";
+import { getDb, unwrap } from "@/lib/db/supabase";
 import { logAudit } from "@/lib/observability/audit";
 
 import { isAuthorized } from "@/lib/auth/api-auth";
@@ -24,7 +24,7 @@ export async function POST(request: Request) {
       // continue to attempt DB cleanup
     }
 
-    await query(`DELETE FROM media_assets WHERE storage_path = $1`, [objectKey]);
+    unwrap(await getDb().from("media_assets").delete().eq("storage_path", objectKey));
 
     try {
       await logAudit({ action: "media.delete", actor: auth.actor || null, entity_type: "object", entity_id: objectKey, details: {} });

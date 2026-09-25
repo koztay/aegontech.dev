@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { query } from "@/lib/db/client";
+import { getDb, unwrap, reviveRows } from "@/lib/db/supabase";
 
 export async function GET(request: Request) {
     try {
@@ -13,15 +13,24 @@ export async function GET(request: Request) {
         const skip = (validPage - 1) * validLimit;
 
         // Get total count of published posts
-        const countResult = await query<any>(
-            "SELECT COUNT(*) as total FROM blog_posts WHERE status = 'published'"
-        );
-        const total = parseInt(countResult[0].total, 10);
+        const db = getDb();
+        const countRes = await db
+            .from("blog_posts")
+            .select("*", { count: "exact", head: true })
+            .eq("status", "published");
+        if (countRes.error) throw new Error(countRes.error.message);
+        const total = countRes.count ?? 0;
         
         // Get paginated posts
-        const rows = await query<any>(
-            "SELECT * FROM blog_posts WHERE status = 'published' ORDER BY published_at DESC LIMIT $1 OFFSET $2",
-            [validLimit, skip]
+        const rows = reviveRows<any>(
+            unwrap(
+                await db
+                    .from("blog_posts")
+                    .select("*")
+                    .eq("status", "published")
+                    .order("published_at", { ascending: false })
+                    .range(skip, skip + validLimit - 1)
+            )
         );
 
         const posts = rows.map((row) => ({

@@ -1,4 +1,4 @@
-import { query } from "@/lib/db/client";
+import { getDb, unwrap, reviveRows, fetchAll } from "@/lib/db/supabase";
 
 export type BlogPost = {
   id: string;
@@ -26,9 +26,15 @@ We also keep observability close to the work: every ingestion run is logged, rat
 
 export async function getBlogPost(slug: string): Promise<BlogPost | null> {
   try {
-    const rows = await query<any>(
-      "SELECT * FROM blog_posts WHERE slug = $1 AND status = 'published' LIMIT 1",
-      [slug]
+    const rows = reviveRows<any>(
+      unwrap(
+        await getDb()
+          .from("blog_posts")
+          .select("*")
+          .eq("slug", slug)
+          .eq("status", "published")
+          .limit(1)
+      )
     );
 
     if (rows.length > 0) {
@@ -54,8 +60,15 @@ export async function getBlogPost(slug: string): Promise<BlogPost | null> {
 
 export async function getBlogIndex(): Promise<BlogPost[]> {
   try {
-    const rows = await query<any>(
-      "SELECT * FROM blog_posts WHERE status = 'published' ORDER BY published_at DESC LIMIT 50"
+    const rows = reviveRows<any>(
+      unwrap(
+        await getDb()
+          .from("blog_posts")
+          .select("*")
+          .eq("status", "published")
+          .order("published_at", { ascending: false })
+          .limit(50)
+      )
     );
 
     if (rows.length > 0) {
@@ -79,8 +92,16 @@ export async function getBlogIndex(): Promise<BlogPost[]> {
 
 export async function getAllBlogSlugs(): Promise<{ slug: string; publishedAt: string }[]> {
   try {
-    const rows = await query<any>(
-      "SELECT slug, published_at FROM blog_posts WHERE status = 'published' ORDER BY published_at DESC"
+    const rows = reviveRows<any>(
+      await fetchAll((from, to) =>
+        getDb()
+          .from("blog_posts")
+          .select("slug, published_at")
+          .eq("status", "published")
+          .order("published_at", { ascending: false })
+          .order("id")
+          .range(from, to)
+      )
     );
 
     if (rows.length > 0) {
