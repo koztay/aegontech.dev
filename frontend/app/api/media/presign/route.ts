@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { presignPut } from "@/lib/storage/minio";
+import { presignPut } from "@/lib/storage/supabase-storage";
 import { logAudit } from "@/lib/observability/audit";
 
 const MAX_SIZE = Number(process.env.MAX_UPLOAD_BYTES || 5 * 1024 * 1024); // 5MB default

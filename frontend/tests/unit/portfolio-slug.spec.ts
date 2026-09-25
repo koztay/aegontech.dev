@@ -7,7 +7,7 @@ vi.mock("@/lib/db/client", () => ({
   query: (...args: unknown[]) => queryMock(...args),
 }));
 
-vi.mock("@/lib/storage/minio", () => ({
+vi.mock("@/lib/storage/supabase-storage", () => ({
   getPublicUrl: (key: string) => `https://cdn.example.com/${key}`,
 }));
 

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getDbPool } from "@/lib/db/client";
-import { removeObject, getPublicUrl } from "@/lib/storage/minio";
+import { removeObject, getPublicUrl } from "@/lib/storage/supabase-storage";
 import { logAudit } from "@/lib/observability/audit";
 
 export async function GET(

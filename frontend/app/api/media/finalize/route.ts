@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { statObject, getPublicUrl } from "@/lib/storage/minio";
+import { statObject, getPublicUrl } from "@/lib/storage/supabase-storage";
 import { query } from "@/lib/db/client";
 import { logAudit } from "@/lib/observability/audit";
 

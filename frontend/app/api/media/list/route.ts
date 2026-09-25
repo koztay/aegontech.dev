@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { query } from "@/lib/db/client";
 import { isAuthorized } from "@/lib/auth/api-auth";
-import { getPublicUrl } from "@/lib/storage/minio";
+import { getPublicUrl } from "@/lib/storage/supabase-storage";
 
 export async function GET(request: Request) {
   try {

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import client, { getPublicUrl, ensureBucketExists } from "@/lib/storage/minio";
+import { getPublicUrl, ensureBucketExists, putObject } from "@/lib/storage/supabase-storage";
 import { query } from "@/lib/db/client";
 import { logAudit } from "@/lib/observability/audit";
 
@@ -87,21 +87,10 @@ export async function POST(request: Request) {
     const id = Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 8);
     const objectKey = `${associatedType || "uploads"}/${id}-${safeName}`;
 
-    // upload to MinIO
+    // upload to Supabase Storage
     await ensureBucketExists();
 
-    await new Promise<void>((resolve, reject) => {
-      client.putObject(
-        process.env.MINIO_S3_BUCKET_NAME || "public-media",
-        objectKey,
-        buffer,
-        buffer.length,
-        (err: any, etag: any) => {
-          if (err) return reject(err);
-          resolve();
-        }
-      );
-    });
+    await putObject(objectKey, buffer, contentType);
 
     const url = getPublicUrl(objectKey);
 

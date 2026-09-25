@@ -1,5 +1,5 @@
 import { query } from "@/lib/db/client";
-import { getPublicUrl } from "@/lib/storage/minio";
+import { getPublicUrl } from "@/lib/storage/supabase-storage";
 import { slugify } from "@/lib/slug";
 import type { PortfolioItem } from "@/lib/types";
 
