@@ -1,4 +1,4 @@
-import { getDbPool } from "@/lib/db/client";
+import { getDb, reviveRows, fetchAll } from "@/lib/db/supabase";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -18,11 +18,15 @@ interface PortfolioItem {
 }
 
 async function getPortfolioItems() {
-  const pool = getDbPool();
-  const result = await pool.query(
-    "SELECT id, title, description, type, screenshot, website_url, app_store_url, play_store_url, published, created_at FROM portfolio_items ORDER BY created_at DESC"
+  const rows = await fetchAll((from, to) =>
+    getDb()
+      .from("portfolio_items")
+      .select("id, title, description, type, screenshot, website_url, app_store_url, play_store_url, published, created_at")
+      .order("created_at", { ascending: false })
+      .order("id")
+      .range(from, to)
   );
-  return result.rows as PortfolioItem[];
+  return reviveRows<PortfolioItem>(rows);
 }
 
 export default async function AdminPortfolio() {

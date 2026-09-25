@@ -1,19 +1,21 @@
 import Link from "next/link";
-import { getDbPool } from "@/lib/db/client";
+import { getDb } from "@/lib/db/supabase";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
 async function getStats() {
-  const pool = getDbPool();
-  
+  const db = getDb();
+
   const [portfolioCount, blogCount] = await Promise.all([
-    pool.query("SELECT COUNT(*) FROM portfolio_items"),
-    pool.query("SELECT COUNT(*) FROM blog_posts"),
+    db.from("portfolio_items").select("*", { count: "exact", head: true }),
+    db.from("blog_posts").select("*", { count: "exact", head: true }),
   ]);
+  if (portfolioCount.error) throw new Error(portfolioCount.error.message);
+  if (blogCount.error) throw new Error(blogCount.error.message);
 
   return {
-    portfolioItems: parseInt(portfolioCount.rows[0].count),
-    blogPosts: parseInt(blogCount.rows[0].count),
+    portfolioItems: portfolioCount.count ?? 0,
+    blogPosts: blogCount.count ?? 0,
   };
 }
 

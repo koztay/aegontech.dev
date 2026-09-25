@@ -1,27 +1,27 @@
 import { NextResponse } from "next/server";
-import { getDbPool } from "@/lib/db/client";
+import { getDb, unwrap, reviveRow } from "@/lib/db/supabase";
 
 export async function POST(request: Request) {
   try {
     const data = await request.json();
-    const pool = getDbPool();
 
-    const result = await pool.query(
-      `INSERT INTO portfolio_items (title, description, type, screenshot, website_url, app_store_url, play_store_url)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)
-       RETURNING *`,
-      [
-        data.title,
-        data.description,
-        data.type,
-        data.screenshot,
-        data.website_url,
-        data.app_store_url,
-        data.play_store_url,
-      ]
+    const row = unwrap(
+      await getDb()
+        .from("portfolio_items")
+        .insert({
+          title: data.title ?? null,
+          description: data.description ?? null,
+          type: data.type ?? null,
+          screenshot: data.screenshot ?? null,
+          website_url: data.website_url ?? null,
+          app_store_url: data.app_store_url ?? null,
+          play_store_url: data.play_store_url ?? null,
+        })
+        .select()
+        .single()
     );
 
-    return NextResponse.json(result.rows[0]);
+    return NextResponse.json(reviveRow(row));
   } catch (error) {
     console.error("Error creating portfolio item:", error);
     return NextResponse.json(

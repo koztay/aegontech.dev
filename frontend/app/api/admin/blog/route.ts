@@ -1,27 +1,27 @@
 import { NextResponse } from "next/server";
-import { getDbPool } from "@/lib/db/client";
+import { getDb, unwrap, reviveRow } from "@/lib/db/supabase";
 
 export async function POST(request: Request) {
   try {
     const data = await request.json();
-    const pool = getDbPool();
 
-    const result = await pool.query(
-      `INSERT INTO blog_posts (title, slug, excerpt, content, featured_image, status, published_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)
-       RETURNING *`,
-      [
-        data.title,
-        data.slug,
-        data.excerpt,
-        data.content,
-        data.featured_image,
-        data.status,
-        data.status === "published" ? new Date() : null,
-      ]
+    const row = unwrap(
+      await getDb()
+        .from("blog_posts")
+        .insert({
+          title: data.title ?? null,
+          slug: data.slug ?? null,
+          excerpt: data.excerpt ?? null,
+          content: data.content ?? null,
+          featured_image: data.featured_image ?? null,
+          status: data.status ?? null,
+          published_at: data.status === "published" ? new Date().toISOString() : null,
+        })
+        .select()
+        .single()
     );
 
-    return NextResponse.json(result.rows[0]);
+    return NextResponse.json(reviveRow(row));
   } catch (error) {
     console.error("Error creating blog post:", error);
     return NextResponse.json(

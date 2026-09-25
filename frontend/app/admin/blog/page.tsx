@@ -1,4 +1,4 @@
-import { getDbPool } from "@/lib/db/client";
+import { getDb, reviveRows, fetchAll } from "@/lib/db/supabase";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -12,11 +12,15 @@ interface BlogPost {
 }
 
 async function getBlogPosts() {
-  const pool = getDbPool();
-  const result = await pool.query(
-    "SELECT id, title, slug, status, created_at FROM blog_posts ORDER BY created_at DESC"
+  const rows = await fetchAll((from, to) =>
+    getDb()
+      .from("blog_posts")
+      .select("id, title, slug, status, created_at")
+      .order("created_at", { ascending: false })
+      .order("id")
+      .range(from, to)
   );
-  return result.rows as BlogPost[];
+  return reviveRows<BlogPost>(rows);
 }
 
 export default async function AdminBlog() {
